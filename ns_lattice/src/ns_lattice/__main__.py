@@ -3,7 +3,7 @@ Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
 
-from ns_lattice import *
+from ns_lattice.all import *
 nt = NSTools()
 
 
@@ -45,69 +45,40 @@ def usecase__get_root_bases():
         nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
 
-def usecase_dp_involutions_0():
+
+
+def usecase__get_cls_involutions( max_rank ):
     '''
-    Test "dp_involutions.complete_basis()".
+    Obtain classification of involutions.
+    
+    See "dp_involutions.get_cls_involutions(max_rank)".
     '''
 
-    d_lst = [ 34, 45]
-    rank = 6
-    d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
-    mat = complete_basis( d_lst )
-    nt.p( rank, d_lst )
-    nt.p( '\n' + str( mat ) )
-    nt.p( 10 * '-' )
-
-
-    d_lst = [ 23, 34, 45 ]
-    rank = 6
-    d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
-    mat = complete_basis( d_lst )
-    nt.p( rank, d_lst )
-    nt.p( '\n' + str( mat ) )
-    nt.p( 10 * '-' )
-
-    # 4A1
-    d_lst = [ 1123, 12, 23, 45 ]
-    rank = 6
-    d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
-    mat = complete_basis( d_lst )
-    nt.p( rank, d_lst )
-    nt.p( '\n' + str( mat ) )
-    nt.p( 10 * '-' )
-
-
-    d_lst = [ 1145, 23 ]
-    rank = 6
-    d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
-    mat = complete_basis( d_lst )
-    nt.p( rank, d_lst )
-    nt.p( '\n' + str( mat ) )
-    nt.p( 10 * '-' )
-
-
-def usecase_dp_involutions_1( max_rank ):
-    '''
-    Test "dp_involutions.get_cls_involutions(max_rank)".
-    '''
+    # rank = rank of NS-lattice
+    # M = matrix for involution
+    # d_lst = basis for corresponding root subsystem
 
     invo_cls_dct = get_cls_involutions( max_rank )
     for rank in range( 3, max_rank + 1 ):
         nt.p( 10 * '-' )
         for ( M, d_lst ) in invo_cls_dct[rank]:
+
             nt.p( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
 
+            # (h,e1,e2) |--> (?,?,?)
             b_lst = [Div( row ) for row in identity_matrix( ZZ, rank ).rows() ]
             nt.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
 
 
-def usecase_dp_involutions_2():
+def usecase__get_involutions():
     '''
     List all compatible involutions for a fixed root basis.
     '''
-    d_lst = []
-    rank = 6
-    Mtype = 'D4'
+    d_lst = [12, 34]  # root basis
+    rank = 6  # rank of NS-lattice
+    Mtype = '2A1'  # root system corresponding to involution is of type D4
+
+    d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     for ( M, Md_lst ) in get_involutions( rank ):
 
         # check whether involution M preserves d_lst
@@ -126,16 +97,12 @@ def usecase_dp_involutions_2():
             raise Exception( 'The canonical class should be preserved M(k)=', k.mat_mul( M ) )
 
 
-        # nt.p( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
-        # b_lst = [Div( row ) for row in identity_matrix( ZZ, rank ).rows() ]
-        # nt.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
 
-
-
-
-def usecase_dp_lattice_0( max_rank ):
+def usecase__get_cls_real_dp( max_rank ):
     '''
-    Test "DPLattice.get_cls_real_dp(...)".
+    Classify real NS-lattices of weak Del Pezzo surfaces
+    
+    See "DPLattice.get_cls_real_dp()".
     '''
     nt.p( 'max_rank =', max_rank )
 
@@ -146,7 +113,7 @@ def usecase_dp_lattice_0( max_rank ):
         for dpl in dp_cls_dct_1[rank]:
             nt.p( dpl )
 
-    nt.p( 5 * ( 10 * '#' + '\n' ) )
+    nt.p( 15 * ( 10 * '#' + '\n' ) )
 
     # non provable version of classification where the
     # number of involutions is minimized
@@ -173,10 +140,12 @@ def usecase_dp_lattice_0( max_rank ):
             nt.p( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
 
 
-def usecase_dp_lattice_1( max_rank ):
+def usecase__get_cls_real_dp__celestials( max_rank ):
     '''
-    Test classification of surfaces with at least 2 real families
-    of circles and no real lines.  
+    Classification NS-lattices of surfaces with 
+    at least 2 real families of circles and no real lines.
+    
+    See "DPLattice.get_cls_real_dp()".  
     '''
 
     dp_cls_dct = DPLattice.get_cls_real_dp( min( max_rank, 7 ), False )
@@ -216,7 +185,7 @@ def usecase_dp_lattice_1( max_rank ):
         nt.p( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
 
 
-def usecase_dp_lattice_2( max_rank ):
+def usecase__get_cls_real_dp__tex( max_rank ):
     '''
     We construct a Tex string for a table with 
     a classification of celestials.
@@ -256,13 +225,12 @@ if __name__ == '__main__':
 
     # usecase__get_cls_root_bases( max_rank )
     # usecase__get_tool_dct()
-    usecase__get_root_bases()
-    # usecase_dp_involutions_0()  #            complete_basis(d_lst)
-    # usecase_dp_involutions_1( max_rank )  #  classification involutions
-    # usecase_dp_involutions_2()  #             list all compatible involutions for a fixed root basis
-    # usecase_dp_lattice_0( max_rank )  #      classification lattices
-    # usecase_dp_lattice_1( max_rank )  #      classification celestials
-    # usecase_dp_lattice_2( max_rank )  #      construct Tex string for table for classification celestials
+    # usecase__get_root_bases()
+    # usecase__get_cls_involutions( max_rank )
+    usecase__get_involutions()
+    # usecase__get_cls_real_dp( max_rank )
+    # usecase__get_cls_real_dp__celestials( max_rank )
+    # usecase__get_cls_real_dp__tex( max_rank )
 
     #########################################
     #                                       #

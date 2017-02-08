@@ -7,7 +7,6 @@ weak del Pezzo surfaces.
 
 See [http://arxiv.org/abs/1302.6678] for more info.
 '''
-
 from ns_lattice import *
 nt = NSTools()
 

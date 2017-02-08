@@ -2,9 +2,8 @@
 Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
-from sage.all import *
-
 from ns_tools import *
+
 
 class Div:
     '''
@@ -77,9 +76,20 @@ class Div:
 
         if 'e' in lbl or 'h' in lbl:
 
-            if 'h' in lbl:
-                c.e_lst = [ int( lbl.split( 'h' )[0] ) ]  # [4] if lbl='4h+3e...'
-                s = lbl.split( 'h' )[1]  # for example '+3e2-2e5+6e7+e8'
+            s = lbl
+            if 'h' in s:
+
+                # cases: 'h...', '-h...', '3h...' or '-2h...'
+                if s[0] == 'h':
+                    c.e_lst = [1]
+                    s = s[1:]
+                elif s[0:2] == '-h':
+                    c.e_lst = [-1]
+                    s = s[2:]
+                else:  # '3h...' or '-2h...'
+                    c.e_lst = [ int( s.split( 'h' )[0] ) ]  # [4] if lbl='4h+3e...'
+                    s = s.split( 'h' )[1]  # for example '+3e2-2e5+6e7+e8'
+
             else:
                 c.e_lst = [0]
                 s = lbl
@@ -227,12 +237,12 @@ class Div:
         
             - We describe the output label in terms of examples.
             
-            * If "abbr==True":
+            * If "abbr==True": (this only works for special cases)
               
                 > e1                --->  'e1'
-                > e1-e2             --->  'e12'  
-                > h-e1              --->  '1e1'
-                > 2h-e1-e2-e4-e5    --->  '2e1245'  
+                > e1-e2             --->  'e12'                  
+                > 2h-e1-e2-e4-e5    --->  '2e1245'
+                > h-e1              --->  '1e1'  
         
             * If "abbr==False" and self*self==-2 and self.rank()<=9:
             

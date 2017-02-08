@@ -3,6 +3,7 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 7, 2017
 @author: Niels Lubbes
 '''
+from ns_lattice import *
 
 import inspect
 import time
@@ -108,7 +109,7 @@ class NSTools():
         file_name = path + fname
         if NSTools.__tool_dct == None:
 
-            NSTools.unset()
+            NSTools.filter_unset()
             try:
 
                 NSTools.p( 'Loading from:', file_name )
@@ -119,7 +120,7 @@ class NSTools():
                 NSTools.p( 'Cannot load ".__tool_dct": ', e )
                 NSTools.__tool_dct = {}
 
-            NSTools.reset()
+            NSTools.filter_reset()
 
         return NSTools.__tool_dct
 

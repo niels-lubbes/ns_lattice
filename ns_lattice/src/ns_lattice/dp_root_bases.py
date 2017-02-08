@@ -7,12 +7,8 @@ See [http://arxiv.org/abs/1302.6678] for more info.
 Classification of root subsystems of root systems
 of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
-from sage.all import *
-
-from ns_tools import *
-from class_div import *
-from div_set import *
-
+from ns_lattice import *
+nt = NSTools()
 
 def is_root_basis( d_lst ):
     '''
@@ -115,8 +111,8 @@ def get_dynkin_type( d_lst ):
     if d_lst == []: return 'A0'
 
     key = "get_dynkin_type"
-    if not key in get_tool_dct():
-        np( 'Constructing list of Dynkin types...' )
+    if not key in nt.get_tool_dct():
+        nt.p( 'Constructing list of Dynkin types...' )
 
         ade_lst = []
         for comb_lst in Combinations( 8 * ['A', 'D', 'E'], 8 ):
@@ -144,7 +140,6 @@ def get_dynkin_type( d_lst ):
                     # obtain type list
                     t_lst = [( ade[i], p_lst[i] - 1 ) for i in range( 8 ) if  p_lst[i] != 1]
                     t_lst.sort()
-
 
                     # obtain Root system
                     # or continue if invalid Cartan/Dynkin type
@@ -184,16 +179,16 @@ def get_dynkin_type( d_lst ):
                     if ts not in ts_lst:
                         type_lst += [( G, ts, t_lst )]
                         ts_lst += [ts]
-                        np( 'added to list: ', ts, '\t\t...please wait...' )
+                        nt.p( 'added to list: ', ts, '\t\t...please wait...' )
 
-        np( 'Finished constructing list of Dynkin types.' )
+        nt.p( 'Finished constructing list of Dynkin types.' )
         # cache the constructed "type_lst"
-        get_tool_dct()[key] = type_lst
-        save_tool_dct()
+        nt.get_tool_dct()[key] = type_lst
+        nt.save_tool_dct()
 
     # end if
 
-    type_lst = get_tool_dct()[key]
+    type_lst = nt.get_tool_dct()[key]
     G1 = get_graph( d_lst )
 
     # loop through all types and check equivalence
@@ -353,15 +348,15 @@ def get_root_bases( rank ):
     key = 'get_root_bases_' + str( rank )
 
     # already computed before?
-    if key in get_tool_dct(): return get_tool_dct()[key]
+    if key in nt.get_tool_dct(): return nt.get_tool_dct()[key]
 
-    np( 'Constructing root bases for rank', rank, '...' )
+    nt.p( 'Constructing root bases for rank', rank, '...' )
 
     # Loop through all subsets of (-2)-classes of length at most rank-1.
     d_lst_lst = [[]]
     m2_lst = get_m2_classes( rank, True )
     for r in range( 1, rank ):
-        np( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
+        nt.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
         for idx_lst in Subsets( range( len( m2_lst ) ), r ):
 
             # construct sub-list
@@ -374,8 +369,8 @@ def get_root_bases( rank ):
 
     # cache output
     d_lst_lst.sort( key = lambda d_lst: get_dynkin_type( d_lst ) )
-    get_tool_dct()[key] = d_lst_lst
-    save_tool_dct()
+    nt.get_tool_dct()[key] = d_lst_lst
+    nt.save_tool_dct()
 
     return d_lst_lst
 
@@ -401,7 +396,7 @@ def get_cls_root_bases( max_rank = 9 ):
               A1, A1+A2, A4, D5, E6, E7 or E8,
           corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively 
           (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
-          Note that the root systems live in the vector space 
+          Note that the root systems live in a subspace of the vector space 
           associated to the Neron-Severi lattice of a weak Del Pezzo surface.
     
           The list "bases_cls_dct[rank]" contains exactly one 
@@ -409,8 +404,8 @@ def get_cls_root_bases( max_rank = 9 ):
     '''
 
     key = 'get_cls_root_bases_' + str( max_rank )
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     Z1 = [ 12, 23, 34, 45, 56, 67, 78, 1123 ]
     Z2 = [ 12, 23, 34, 45, 56, 67, 78, 1123, 1145, 1347, 1678, 1127, 1456, 1567, 234, 278, 308 ]
@@ -433,13 +428,13 @@ def get_cls_root_bases( max_rank = 9 ):
         for Z in Z_lst:
 
             # consider all subsets of Z of length at most rank-1
-            np( 'rank =', rank )
-            np( 'Z before =', Z )
+            nt.p( 'rank =', rank )
+            nt.p( 'Z before =', Z )
             Z = [ Div.new( str( z ), rank ) for z in Z if rank >= Div.get_min_rank( str( z ) )]
-            np( 'Z after  =', Z )
+            nt.p( 'Z after  =', Z )
             for i in range( 1, rank ):
 
-                np( '\trank subsystem =', i, '\trank =', rank, )
+                nt.p( '\trank subsystem =', i, '\trank =', rank, )
                 for idx_lst in Subsets( range( len( Z ) ), i ):
 
                     # recover subset of Z from indices
@@ -464,8 +459,8 @@ def get_cls_root_bases( max_rank = 9 ):
         bases_cls_dct[rank] = d_lst_lst
 
     # cache output
-    get_tool_dct()[key] = bases_cls_dct
-    save_tool_dct()
+    nt.get_tool_dct()[key] = bases_cls_dct
+    nt.save_tool_dct()
 
     return bases_cls_dct
 

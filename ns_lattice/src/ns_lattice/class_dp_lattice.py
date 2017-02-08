@@ -6,12 +6,8 @@ This module is for classifying real structures and singularities
 of weak Del Pezzo surfaces of degree between 1 and 7.
 
 '''
-from sage.all import *
-
-from ns_tools import *
-from class_div import *
-from dp_root_bases import *
-from dp_involutions import *
+from ns_lattice import *
+nt = NSTools()
 
 
 class DPLattice:
@@ -236,21 +232,21 @@ class DPLattice:
         if not provable:
             key += '_' + str( provable )
 
-        if key in get_tool_dct():
-            return get_tool_dct()[key]
+        if key in nt.get_tool_dct():
+            return nt.get_tool_dct()[key]
 
-        np( 'max_rank =', max_rank, ', provable =', provable )
+        nt.p( 'max_rank =', max_rank, ', provable =', provable )
         dp_cls_dct = {}
         for rank in range( 3, max_rank + 1 ):
             dpl_lst = []
-            np( 'rank =', rank )
+            nt.p( 'rank =', rank )
 
             if provable:
                 #
                 # slow version of algorithm
                 #
                 for d_lst in get_cls_root_bases( max_rank )[rank]:
-                    np( 'd_lst =', d_lst )
+                    nt.p( 'd_lst =', d_lst )
                     for ( M, Md_lst ) in get_involutions( rank ):
 
                         # check whether involution M preserves d_lst
@@ -270,7 +266,7 @@ class DPLattice:
                 # fast version of algorithm with nice representatives of dpl's
                 #
                 for ( M, Md_lst ) in get_cls_involutions( max_rank )[rank]:
-                    np( 'Md_lst =', Md_lst )
+                    nt.p( 'Md_lst =', Md_lst )
                     for d_lst in get_root_bases( rank ):
 
                         # check whether involution M preserves d_lst
@@ -291,8 +287,8 @@ class DPLattice:
             dp_cls_dct[rank] = dpl_lst
 
         # store classification
-        get_tool_dct()[key] = dp_cls_dct
-        save_tool_dct()
+        nt.get_tool_dct()[key] = dp_cls_dct
+        nt.save_tool_dct()
 
         return dp_cls_dct
 
@@ -451,14 +447,14 @@ class DPLattice:
         G1 = get_ext_graph( self.d_lst + all_m1_lst, self.M )
         G2 = get_ext_graph( other.d_lst + all_m1_lst, other.M )
         if not G1.is_isomorphic( G2, edge_labels = True ):
-            np( 'Non isomorphic graphs (unexpected position): ', self, other )
+            nt.p( 'Non isomorphic graphs (unexpected position): ', self, other )
             return False
 
         # check incidence graphs including fam_lst classes
         G1 = get_ext_graph( self.d_lst + all_m1_lst + self.fam_lst, self.M )
         G2 = get_ext_graph( other.d_lst + all_m1_lst + other.fam_lst, other.M )
         if not G1.is_isomorphic( G2, edge_labels = True ):
-            np( 'Non isomorphic graphs including fam_lst (unexpected position): ', self, other )
+            nt.p( 'Non isomorphic graphs including fam_lst (unexpected position): ', self, other )
             return False
 
         return True

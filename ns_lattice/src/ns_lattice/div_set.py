@@ -2,10 +2,8 @@
 Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
-from sage.all import *
-
-from ns_tools import *
-from class_div import *
+from ns_lattice import *
+nt = NSTools()
 
 
 def get_div_set( d, dc, cc, perm = False ):
@@ -41,11 +39,11 @@ def get_div_set( d, dc, cc, perm = False ):
 
     # check if input was already computed
     key = 'get_div_set_' + str( ( d, dc, cc, perm ) )
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     # construct div set
-    np( 'Constructing div set classes for ', ( d, dc, cc, perm ) )
+    nt.p( 'Constructing div set classes for ', ( d, dc, cc, perm ) )
     out_lst = []
 
     #
@@ -69,7 +67,7 @@ def get_div_set( d, dc, cc, perm = False ):
         if dc_tail * dc_tail > dd_tail * cc_tail:
             break  # out of while loop
 
-        np( c0, dc_tail )
+        nt.p( c0, dc_tail )
 
         # obtain all possible [d1*c1+1,...,dr*cr+1]
         r = d.rank() - 1
@@ -106,8 +104,8 @@ def get_div_set( d, dc, cc, perm = False ):
 
 
     # cache output
-    get_tool_dct()[key] = out_lst
-    save_tool_dct()
+    nt.get_tool_dct()[key] = out_lst
+    nt.save_tool_dct()
 
     return out_lst
 
@@ -146,8 +144,8 @@ def get_m2_classes( rank, perm = False ):
         raise ValueError( 'Rank expected an integer between 2 and 9:', rank )
 
     key = 'get_m2_classes_' + str( ( rank, perm ) )
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     d = Div( [3] + ( rank - 1 ) * [-1] )
     m2_lst = get_div_set( d, 0, -2, perm )
@@ -160,8 +158,8 @@ def get_m2_classes( rank, perm = False ):
     m2_lst.sort( reverse = True )
 
     # cache generated data in file
-    get_tool_dct()[key] = m2_lst
-    save_tool_dct()
+    nt.get_tool_dct()[key] = m2_lst
+    nt.save_tool_dct()
 
     return m2_lst
 
@@ -184,13 +182,13 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
         raise ValueError( 'Rank expected an integer between 3 and 9:', rank )
 
     key = 'get_m1_classes_' + str( ( rank, perm, d_lst ) )
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     # construct (-1) classes
     d = Div( [3] + ( rank - 1 ) * [-1] )
     m1t_lst = copy( get_div_set( d, 1, -1, perm ) )
-    np( m1t_lst )
+    nt.p( m1t_lst )
     if perm:
         m1t_lst += [Div.new( 'e' + str( i ), rank ) for i in range( 1, rank )]
     else:
@@ -210,8 +208,8 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
     m1_lst.sort( reverse = True )
 
     # cache generated data in file
-    get_tool_dct()[key] = m1_lst
-    save_tool_dct()
+    nt.get_tool_dct()[key] = m1_lst
+    nt.save_tool_dct()
 
     return m1_lst
 
@@ -234,8 +232,8 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
         raise ValueError( 'Rank expected an integer between 3 and 9:', rank )
 
     key = 'get_fam_classes_' + str( ( rank, perm, d_lst ) )
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     # construct "Div" objects s.t. f*f=0 and d*f=2
     d = Div( [3] + ( rank - 1 ) * [-1] )
@@ -256,8 +254,8 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
     f_lst.sort( reverse = True )
 
     # cache generated data in file
-    get_tool_dct()[key] = f_lst
-    save_tool_dct()
+    nt.get_tool_dct()[key] = f_lst
+    nt.save_tool_dct()
 
     return f_lst
 

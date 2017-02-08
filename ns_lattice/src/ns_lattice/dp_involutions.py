@@ -8,11 +8,8 @@ weak del Pezzo surfaces.
 See [http://arxiv.org/abs/1302.6678] for more info.
 '''
 
-from sage.all import *
-
-from ns_tools import *
-from class_div import *
-from dp_root_bases import *
+from ns_lattice import *
+nt = NSTools()
 
 
 def complete_basis( d_lst ):
@@ -57,6 +54,7 @@ def complete_basis( d_lst ):
                 raise Error( 'Extended columns are expected to be orthogonal: ', de, d, de_lst, d_lst, list( mat ) )
 
     return mat
+
 
 def is_integral_involution( M ):
     '''
@@ -106,14 +104,14 @@ def get_cls_involutions( max_rank = 9 ):
     key = 'get_cls_involutions_' + str( max_rank )
 
     # classification of involutions in cache?
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     # compute classification of involutions
     invo_cls_dct = {}
     for rank in range( 3, max_rank + 1 ):
 
-        np( rank )
+        nt.p( rank )
 
         M_lst = [( identity_matrix( ZZ, rank ), [] )]  # include identity involution
         for d_lst in get_cls_root_bases( max_rank )[rank]:
@@ -132,8 +130,8 @@ def get_cls_involutions( max_rank = 9 ):
         invo_cls_dct[rank] = M_lst
 
     # store classification
-    get_tool_dct()[key] = invo_cls_dct
-    save_tool_dct()
+    nt.get_tool_dct()[key] = invo_cls_dct
+    nt.save_tool_dct()
 
     return invo_cls_dct
 
@@ -154,8 +152,8 @@ def get_involutions( rank ):
     key = 'get_involutions_' + str( rank )
 
     # involutions in cache?
-    if key in get_tool_dct():
-        return get_tool_dct()[key]
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
 
     # construct list of all (-2)-classes (also negative)
     m2_lst = get_m2_classes( rank, True )
@@ -166,7 +164,7 @@ def get_involutions( rank ):
     for r in range( 1, rank ):
 
         # go through all possible root bases of length r
-        np( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
+        nt.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
         for idx_lst in Subsets( range( len( m2_lst ) ), r ):
 
             # construct sub-list
@@ -188,8 +186,8 @@ def get_involutions( rank ):
 
 
     # store involutions
-    get_tool_dct()[key] = MB_lst
-    save_tool_dct()
+    nt.get_tool_dct()[key] = MB_lst
+    nt.save_tool_dct()
 
     return MB_lst
 

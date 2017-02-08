@@ -6,93 +6,12 @@ Created on Aug 11, 2016
 from ns_lattice import *
 nt = NSTools()
 
-def test_div_0():
+
+def usecase__get_cls_root_bases( max_rank ):
     '''
-    Test the "Div.new()" and "Div.get_label()" methods.
-    '''
-
-    lbl_lst = []
-    lbl_lst += ['3h+e1+5e5-e6']
-    lbl_lst += [ 'e1-e2']
-    lbl_lst += ['-e1+e2']
-    lbl_lst += ['-3h']
-    lbl_lst += ['-e3']
-    lbl_lst += ['12']
-    lbl_lst += ['-12']
-    lbl_lst += ['1245']
-    lbl_lst += ['214']
-    lbl_lst += ['306']
-    lbl_lst += ['-308']
-
-    div_lst = []
-    for lbl in lbl_lst:
-        div_lst += [Div.new( lbl )]
-        nt.p( lbl + ' =', div_lst[-1].e_lst )
-
-    for div in div_lst:
-        nt.p( div.e_lst, '=', div.get_label() )
-
-    nt.p( 10 * '-' )
-    nt.p( '1124 < 1123: ', Div.new( '1124' ) < Div.new( '1123' ) )
-    nt.p( '12   < 1123: ', Div.new( '12' ) < Div.new( '1123' ) )
-    nt.p( '13   < 12  : ', Div.new( '13' ) < Div.new( '12' ) )
-    nt.p( '34   < 12  : ', Div.new( '34' ) < Div.new( '12' ) )
-
-
-def test_div_set_0():
-    '''
-    Test the methods in the "div_set" module.
-    '''
-
-    nt.p( 20 * '-' )
-    d = Div( [3] + 4 * [-1] )
-    for div in get_div_set( d, 1, -1, True ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    for div in get_m1_classes( 5, True, [] ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    d = Div( [3] + 8 * [-1] )
-    for div in get_div_set( d, 1, -1, False ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    for div in get_m1_classes( 9, False, [] ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    for div in get_m1_classes( 3, True, [] ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    m2_lst = get_m2_classes( 5, True )
-    m2_lst.sort( reverse = True )
-    for div in m2_lst:
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    for div in get_fam_classes( 6, False, [] ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-    for div in get_fam_classes( 6, True, [] ):
-        nt.p( div )
-
-
-    nt.p( 20 * '-' )
-    for div in get_m1_classes( 4, True, [] ):
-        nt.p( div )
-
-    nt.p( 20 * '-' )
-
-
-
-
-def test_dp_root_bases_0( max_rank ):
-    '''
-    Test "dp_root_bases.get_cls_root_bases(max_rank)".
+    Obtain classification of root bases of rank at most "max_rank".
+    
+    See "dp_root_bases.get_cls_root_bases(max_rank)".
     '''
 
     for rank in range( 3, max_rank + 1 ):
@@ -105,25 +24,28 @@ def test_dp_root_bases_0( max_rank ):
         nt.p( '# =', len( d_lst_lst ) )
 
 
-def test_dp_root_bases_1():
-    '''
-    Test "dp_root_bases.get_dynkin_type()".
+def usecase__get_tool_dct():
+    '''    
+    List current data in NSTools.get_tool_dct().
     '''
 
-    for ( G, ts, t_lst ) in get_tool_dct()["get_dynkin_type"]:
+    # See "dp_root_bases.get_dynkin_type()".
+    for ( G, ts, t_lst ) in nt.get_tool_dct()["get_dynkin_type"]:
         nt.p( ts, t_lst, G )
 
 
-def test_dp_root_bases_2():
+def usecase__get_root_bases():
     '''
-    Test "dp_root_bases.get_root_bases()" for rank 6 (degree 4 Del Pezzo).
+    Compute root bases for rank 6  NS-lattice of a degree 4 Del Pezzo.
+    
+    See "dp_root_bases.get_root_bases()".
     '''
 
     for d_lst in get_root_bases( 6 ):
         nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
 
-def test_dp_involutions_0():
+def usecase_dp_involutions_0():
     '''
     Test "dp_involutions.complete_basis()".
     '''
@@ -164,7 +86,7 @@ def test_dp_involutions_0():
     nt.p( 10 * '-' )
 
 
-def test_dp_involutions_1( max_rank ):
+def usecase_dp_involutions_1( max_rank ):
     '''
     Test "dp_involutions.get_cls_involutions(max_rank)".
     '''
@@ -179,7 +101,7 @@ def test_dp_involutions_1( max_rank ):
             nt.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
 
 
-def test_dp_involutions_2():
+def usecase_dp_involutions_2():
     '''
     List all compatible involutions for a fixed root basis.
     '''
@@ -211,7 +133,7 @@ def test_dp_involutions_2():
 
 
 
-def test_dp_lattice_0( max_rank ):
+def usecase_dp_lattice_0( max_rank ):
     '''
     Test "DPLattice.get_cls_real_dp(...)".
     '''
@@ -251,7 +173,7 @@ def test_dp_lattice_0( max_rank ):
             nt.p( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
 
 
-def test_dp_lattice_1( max_rank ):
+def usecase_dp_lattice_1( max_rank ):
     '''
     Test classification of surfaces with at least 2 real families
     of circles and no real lines.  
@@ -294,7 +216,7 @@ def test_dp_lattice_1( max_rank ):
         nt.p( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
 
 
-def test_dp_lattice_2( max_rank ):
+def usecase_dp_lattice_2( max_rank ):
     '''
     We construct a Tex string for a table with 
     a classification of celestials.
@@ -316,8 +238,8 @@ if __name__ == '__main__':
 
     #  Debug output settings
     #
-    # nt.p( True )  # show all output (this will be altered in the test methods!)
-    nt.p( False, 'ns_main.py' )  # show only when nt.p() is called from here.
+    # nt.filter( '__main__.py' ) # only print if output by module <file_name>
+    nt.filter( None )
     nt.start_timer()
 
     #
@@ -328,25 +250,23 @@ if __name__ == '__main__':
 
     #########################################
     #                                       #
-    # Uncomment one or more test methods    #
+    # Uncomment one or more use cases       #
     #                                       #
     #########################################
 
-    test_div_0()  #                       Div object
-    # test_div_set_0()  #                   div_set
-    # test_dp_root_bases_0( max_rank )  #   classification singularities
-    # test_dp_root_bases_1()  #             get_dynkin_type()
-    # test_dp_root_bases_2()  #             get_root_basis(rank)
-    # test_dp_involutions_0()  #            complete_basis(d_lst)
-    # test_dp_involutions_1( max_rank )  #  classification involutions
-    # test_dp_involutions_2()  #             list all compatible involutions for a fixed root basis
-    # test_dp_lattice_0( max_rank )  #      classification lattices
-    # test_dp_lattice_1( max_rank )  #      classification celestials
-    # test_dp_lattice_2( max_rank )  #      construct Tex string for table for classification celestials
+    # usecase__get_cls_root_bases( max_rank )
+    # usecase__get_tool_dct()
+    usecase__get_root_bases()
+    # usecase_dp_involutions_0()  #            complete_basis(d_lst)
+    # usecase_dp_involutions_1( max_rank )  #  classification involutions
+    # usecase_dp_involutions_2()  #             list all compatible involutions for a fixed root basis
+    # usecase_dp_lattice_0( max_rank )  #      classification lattices
+    # usecase_dp_lattice_1( max_rank )  #      classification celestials
+    # usecase_dp_lattice_2( max_rank )  #      construct Tex string for table for classification celestials
 
     #########################################
     #                                       #
-    # End of list of test methods.          #
+    # End of list of use case methods.      #
     #                                       #
     #########################################
 

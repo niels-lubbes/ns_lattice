@@ -3,15 +3,8 @@ Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
 
-from sage.all import *
-
-from ns_tools import *
-from class_div import *
-from class_dp_lattice import *
-from div_set import *
-from dp_involutions import *
-from dp_root_bases import *
-
+from ns_lattice import *
+nt = NSTools()
 
 def test_div_0():
     '''
@@ -34,16 +27,16 @@ def test_div_0():
     div_lst = []
     for lbl in lbl_lst:
         div_lst += [Div.new( lbl )]
-        np( lbl + ' =', div_lst[-1].e_lst )
+        nt.p( lbl + ' =', div_lst[-1].e_lst )
 
     for div in div_lst:
-        np( div.e_lst, '=', div.get_label() )
+        nt.p( div.e_lst, '=', div.get_label() )
 
-    np( 10 * '-' )
-    np( '1124 < 1123: ', Div.new( '1124' ) < Div.new( '1123' ) )
-    np( '12   < 1123: ', Div.new( '12' ) < Div.new( '1123' ) )
-    np( '13   < 12  : ', Div.new( '13' ) < Div.new( '12' ) )
-    np( '34   < 12  : ', Div.new( '34' ) < Div.new( '12' ) )
+    nt.p( 10 * '-' )
+    nt.p( '1124 < 1123: ', Div.new( '1124' ) < Div.new( '1123' ) )
+    nt.p( '12   < 1123: ', Div.new( '12' ) < Div.new( '1123' ) )
+    nt.p( '13   < 12  : ', Div.new( '13' ) < Div.new( '12' ) )
+    nt.p( '34   < 12  : ', Div.new( '34' ) < Div.new( '12' ) )
 
 
 def test_div_set_0():
@@ -51,48 +44,48 @@ def test_div_set_0():
     Test the methods in the "div_set" module.
     '''
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     d = Div( [3] + 4 * [-1] )
     for div in get_div_set( d, 1, -1, True ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     for div in get_m1_classes( 5, True, [] ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     d = Div( [3] + 8 * [-1] )
     for div in get_div_set( d, 1, -1, False ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     for div in get_m1_classes( 9, False, [] ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     for div in get_m1_classes( 3, True, [] ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     m2_lst = get_m2_classes( 5, True )
     m2_lst.sort( reverse = True )
     for div in m2_lst:
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     for div in get_fam_classes( 6, False, [] ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     for div in get_fam_classes( 6, True, [] ):
-        np( div )
+        nt.p( div )
 
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
     for div in get_m1_classes( 4, True, [] ):
-        np( div )
+        nt.p( div )
 
-    np( 20 * '-' )
+    nt.p( 20 * '-' )
 
 
 
@@ -104,12 +97,12 @@ def test_dp_root_bases_0( max_rank ):
 
     for rank in range( 3, max_rank + 1 ):
         d_lst_lst = get_cls_root_bases( max_rank )[rank]
-        np( 10 * '-' )
+        nt.p( 10 * '-' )
         i = 1
         for d_lst in d_lst_lst:
-            np( i, '<' + str( rank ) + '>', ': ', get_dynkin_type( d_lst ), '\t\t', d_lst )
+            nt.p( i, '<' + str( rank ) + '>', ': ', get_dynkin_type( d_lst ), '\t\t', d_lst )
             i += 1
-        np( '# =', len( d_lst_lst ) )
+        nt.p( '# =', len( d_lst_lst ) )
 
 
 def test_dp_root_bases_1():
@@ -118,7 +111,7 @@ def test_dp_root_bases_1():
     '''
 
     for ( G, ts, t_lst ) in get_tool_dct()["get_dynkin_type"]:
-        np( ts, t_lst, G )
+        nt.p( ts, t_lst, G )
 
 
 def test_dp_root_bases_2():
@@ -127,7 +120,7 @@ def test_dp_root_bases_2():
     '''
 
     for d_lst in get_root_bases( 6 ):
-        np( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
+        nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
 
 def test_dp_involutions_0():
@@ -139,36 +132,36 @@ def test_dp_involutions_0():
     rank = 6
     d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     mat = complete_basis( d_lst )
-    np( rank, d_lst )
-    np( '\n' + str( mat ) )
-    np( 10 * '-' )
+    nt.p( rank, d_lst )
+    nt.p( '\n' + str( mat ) )
+    nt.p( 10 * '-' )
 
 
     d_lst = [ 23, 34, 45 ]
     rank = 6
     d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     mat = complete_basis( d_lst )
-    np( rank, d_lst )
-    np( '\n' + str( mat ) )
-    np( 10 * '-' )
+    nt.p( rank, d_lst )
+    nt.p( '\n' + str( mat ) )
+    nt.p( 10 * '-' )
 
     # 4A1
     d_lst = [ 1123, 12, 23, 45 ]
     rank = 6
     d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     mat = complete_basis( d_lst )
-    np( rank, d_lst )
-    np( '\n' + str( mat ) )
-    np( 10 * '-' )
+    nt.p( rank, d_lst )
+    nt.p( '\n' + str( mat ) )
+    nt.p( 10 * '-' )
 
 
     d_lst = [ 1145, 23 ]
     rank = 6
     d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     mat = complete_basis( d_lst )
-    np( rank, d_lst )
-    np( '\n' + str( mat ) )
-    np( 10 * '-' )
+    nt.p( rank, d_lst )
+    nt.p( '\n' + str( mat ) )
+    nt.p( 10 * '-' )
 
 
 def test_dp_involutions_1( max_rank ):
@@ -178,12 +171,12 @@ def test_dp_involutions_1( max_rank ):
 
     invo_cls_dct = get_cls_involutions( max_rank )
     for rank in range( 3, max_rank + 1 ):
-        np( 10 * '-' )
+        nt.p( 10 * '-' )
         for ( M, d_lst ) in invo_cls_dct[rank]:
-            np( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
+            nt.p( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
 
             b_lst = [Div( row ) for row in identity_matrix( ZZ, rank ).rows() ]
-            np( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
+            nt.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
 
 
 def test_dp_involutions_2():
@@ -204,16 +197,16 @@ def test_dp_involutions_2():
         if dpl.Mtype != Mtype:
             continue
 
-        np( dpl )
+        nt.p( dpl )
 
         k = Div( [-3] + ( rank - 1 ) * [1] )
         if k.mat_mul( M ) != k:
             raise Exception( 'The canonical class should be preserved M(k)=', k.mat_mul( M ) )
 
 
-        # np( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
+        # nt.p( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
         # b_lst = [Div( row ) for row in identity_matrix( ZZ, rank ).rows() ]
-        # np( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
+        # nt.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
 
 
 
@@ -222,16 +215,16 @@ def test_dp_lattice_0( max_rank ):
     '''
     Test "DPLattice.get_cls_real_dp(...)".
     '''
-    np( 'max_rank =', max_rank )
+    nt.p( 'max_rank =', max_rank )
 
     # provable version of the classification algorithm.
     #
     dp_cls_dct_1 = DPLattice.get_cls_real_dp( min( max_rank, 7 ), True )
     for rank in range( 3, max_rank + 1 ):
         for dpl in dp_cls_dct_1[rank]:
-            np( dpl )
+            nt.p( dpl )
 
-    np( 5 * ( 10 * '#' + '\n' ) )
+    nt.p( 5 * ( 10 * '#' + '\n' ) )
 
     # non provable version of classification where the
     # number of involutions is minimized
@@ -240,7 +233,7 @@ def test_dp_lattice_0( max_rank ):
     for rank in range( 3, max_rank + 1 ):
         for dpl in dp_cls_dct_2[rank]:
             if dpl in dp_cls_dct_1[rank] and len( dp_cls_dct_1[rank] ) == len( dp_cls_dct_2[rank] ):
-                np( dpl )
+                nt.p( dpl )
             else:
                 err_str = '''
                 The provable and non-provable version of the 
@@ -255,7 +248,7 @@ def test_dp_lattice_0( max_rank ):
     for rank in range( 3, max_rank + 1 ):
         for dpl in dp_cls_dct_2[rank]:
             # (#families, degree ), involution, isolated singularities
-            np( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
+            nt.p( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
 
 
 def test_dp_lattice_1( max_rank ):
@@ -271,7 +264,7 @@ def test_dp_lattice_1( max_rank ):
         for dpl in sorted( dp_cls_dct[rank] ):
             if len( dpl.real_fam_lst ) >= 2 and len( dpl.real_m1_lst ) == 0:
 
-                np( dpl )
+                nt.p( dpl )
 
                 if rank not in celestial_dct:
                     celestial_dct[rank] = []
@@ -298,7 +291,7 @@ def test_dp_lattice_1( max_rank ):
         print row_format.format( *row )
 
     for rank in celestial_dct:
-        np( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
+        nt.p( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
 
 
 def test_dp_lattice_2( max_rank ):
@@ -323,9 +316,9 @@ if __name__ == '__main__':
 
     #  Debug output settings
     #
-    # np( True )  # show all output (this will be altered in the test methods!)
-    np( False, 'ns_main.py' )  # show only when np() is called from here.
-    nt( True )  # show timing
+    # nt.p( True )  # show all output (this will be altered in the test methods!)
+    nt.p( False, 'ns_main.py' )  # show only when nt.p() is called from here.
+    nt.start_timer()
 
     #
     # Should be between 3 and 9.
@@ -339,14 +332,14 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    # test_div_0()  #                       Div object
+    test_div_0()  #                       Div object
     # test_div_set_0()  #                   div_set
     # test_dp_root_bases_0( max_rank )  #   classification singularities
     # test_dp_root_bases_1()  #             get_dynkin_type()
     # test_dp_root_bases_2()  #             get_root_basis(rank)
     # test_dp_involutions_0()  #            complete_basis(d_lst)
     # test_dp_involutions_1( max_rank )  #  classification involutions
-    test_dp_involutions_2()  #             list all compatible involutions for a fixed root basis
+    # test_dp_involutions_2()  #             list all compatible involutions for a fixed root basis
     # test_dp_lattice_0( max_rank )  #      classification lattices
     # test_dp_lattice_1( max_rank )  #      classification celestials
     # test_dp_lattice_2( max_rank )  #      construct Tex string for table for classification celestials
@@ -358,7 +351,7 @@ if __name__ == '__main__':
     #########################################
 
     # end timing
-    nt()
+    nt.end_timer()
 
     print
     print 'The End'

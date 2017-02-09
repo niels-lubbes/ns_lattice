@@ -102,11 +102,13 @@ def get_cls_involutions( max_rank = 9 ):
           where r=rank-1. Up to equivalence the list contains all possible 
           involutions. Thus a key for "invo_dct" denotes the rank.          
     '''
-    key = 'get_cls_involutions_' + str( max_rank )
 
     # classification of involutions in cache?
-    if key in nt.get_tool_dct():
-        return nt.get_tool_dct()[key]
+    for rank in range( 3, max_rank + 1 ):
+        key = 'get_cls_involutions_' + str( rank )
+        if key in nt.get_tool_dct():
+            return nt.get_tool_dct()[key]
+    key = 'get_cls_involutions_' + str( max_rank )
 
     # compute classification of involutions
     invo_cls_dct = {}

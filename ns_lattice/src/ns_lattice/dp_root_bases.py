@@ -404,10 +404,13 @@ def get_cls_root_bases( max_rank = 9 ):
           The list "bases_cls_dct[rank]" contains exactly one 
           representative for all root subsystems up to equivalence.         
     '''
-
+    # classification of root bases in cache?
+    for rank in range( 3, max_rank + 1 ):
+        key = 'get_cls_root_bases_' + str( rank )
+        if key in nt.get_tool_dct():
+            return nt.get_tool_dct()[key]
     key = 'get_cls_root_bases_' + str( max_rank )
-    if key in nt.get_tool_dct():
-        return nt.get_tool_dct()[key]
+
 
     Z1 = [ 12, 23, 34, 45, 56, 67, 78, 1123 ]
     Z2 = [ 12, 23, 34, 45, 56, 67, 78, 1123, 1145, 1347, 1678, 1127, 1456, 1567, 234, 278, 308 ]

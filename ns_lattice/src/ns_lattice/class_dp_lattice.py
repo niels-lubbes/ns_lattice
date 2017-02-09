@@ -7,8 +7,9 @@ of weak Del Pezzo surfaces of degree between 1 and 7.
 
 '''
 from ns_lattice import *
-from dp_root_bases import *
 from div_set import *
+from dp_root_bases import *
+from dp_involutions import *
 
 nt = NSTools()
 

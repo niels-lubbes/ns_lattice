@@ -8,6 +8,8 @@ Classification of root subsystems of root systems
 of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
 from ns_lattice import *
+from div_set import *
+
 nt = NSTools()
 
 def is_root_basis( d_lst ):

@@ -399,6 +399,11 @@ class Div:
         v = vector( ZZ, self.e_lst ) + vector( ZZ, div.e_lst )
         return Div( list( v ) )
 
+    # operator overload for -
+    def __sub__( self, div ):
+        v = vector( ZZ, self.e_lst ) - vector( ZZ, div.e_lst )
+        return Div( list( v ) )
+
     # operator overloading for []
     def __getitem__( self, index ):
         return self.e_lst[index]

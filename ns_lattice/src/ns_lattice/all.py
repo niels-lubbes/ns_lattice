@@ -9,6 +9,7 @@ from sage.all import *
 from div_set import *
 from dp_involutions import *
 from dp_root_bases import *
+from ns_basis import *
 
 from class_ns_tools import NSTools
 from class_div import Div

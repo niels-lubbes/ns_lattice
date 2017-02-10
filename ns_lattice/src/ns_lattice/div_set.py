@@ -2,7 +2,11 @@
 Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
-from ns_lattice import *
+from sage.all import *
+
+from class_ns_tools import NSTools
+from class_div import Div
+
 nt = NSTools()
 
 

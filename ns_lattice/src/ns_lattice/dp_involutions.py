@@ -7,8 +7,14 @@ weak del Pezzo surfaces.
 
 See [http://arxiv.org/abs/1302.6678] for more info.
 '''
-from ns_lattice import *
+from sage.all import *
+
+from div_set import *
 from dp_root_bases import *
+
+from class_ns_tools import NSTools
+from class_div import Div
+
 
 nt = NSTools()
 

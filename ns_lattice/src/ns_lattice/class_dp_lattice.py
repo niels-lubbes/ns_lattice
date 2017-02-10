@@ -6,10 +6,14 @@ This module is for classifying real structures and singularities
 of weak Del Pezzo surfaces of degree between 1 and 7.
 
 '''
-from ns_lattice import *
+from sage.all import *
+
 from div_set import *
 from dp_root_bases import *
 from dp_involutions import *
+
+from class_ns_tools import NSTools
+from class_div import Div
 
 nt = NSTools()
 

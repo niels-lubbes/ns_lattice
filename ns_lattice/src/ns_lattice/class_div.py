@@ -2,7 +2,7 @@
 Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
-from ns_tools import *
+from sage.all import *
 
 
 class Div:

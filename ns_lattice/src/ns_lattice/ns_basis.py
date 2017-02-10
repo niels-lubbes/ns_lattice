@@ -4,7 +4,13 @@ Created on Feb 9, 2017
 @author: Niels Lubbes
 '''
 
-from ns_lattice import *
+from sage.all import *
+
+from div_set import *
+from class_ns_tools import NSTools
+from class_div import Div
+from class_dp_lattice import DPLattice
+
 nt = NSTools()
 
 

@@ -7,10 +7,14 @@ See [http://arxiv.org/abs/1302.6678] for more info.
 Classification of root subsystems of root systems
 of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
-from ns_lattice import *
+from sage.all import *
+
 from div_set import *
+from class_ns_tools import NSTools
+from class_div import Div
 
 nt = NSTools()
+
 
 def is_root_basis( d_lst ):
     '''

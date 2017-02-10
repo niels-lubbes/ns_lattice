@@ -3,7 +3,7 @@ Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
 
-from ns_lattice.all import *
+from ns_lattice.all import *  # import does not work
 nt = NSTools()
 
 

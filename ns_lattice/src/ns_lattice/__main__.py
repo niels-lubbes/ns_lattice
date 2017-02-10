@@ -223,13 +223,13 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    usecase__get_cls_root_bases( max_rank )
+    # usecase__get_cls_root_bases( max_rank )
     # usecase__get_tool_dct()
     # usecase__get_root_bases()
     # usecase__get_cls_involutions( max_rank )
     # usecase__get_involutions()
     # usecase__get_cls_real_dp( max_rank )
-    # usecase__get_cls_real_dp__celestials( max_rank )
+    usecase__get_cls_real_dp__celestials( max_rank )
     # usecase__get_cls_real_dp__tex( max_rank )
 
     #########################################

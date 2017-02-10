@@ -181,28 +181,38 @@ def get_real_base_changes( dpl ):
                        as the input "dp_lat", but wrt. a different basis
                        coming from a matrix in "mat_lst". 
     '''
+    mat_lst = []
     dpl_lst = []
-    for mat in get_base_changes( dp_lat.get_rank(), dp_lat.d_lst ):
+    for mat in get_base_changes( dpl.get_rank(), dpl.d_lst ):
 
-        B = mat.T  # columns form generators for bases
+        # consider list of generators and
+        # list of generators after application of involution
+        div1_lst = [ Div( row ) for row in mat ]
+        div2_lst = [ div1.mat_mul( dpl.M ) for div1 in div1_lst ]
 
-        dpl = DPLattice()
-        dpl.M = ~B * dp_lat.M * B  # new matrix for involution
-        dpl.Md_lst = [ Md.mat_mul( B ) ]
+        # check whether involution preserves generators
+        if set( div1_lst ) != set( div2_lst ):
+            continue
 
+        # check whether first generator is preserved
+        if div1_lst[0] != div2_lst[0]:
+            continue
 
+        # in case type (II) matrix check whether 2nd
+        # generator is preserved
+        int_lst = [ div2 * div2 for div2 in div2_lst ]
+        if int_lst[:2] == [0, 0] and div1_lst[1] != div2_lst[1]:
+            continue
+
+        # add matrix and adapted lattice
+        mat_lst += [mat]
+        dpl_lst += [ dpl.change_basis( mat ) ]
+
+    return mat_lst, dpl_lst
 
 
 if __name__ == '__main__':
 
-    # mat_lst = get_base_changes( 3, [Div( [0, 1, -1] )] )
-    # mat_lst = get_base_changes( 4, [Div( [0, 1, -1, 0] )] )
-    mat_lst = get_base_changes( 5, [] )
-
-
-    for mat in mat_lst:
-        print list( mat )
-        # print '\t\tchk_lst += [', list( mat ), ']'
 
     print
     print 'The End'

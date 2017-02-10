@@ -41,8 +41,6 @@ class Div:
 
         self.e_lst = list( e_lst )
 
-        if int_mat == None:
-            int_mat = diagonal_matrix( ZZ, [1] + ( self.rank() - 1 ) * [-1] )
 
         #
         # equal "self.int_mat" for each instantiated Div object references
@@ -50,10 +48,12 @@ class Div:
         # Div object. Maybe this is already ensured by Sage library, but just
         # to be on the safe side.
         #
-        if int_mat not in int_mat_lst:
-            int_mat_lst += [int_mat]
-        idx = int_mat_lst.index( int_mat )
-        self.int_mat = int_mat_lst[idx]
+        if int_mat == None:
+            int_mat = diagonal_matrix( ZZ, [1] + ( self.rank() - 1 ) * [-1] )
+        if int_mat not in Div.int_mat_lst:
+            Div.int_mat_lst += [int_mat]
+        idx = Div.int_mat_lst.index( int_mat )
+        self.int_mat = Div.int_mat_lst[idx]
 
 
 
@@ -209,9 +209,9 @@ class Div:
               with respect to a new basis.
                 
         '''
-
-        int_mat = B * self.M * B.T
-        e_lst = self.mat_mul( B.T )
+        B = B.T
+        int_mat = ( ~B ).T * self.M * ( ~B )
+        e_lst = self.mat_mul( B )
 
         return Div( self.e_lst, int_mat )
 
@@ -442,6 +442,7 @@ class Div:
         row_vec = vector( ZZ, self.e_lst ).row()
         col_vec = vector( ZZ, div.e_lst ).column()
         mat = self.int_mat
+
 
         v = row_vec * mat * col_vec
 

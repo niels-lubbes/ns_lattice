@@ -104,7 +104,7 @@ def get_cls_involutions( max_rank = 9 ):
     '''
 
     # classification of involutions in cache?
-    for rank in range( 3, max_rank + 1 ):
+    for rank in range( max_rank, 3 - 1, -1 ):
         key = 'get_cls_involutions_' + str( rank )
         if key in nt.get_tool_dct():
             return nt.get_tool_dct()[key]

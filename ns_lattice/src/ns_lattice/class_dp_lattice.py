@@ -188,6 +188,41 @@ class DPLattice:
                  len( self.real_m1_lst ),
                  len( self.real_fam_lst ) )
 
+
+    def change_basis( self, B ):
+        '''
+        INPUT:
+            
+            - "self" -- "DPLattice" object.
+            
+            - "B"    -- A matrix whose rows correspond to generators of 
+                        a new basis. We assume that the intersection
+                        matrix for this basis is the default
+                        diagonal matrix with diagonal (1,-1,...,-1).
+        OUTPUT:
+        
+            - A new "DPLattice" object, which represents the current  
+              lattice with respect to a new basis.
+                
+        '''
+
+        B = B.T  # now columns form generators for bases
+
+        dpl = DPLattice()
+        dpl.M = ( ~B ).T * self.M * ( ~B )  # ~B is inverse of B
+        dpl.Md_lst = [ Md.change_basis( B.T ) for Md in self.Md_lst ]
+        dpl.Mtype = self.Mtype
+        dpl.d_lst = [ Md.change_basis( B.T ) for d in self.d_lst ]
+        dpl.type = self.type
+        dpl.m1_lst = [ m1.change_basis( B.T ) for m1 in self.m1_lst ]
+        dpl.fam_lst = [ fam.change_basis( B.T ) for fam in self.fam_lst ]
+        dpl.real_d_lst = [ d.change_basis( B.T ) for d in self.real_d_lst ]
+        dpl.real_m1_lst = [ m1.change_basis( B.T ) for m1 in self.real_m1_lst ]
+        dpl.real_fam_lst = [ fam.change_basis( B.T ) for fam in self.real_fam_lst ]
+
+        return dpl
+
+
     @staticmethod
     def init( d_lst, Md_lst, M ):
         '''

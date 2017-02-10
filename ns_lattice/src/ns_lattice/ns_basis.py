@@ -8,6 +8,7 @@ from ns_lattice import *
 nt = NSTools()
 
 
+
 def get_base_changes( rank, d_lst = [], div_dct = None ):
     '''
     Computes a basis change for a NS-lattice of a Del Pezzo surface.
@@ -22,6 +23,9 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                             (3h-e1-...-er)*d==0 and d^2==-2
                         for all d in "d_lst". Thus such divisors 
                         represent effective (-2)-classes.
+                        The intersection matrix of the Div objects
+                        is assumed to be the default: a diagonal
+                        matrix with diagonal (1,-1,...,-1). 
 
         - "div_dct" --  A dictionary representing the current NS-lattice 
                         and either has the following entries:
@@ -30,42 +34,54 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                               List of Div objects of (-1) classes that
                               were contracted. First in list in contracted
                               last.
-                            
-                            * div_dct['m1_lst']: 
-                              List of Div objects corresponding 
-                              to (-1)-classes that can be contracted.
-                              See also "div_set.get_m1_classes()"
-                              
+
+                            * div_dct['k']: 
+                              The canonical divisor class.
+
                             * div_dct['fam_lst']:
                               List of Div objects f such that 
                                (3h-e1-...-3r)*f==2 and f^2==0
                               for all f in the list.
                               See also "div_set.get_fam_classes()"
-                               
-                            * div_dct['k']: 
-                              The canonical divisor class.
-                              
+                            
+                            * div_dct['m1_lst']: 
+                              List of Div objects corresponding 
+                              to (-1)-classes that can be contracted.
+                              See also "div_set.get_m1_classes()"
+                                                                                  
                         For initial call the default is None,
                         and used for recursive calls of this method.                              
     
     OUTPUT:
-        - Returns a list rank*rank matrices over QQ, such that the 
+        - Returns a list rank*rank matrices over ZZ, such that the 
           rows of the matrix represent generators for a new basis.
-          
-          Let M be a matrix in this list and we denote the i-th row
-          of this matrix by M[i].
-          
-          If "Div(M[0])*Div(M[0])==1" then the basis of M corresponds to          
-              <h,e1,...er>            
-          where h corresponds to M[0] and generates the NS-lattice of 
-          the projective plane and e1,...er are (-1)-classes. 
-         
-          Otherwise "Div(M[i])*Div(M[i])==0" for i in [0,1] and 
-          the basis corresponds to
-              <f,q,e1,...,et>
-          where f and q generate the NS-lattice of P1xP1 and
-          e1,...,et are (-1)-classes.  
-              
+                    
+          There are two types of matrices in this list:
+
+            (I) The first row has self-intersection one
+                and the remaining rows have self-intersection 
+                minus one. This basis corresponds to a basis 
+                of the Neron-Severi lattice of the projective 
+                plane P^2 blown up in points: <h,e1,...,er> 
+                such h^2==1 and e1**2==-1,...er**2==-1,
+                and the remaining intersections are zero.
+                Thus the diagonal matrix corresponding to 
+                this bilinear intersection product has 
+                diagonal (1,-1,...,-1).
+                                                                              
+           (II) The first two of the matrix have self- 
+                intersection zero and the remaining rows
+                have self-intersection minus one.
+                This basis corresponds to a basis of 
+                the Neron-Severi lattice of P^1xP^1
+                blown up in points: <h,e1,...,er>
+                such that h*e1==1, e2**2==-1,...er**2==-1, 
+                and the remaining intersections are zero.      
+                Thus the matrix corresponding to this
+                bilinear intersection product is
+                the identity matrix with the first two 
+                columns switched.  
+                                      
     '''
     # initialize div_dct
     if div_dct == None:
@@ -107,7 +123,7 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             # fiber bundle
             return []
 
-        mat = matrix( QQ, [ gen.e_lst for gen in gen_lst ] )  # rows form new basis
+        mat = matrix( ZZ, [ gen.e_lst for gen in gen_lst ] )  # rows form new basis
         return [mat]
 
     else:
@@ -134,6 +150,47 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             mat_lst += get_base_changes( rank, new_d_lst, new_dct )
 
         return mat_lst
+
+
+def get_real_base_changes( dpl ):
+    '''
+    INPUT:
+        - "dp_lat"  -- DPLattice object.
+    OUTPUT
+        - "mat_lst" -- A list of matrices corresponding to base changes of
+                       the Neron-Severi lattice, which are compatible 
+                       with the real structure in the following way.
+                       
+                       First we consider the output of ".get_base_changes()"
+                       which is a list of matrices of type (I) and (II).
+                       
+                       If the matrix is of type (I) with basis: 
+                           <h,e1,...,er>
+                       then we include the matrix in the output list of 
+                       this method, if the involution sends h to h
+                       and preserves the set {e1,..,er}. 
+                                              
+                       If the matrix is of type (II) with basis: 
+                           <h,e1,...,er>
+                       then we include the matrix in the output list of 
+                       this method, if the involution sends h to h,
+                       e1 to e1 and preserves the set {e2,..,er}.                                                
+        
+        - "dpl_lst" -- A list of "DPLattice" objects such that 
+                       each lattice represents the same lattice 
+                       as the input "dp_lat", but wrt. a different basis
+                       coming from a matrix in "mat_lst". 
+    '''
+    dpl_lst = []
+    for mat in get_base_changes( dp_lat.get_rank(), dp_lat.d_lst ):
+
+        B = mat.T  # columns form generators for bases
+
+        dpl = DPLattice()
+        dpl.M = ~B * dp_lat.M * B  # new matrix for involution
+        dpl.Md_lst = [ Md.mat_mul( B ) ]
+
+
 
 
 if __name__ == '__main__':

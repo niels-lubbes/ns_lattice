@@ -118,8 +118,13 @@ def get_m2_classes( rank, perm = False ):
     OUTPUT:
         - Returns a list of "Div" objects that 
           represent (-2)-classes on a 
-          weak del Pezzo surface of rank (10-<rank>).'
-          Thus classes f such that 
+          weak del Pezzo surface of rank (10-<rank>).
+
+          We assume that the matrix of the intersection
+          product of these divisors is a diagonal matrix
+          with signature (-1,1,...,1).           
+          
+          Thus we return classes f such that 
               
               f*f==-2 and (-3h+e1+...+er)*f==0
           
@@ -171,7 +176,10 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
         - "perm" -- A boolean.
         - "d_lst" -- A list of lists of "Div" objects "d", 
                      such that d*d=-2 and d*(3h-e1-...-er)=0 
-                     where r=rank-1.        
+                     where r=rank-1.
+                     We assume that the matrix of the intersection
+                     product of these divisors is a diagonal matrix
+                     with signature (-1,1,...,1).        
     OUTPUT:
         - Returns a list of "Div" objects "q", 
           such that 
@@ -221,7 +229,10 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
         - "perm"  -- A boolean.
         - "d_lst" -- A list of lists of "Div" objects "d", 
                      such that d*d=-2 and d*(-3h+e1+...+er)=0 
-                     where r=rank-1.        
+                     where r=rank-1.
+                     We assume that the matrix of the intersection
+                     product of these divisors is a diagonal matrix
+                     with signature (-1,1,...,1).        
     OUTPUT:
         - Returns a list of "Div" objects "f", 
           such that 

@@ -16,48 +16,45 @@ class Div:
     '''
 
     # static variable
+    #
     short_output = True
 
-    def __init__( self, e_lst = 9 * [0], signature_mat = None ):
+
+    # static list of intersection matrices
+    #
+    int_mat_lst = []
+
+
+    def __init__( self, e_lst = 9 * [0], int_mat = None ):
         '''
         INPUT:
-            - "e_lst "        -- A list of elements in ZZ.
-            - "signature_mat" -- A matrix over ZZ of rank "len(e_lst)".                                 
+            - "e_lst "  -- A list of elements in ZZ.
+            - "int_mat" -- A matrix over ZZ of rank "len(e_lst)".                                 
         OUTPUT:
-            - Constructor.
-              If "signature_mat==None" then the default 
+            - Constructor (called when instantiating object).
+              
+              If "int_mat==None" then the default 
               diagonal matrix has signature (+-...-). 
+              This matrix determines the intersection
+              product of divisors.
         '''
 
         self.e_lst = list( e_lst )
 
-        if signature_mat != None:
-            self.signature_mat = signature_mat
-        else:
-            self.signature_mat = diagonal_matrix( ZZ, [1] + ( self.rank() - 1 ) * [-1] )
+        if int_mat == None:
+            int_mat = diagonal_matrix( ZZ, [1] + ( self.rank() - 1 ) * [-1] )
 
-    def rank( self ):
-        return len( self.e_lst )
+        #
+        # equal "self.int_mat" for each instantiated Div object references
+        # to a unique matrix, so that no new matrix is instantiated for each
+        # Div object. Maybe this is already ensured by Sage library, but just
+        # to be on the safe side.
+        #
+        if int_mat not in int_mat_lst:
+            int_mat_lst += [int_mat]
+        idx = int_mat_lst.index( int_mat )
+        self.int_mat = int_mat_lst[idx]
 
-    @staticmethod
-    def get_min_rank( lbl ):
-        '''
-        INPUT:
-            - "lbl"  -- A string with format as output of "self.get_label()".
-        OUTPUT:
-            - The minimal rank of the "Div" object with a given label.
-        
-        EXAMPLE:
-            - "get_rank('78')    == 9  "
-            - "get_rank('301')   == 9  "
-            - "get_rank('12')    == 3  "
-        '''
-        d = Div.new( lbl )
-        lst = copy( d.e_lst )
-        while lst[-1] == 0 and lst != []:
-            lst.pop()
-
-        return len( lst )
 
 
     @staticmethod
@@ -170,6 +167,55 @@ class Div:
 
         return c
 
+
+    def rank( self ):
+        return len( self.e_lst )
+
+
+    @staticmethod
+    def get_min_rank( lbl ):
+        '''
+        INPUT:
+            - "lbl"  -- A string with format as output of "self.get_label()".
+        OUTPUT:
+            - The minimal rank of the "Div" object with a given label.
+        
+        EXAMPLE:
+            - "get_rank('78')    == 9  "
+            - "get_rank('301')   == 9  "
+            - "get_rank('12')    == 3  "
+        '''
+        d = Div.new( lbl )
+        lst = copy( d.e_lst )
+        while lst[-1] == 0 and lst != []:
+            lst.pop()
+
+        return len( lst )
+
+
+    def change_basis( self, B ):
+        '''
+        INPUT:
+            
+            - "self" -- "Div" object.
+            
+            - "B"    -- A matrix whose rows correspond to generators of 
+                        a new basis. We assume that the intersection
+                        matrix for this basis is the default
+                        diagonal matrix with diagonal (1,-1,...,-1).
+        OUTPUT:
+        
+            - A new "Div" object, which represents the current divisor  
+              with respect to a new basis.
+                
+        '''
+
+        int_mat = B * self.M * B.T
+        e_lst = self.mat_mul( B.T )
+
+        return Div( self.e_lst, int_mat )
+
+
     def __get_minus_two_label( self ):
         '''
         Private helper method for "get_label()"
@@ -237,13 +283,19 @@ class Div:
         
             - We describe the output label in terms of examples.
             
-            * If "abbr==True": (this only works for special cases)
+            * If "abbr==True": 
               
                 > e1                --->  'e1'
                 > e1-e2             --->  'e12'                  
                 > 2h-e1-e2-e4-e5    --->  '2e1245'
                 > h-e1              --->  '1e1'  
         
+              This options only works for special cases and for 
+              the remaining case this algorithm returns 
+              as if "abbr==False". The cases which are covered
+              are (-1)- and (-2)-classes, and classes of conical
+              families on weak Del Pezzo surfaces.
+                
             * If "abbr==False" and self*self==-2 and self.rank()<=9:
             
                 >  e1-e2               ---> '12'
@@ -256,8 +308,7 @@ class Div:
             * For the remaining cases not treated above:
             
                 > 3h-2e1-13e2-4e3  ---> '3h-2e1-13e2-4e3'                                
-            
-            
+                    
         '''
 
         divK = Div( [-3] + ( self.rank() - 1 ) * [1] )
@@ -331,7 +382,7 @@ class Div:
     def int_mul( self, n ):
         '''
         INPUT:
-            - "self" -- A "Div" object.
+            - "self" -- "Div" object.
             - "n"    -- An integer.
         OUTPUT:
             - Returns a "Div" object that is a result of 
@@ -344,9 +395,11 @@ class Div:
     def __eq__( self, other ):
         return self.e_lst == other.e_lst
 
+
     # operator overloading for !=
     def __ne__( self, other ):
         return not self.__eq__( other )
+
 
     # operator overloading for <
     # Used for sorting lists of "Div"-objects:
@@ -383,34 +436,39 @@ class Div:
             - "div" -- A "Div" object.
         OUTPUT:
             - The intersection product of "self" and 
-              "div" wrt. to signature "self.signature_mat".
+              "div" wrt. to matrix "self.int_mat".
         '''
 
         row_vec = vector( ZZ, self.e_lst ).row()
         col_vec = vector( ZZ, div.e_lst ).column()
-        mat = self.signature_mat
+        mat = self.int_mat
 
         v = row_vec * mat * col_vec
 
         return v[0][0]
+
 
     # operator overload for +
     def __add__( self, div ):
         v = vector( ZZ, self.e_lst ) + vector( ZZ, div.e_lst )
         return Div( list( v ) )
 
+
     # operator overload for -
     def __sub__( self, div ):
         v = vector( ZZ, self.e_lst ) - vector( ZZ, div.e_lst )
         return Div( list( v ) )
 
+
     # operator overloading for []
     def __getitem__( self, index ):
         return self.e_lst[index]
 
+
     # operator overloading for []
     def __setitem__( self, index, item ):
         self.e_lst[index] = item
+
 
     # overloading for str(.): human readable string representation of object
     def __str__( self ):
@@ -418,6 +476,7 @@ class Div:
             return self.get_label()
         else:
             return str( self.e_lst )
+
 
     # overloading "repr" as well, since python call this for Div objects in a list
     def __repr__( self ):

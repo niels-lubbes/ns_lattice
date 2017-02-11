@@ -209,11 +209,10 @@ class Div:
               with respect to a new basis.
                 
         '''
-        B = B.T
-        int_mat = ( ~B ).T * self.M * ( ~B )
-        e_lst = self.mat_mul( B )
+        new_int_mat = B * self.int_mat * B.T
+        new_e_lst = self.mat_mul( ~( B.T ) )
 
-        return Div( self.e_lst, int_mat )
+        return Div( new_e_lst, new_int_mat )
 
 
     def __get_minus_two_label( self ):

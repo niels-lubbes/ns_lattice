@@ -10,6 +10,8 @@ from div_set import *
 from class_ns_tools import NSTools
 from class_div import Div
 from class_dp_lattice import DPLattice
+from dp_involutions import *
+
 
 nt = NSTools()
 
@@ -89,6 +91,12 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                 columns switched.  
                                       
     '''
+    # check if return value has been cached
+    if div_dct == None:
+        key = 'get_base_changes' + str( rank ) + '_ ' + str( d_lst )
+        if key in nt.get_tool_dct():
+            return nt.get_tool_dct()[key]
+
     # initialize div_dct
     if div_dct == None:
         div_dct = {}
@@ -101,8 +109,8 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             if d.rank() != rank:
                 raise ValueError( 'All Div objects in d_lst argument must have rank:', rank )
 
-    # output info
-    if True:
+    # output for debugging
+    if False:
         nt.p( 10 * '-' )
         for key in ['ray_lst', 'k', 'fam_lst', 'm1_lst']:
             nt.p( key, '=', div_dct[key] )
@@ -155,6 +163,11 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
 
             mat_lst += get_base_changes( rank, new_d_lst, new_dct )
 
+        # if not recursively called by itself, cache output value
+        if div_dct == None:
+            nt.get_tool_dct()[key] = mat_lst
+            nt.save_tool_dct()
+
         return mat_lst
 
 
@@ -187,6 +200,12 @@ def get_real_base_changes( dpl ):
                        as the input "dp_lat", but wrt. a different basis
                        coming from a matrix in "mat_lst". 
     '''
+    # check if return value has been cached
+    key = 'get_real_base_changes' + str( dpl )
+    if key in nt.get_tool_dct():
+        return nt.get_tool_dct()[key]
+
+
     mat_lst = []
     dpl_lst = []
     for mat in get_base_changes( dpl.get_rank(), dpl.d_lst ):
@@ -197,8 +216,9 @@ def get_real_base_changes( dpl ):
         div2_lst = [ div1.mat_mul( dpl.M ) for div1 in div1_lst ]
 
         # check whether involution preserves generators
-        if set( div1_lst ) != set( div2_lst ):
-            continue
+        for div1 in div1_lst:
+            if div1 not in div2_lst:
+                continue
 
         # check whether first generator is preserved
         if div1_lst[0] != div2_lst[0]:
@@ -214,11 +234,39 @@ def get_real_base_changes( dpl ):
         mat_lst += [mat]
         dpl_lst += [ dpl.change_basis( mat ) ]
 
+    nt.get_tool_dct()[key] = mat_lst, dpl_lst
+    nt.save_tool_dct()
+
     return mat_lst, dpl_lst
 
 
 if __name__ == '__main__':
 
+    rank = 6
+    num_fam = 6
+
+    #
+    my_dlp = None
+    for dpl in DPLattice.get_cls_real_dp( 6, False )[rank]:
+        if dpl.get_numbers()[5] == num_fam:
+            my_dlp = dpl
+
+    nt.p( my_dlp )
+    nt.p( 50 * '#' )
+
+    for ( M, Md_lst ) in get_involutions( rank ):
+
+        # check whether involution M preserves d_lst
+        dm_lst = [ d.mat_mul( M ) for d in my_dlp.d_lst ]
+        if sorted( dm_lst ) != sorted( my_dlp.d_lst ):
+            continue
+
+        new_dlp = DPLattice.init( my_dlp.d_lst, Md_lst, M )
+        mat_lst, dpl_lst = get_real_base_changes( my_dlp )
+
+        for i in range( len( dpl_lst ) ):
+            if dpl_lst[i].m1_lst[0].int_mat != matrix( [( 0, 1, 0, 0, 0, 0 ), ( 1, 0, 0, 0, 0, 0 ), ( 0, 0, -1, 0, 0, 0 ), ( 0, 0, 0, -1, 0, 0 ), ( 0, 0, 0, 0, -1, 0 ), ( 0, 0, 0, 0, 0, -1 )] ):
+                nt.p( dpl_lst[i], '\n' + str( mat_lst[i].T ) + '\n' )
 
     print
-    print 'The End'
+    print 'The End ns_basis'

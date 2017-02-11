@@ -409,7 +409,7 @@ def get_cls_root_bases( max_rank = 9 ):
           representative for all root subsystems up to equivalence.         
     '''
     # classification of root bases in cache?
-    for rank in range( max_rank, 3 - 1, -1 ):
+    for rank in range( max_rank, 9 + 1 ):
         key = 'get_cls_root_bases_' + str( rank )
         if key in nt.get_tool_dct():
             return nt.get_tool_dct()[key]

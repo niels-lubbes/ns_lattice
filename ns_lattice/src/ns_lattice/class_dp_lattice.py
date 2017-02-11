@@ -209,20 +209,17 @@ class DPLattice:
               lattice with respect to a new basis.
                 
         '''
-
-        B = B.T  # now columns form generators for bases
-
         dpl = DPLattice()
-        dpl.M = ( ~B ).T * self.M * ( ~B )  # ~B is inverse of B
-        dpl.Md_lst = [ Md.change_basis( B.T ) for Md in self.Md_lst ]
+        dpl.M = ~( B.T ) * self.M * ( B.T )  # ~B is inverse of B
+        dpl.Md_lst = [ Md.change_basis( B ) for Md in self.Md_lst ]
         dpl.Mtype = self.Mtype
-        dpl.d_lst = [ Md.change_basis( B.T ) for d in self.d_lst ]
+        dpl.d_lst = [ d.change_basis( B ) for d in self.d_lst ]
         dpl.type = self.type
-        dpl.m1_lst = [ m1.change_basis( B.T ) for m1 in self.m1_lst ]
-        dpl.fam_lst = [ fam.change_basis( B.T ) for fam in self.fam_lst ]
-        dpl.real_d_lst = [ d.change_basis( B.T ) for d in self.real_d_lst ]
-        dpl.real_m1_lst = [ m1.change_basis( B.T ) for m1 in self.real_m1_lst ]
-        dpl.real_fam_lst = [ fam.change_basis( B.T ) for fam in self.real_fam_lst ]
+        dpl.m1_lst = [ m1.change_basis( B ) for m1 in self.m1_lst ]
+        dpl.fam_lst = [ fam.change_basis( B ) for fam in self.fam_lst ]
+        dpl.real_d_lst = [ d.change_basis( B ) for d in self.real_d_lst ]
+        dpl.real_m1_lst = [ m1.change_basis( B ) for m1 in self.real_m1_lst ]
+        dpl.real_fam_lst = [ fam.change_basis( B ) for fam in self.real_fam_lst ]
 
         return dpl
 
@@ -571,7 +568,7 @@ class DPLattice:
 
         s += 'Degree          = ' + str( self.get_degree() ) + '\n'
         s += 'Rank            = ' + str( self.get_rank() ) + '\n'
-        s += 'Intersection    = ' + str( list( self.m1_lst[0].signature_mat ) )
+        s += 'Intersection    = ' + str( list( self.m1_lst[0].int_mat ) ) + '\n'
         s += 'Real structure  = ' + str( self.Mtype ) + '\n'
         s += 'Singularities   = ' + str( self.type ) + '\n'
 

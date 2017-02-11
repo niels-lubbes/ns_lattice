@@ -40,6 +40,10 @@ def usecase__get_tool_dct():
     List current data in NSTools.get_tool_dct().
     '''
 
+    # list keys
+    for key in nt.get_tool_dct():
+        nt.p( 'key =', key )
+
     # See "dp_root_bases.get_dynkin_type()".
     for ( G, ts, t_lst ) in nt.get_tool_dct()["get_dynkin_type"]:
         nt.p( ts, t_lst, G )
@@ -226,7 +230,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     # If max_rank==9 then the computations take about 4 hours.
-    max_rank = 6
+    max_rank = 9
 
     #########################################
     #                                       #
@@ -235,12 +239,12 @@ if __name__ == '__main__':
     #########################################
 
     # usecase__get_cls_root_bases( max_rank )
-    # usecase__get_tool_dct()
+    usecase__get_tool_dct()
     # usecase__get_root_bases()
     # usecase__get_cls_involutions( max_rank )
     # usecase__get_involutions()
     # usecase__get_cls_real_dp( max_rank )
-    usecase__get_cls_real_dp__celestials( max_rank )
+    # usecase__get_cls_real_dp__celestials( max_rank )
     # usecase__get_cls_real_dp__tex( max_rank )
 
     #########################################

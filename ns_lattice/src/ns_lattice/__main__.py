@@ -212,6 +212,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     # If max_rank==9 then the computations take about 4 hours.
+    #
     max_rank = 6
 
     #########################################

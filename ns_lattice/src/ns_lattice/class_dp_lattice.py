@@ -298,10 +298,6 @@ class DPLattice:
               For rank 8 and 9 this classification method 
               will not terminate within reasonable time.
         '''
-        # TODO: REMOVE
-        return nt.get_tool_dct()['get_cls_real_dp_False']
-        # END REMOVE
-
         # classification of involutions in cache?
         for rank in range( max_rank, 9 + 1 ):
             key = 'get_cls_real_dp_' + str( rank )

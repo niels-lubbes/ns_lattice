@@ -3,7 +3,9 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 8, 2017
 @author: Niels Lubbes
 '''
-from ns_lattice import *
+from sage.all import *
+
+from ns_lattice.div_set import *
 
 class TestDivSet:
 
@@ -82,7 +84,7 @@ class TestDivSet:
         m2_lst = get_m2_classes( 5, True )
         m2_lst.sort( reverse = True )
         for div in m2_lst:
-            out_lst += [ int( div.get_label() ) ]
+            out_lst += [ int( div.get_label( True ) ) ]
 
         print out_lst
         assert out_lst == chk_lst

@@ -12,19 +12,27 @@ import sys
 
 class NSTools():
     '''
-    
     For accessing static variables in python see for example:
-    <http://stackoverflow.com/questions/11759269/calling-static-method-in-python>
+    <http://stackoverflow.com/questions/68645/static-class-variables-in-python>    
     '''
 
-    # private dictionary object used by ".get_tool_dct()"
+    # Private dictionary object for caching result
+    # used by ".get_tool_dct()" and ".save_tool_dct()".
+    # If "enable_tool_dct" is false then caching in
+    # disabled. This is useful for example in test
+    # methods. However, it should be noted that it
+    # could take a long time to compute the data.
+    #
     __tool_dct = None
+    __enable_tool_dct = True
 
     # private variable for timer
+    #
     __start_time = None
     __end_time = None
 
     # private static variables used by ".verbose()"
+    #
     __filter_fname = None
     __prev_filter_fname = None
 
@@ -32,6 +40,9 @@ class NSTools():
     @staticmethod
     def filter( filter_fname ):
         '''
+        It is adviced to access this method 
+        as NSTools.filter().  
+        
         INPUT:
             - "filter_fname" -- File name 
         '''
@@ -60,10 +71,11 @@ class NSTools():
         OUTPUT:
             - If ".filter_on(<fname>)" has been called and the file name
               of the calling module does not coincide with <fname>
-              then the output is surpressed.
-              
+              then the output is surpressed and "None" is returned.
+                            
               Otherwise, this method prints arguments to "sys.stdout" 
               together with reflection info from "inspect.stack()".
+              Additional returns the output string.
               
               Call ".filter_off()" to turn off filter, such that
               all output is send to "sys.stdout".  
@@ -93,6 +105,10 @@ class NSTools():
 
 
     @staticmethod
+    def set_enable_tool_dct( enable_tool_dct ):
+        NSTools.__enable_tool_dct = enable_tool_dct
+
+    @staticmethod
     def get_tool_dct( fname = 'ns_tools' ):
         '''
         INPUT:
@@ -102,8 +118,14 @@ class NSTools():
               in memory from file "<local path>/<fname>.sobj"
               if called for the first time.
               
-            - Returns "__tool_dct".
+            - Returns ".__tool_dct" if ".__enable_tool_dct==True" 
+              and "{}" otherwise.
         '''
+        if not NSTools.__enable_tool_dct:
+            NSTools.filter_unset()
+            NSTools.p( 'Caching is disabled!' )
+            NSTools.filter_reset()
+            return {}
 
         path = os.path.dirname( os.path.abspath( __file__ ) ) + '/'
         file_name = path + fname
@@ -131,8 +153,15 @@ class NSTools():
         INPUT:
             - "fname" -- Name of file without extension.        
         OUTPUT:
-            - Saves "__tool_dct" to  "fname".
+            - Saves ".__tool_dct" to  "fname" if ".enable_tool_dct==True" 
+              otherwise do nothing.
         '''
+        if not NSTools.__enable_tool_dct:
+            NSTools.filter_unset()
+            NSTools.p( 'Data is not saved to disk!' )
+            NSTools.filter_reset()
+            return
+
         path = os.path.dirname( os.path.abspath( __file__ ) ) + '/'
         file_name = path + fname
 

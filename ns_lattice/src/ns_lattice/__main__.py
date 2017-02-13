@@ -45,7 +45,7 @@ def usecase__get_tool_dct():
         nt.p( 'key =', key )
 
     # See "dp_root_bases.get_dynkin_type()".
-    for ( G, ts, t_lst ) in nt.get_tool_dct()["get_dynkin_type"]:
+    for ( G, ts, t_lst ) in nt.get_tool_dct()['get_dynkin_type_4']:
         nt.p( ts, t_lst, G )
 
 
@@ -58,8 +58,6 @@ def usecase__get_root_bases():
 
     for d_lst in get_root_bases( 6 ):
         nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
-
-
 
 
 def usecase__get_cls_involutions( max_rank ):
@@ -112,45 +110,26 @@ def usecase__get_involutions():
             raise Exception( 'The canonical class should be preserved M(k)=', k.mat_mul( M ) )
 
 
-
 def usecase__get_cls_real_dp( max_rank ):
     '''
     Classify real NS-lattices of weak Del Pezzo surfaces
     
     See "DPLattice.get_cls_real_dp()".
     '''
+    bnd_max_rank = min( max_rank, 7 )
     nt.p( 'max_rank =', max_rank )
 
-    # provable version of the classification algorithm.
+    # print all equivalence classes
     #
-    dp_cls_dct_1 = DPLattice.get_cls_real_dp( min( max_rank, 7 ), True )
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in dp_cls_dct_1[rank]:
+    dp_cls_dct = DPLattice.get_cls_real_dp( bnd_max_rank )
+    for rank in range( 3, bnd_max_rank + 1 ):
+        for dpl in dp_cls_dct[rank]:
             nt.p( dpl )
 
-    nt.p( 15 * ( 10 * '#' + '\n' ) )
-
-    # non provable version of classification where the
-    # number of involutions is minimized
+    # print out a formatted table
     #
-    dp_cls_dct_2 = DPLattice.get_cls_real_dp( min( max_rank, 7 ), False )
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in dp_cls_dct_2[rank]:
-            if dpl in dp_cls_dct_1[rank] and len( dp_cls_dct_1[rank] ) == len( dp_cls_dct_2[rank] ):
-                nt.p( dpl )
-            else:
-                err_str = '''
-                The provable and non-provable version of the 
-                classification algorithm 
-                    "DPLattice.get_cls_real_dp()" 
-                do not agree.
-                '''
-                raise Exception( err_str )
-
-    # print out a table
-    #
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in dp_cls_dct_2[rank]:
+    for rank in range( 3, bnd_max_rank + 1 ):
+        for dpl in dp_cls_dct[rank]:
             # (#families, degree ), involution, isolated singularities
             nt.p( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
 
@@ -162,13 +141,15 @@ def usecase__get_cls_real_dp__celestials( max_rank ):
     
     See "DPLattice.get_cls_real_dp()".  
     '''
+    bnd_max_rank = min( max_rank, 7 )
 
-    dp_cls_dct = DPLattice.get_cls_real_dp( min( max_rank, 7 ), False )
+    dp_cls_dct = DPLattice.get_cls_real_dp( bnd_max_rank )
     celestial_dct = {}
     table = []
-    for rank in range( 3, max_rank + 1 ):
+    for rank in range( 3, bnd_max_rank + 1 ):
         for dpl in sorted( dp_cls_dct[rank] ):
             if len( dpl.real_fam_lst ) >= 2 and len( dpl.real_m1_lst ) == 0:
+                # no real lines and two families of conics
 
                 nt.p( dpl )
 
@@ -205,9 +186,11 @@ def usecase__get_cls_real_dp__tex( max_rank ):
     We construct a Tex string for a table with 
     a classification of celestials.
     '''
-    dp_cls_dct = DPLattice.get_cls_real_dp( min( max_rank, 7 ), False )
+    bnd_max_rank = min( max_rank, 7 )
+
+    dp_cls_dct = DPLattice.get_cls_real_dp( bnd_max_rank )
     celestial_dct = {}
-    for rank in range( 3, max_rank + 1 ):
+    for rank in range( 3, bnd_max_rank + 1 ):
         for dpl in sorted( dp_cls_dct[rank] ):
             if len( dpl.real_fam_lst ) >= 2 and len( dpl.real_m1_lst ) == 0:
                 if rank not in celestial_dct:
@@ -215,7 +198,6 @@ def usecase__get_cls_real_dp__tex( max_rank ):
                 celestial_dct[rank] += [dpl]
 
     print DPLattice.get_tex_table( celestial_dct )
-
 
 
 if __name__ == '__main__':
@@ -230,7 +212,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     # If max_rank==9 then the computations take about 4 hours.
-    max_rank = 9
+    max_rank = 6
 
     #########################################
     #                                       #
@@ -238,14 +220,14 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    # usecase__get_cls_root_bases( max_rank )
+    usecase__get_cls_root_bases( max_rank )
     usecase__get_tool_dct()
-    # usecase__get_root_bases()
-    # usecase__get_cls_involutions( max_rank )
-    # usecase__get_involutions()
-    # usecase__get_cls_real_dp( max_rank )
-    # usecase__get_cls_real_dp__celestials( max_rank )
-    # usecase__get_cls_real_dp__tex( max_rank )
+    usecase__get_root_bases()
+    usecase__get_cls_involutions( max_rank )
+    usecase__get_involutions()
+    usecase__get_cls_real_dp( max_rank )
+    usecase__get_cls_real_dp__celestials( max_rank )
+    usecase__get_cls_real_dp__tex( max_rank )
 
     #########################################
     #                                       #

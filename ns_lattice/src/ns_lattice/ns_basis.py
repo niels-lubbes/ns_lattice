@@ -91,33 +91,38 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                 columns switched.  
                                       
     '''
-    # check if return value has been cached
-    if div_dct == None:
+
+    # first call?
+    first_call = ( div_dct == None )
+    if first_call:
+
+        # check if return value has been cached
         key = 'get_base_changes' + str( rank ) + '_ ' + str( d_lst )
         if key in nt.get_tool_dct():
             return nt.get_tool_dct()[key]
 
-    # initialize div_dct
-    if div_dct == None:
+        # initialize div_dct
         div_dct = {}
         div_dct['ray_lst'] = []
         div_dct['k'] = Div( [-3] + ( rank - 1 ) * [1] )  # k = -3h+e1+...+er
         div_dct['fam_lst'] = get_fam_classes( rank, True, d_lst )
         div_dct['m1_lst'] = get_m1_classes( rank, True, d_lst )
 
+        # check if all divisors in d_lst have equal rank
         for d in d_lst:
             if d.rank() != rank:
                 raise ValueError( 'All Div objects in d_lst argument must have rank:', rank )
 
-    # output for debugging
-    if False:
-        nt.p( 10 * '-' )
-        for key in ['ray_lst', 'k', 'fam_lst', 'm1_lst']:
-            nt.p( key, '=', div_dct[key] )
-        nt.p( 'd_lst =', d_lst )
 
-    # are
+    # output for debugging
+    nt.p( 10 * '-' )
+    for key in ['ray_lst', 'k', 'fam_lst', 'm1_lst']:
+        nt.p( key, '=', div_dct[key] )
+    nt.p( 'd_lst =', d_lst )
+
+
     if div_dct['m1_lst'] == []:
+        # all rays are contracted
 
         gen_lst = []
 
@@ -153,7 +158,7 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             new_d_lst = [ d for d in d_lst if d * ray == 0]
 
 
-            # add (-1)-curves that appeared previously as (-2)-curve
+            # add (-1)-curves that appeared previously as a (-2)-curve
             new_dct['m1_lst'] = [ a for a in div_dct['m1_lst'] if a * ray == 0]
             new_dct['m1_lst'] += [d + ray.int_mul( d * ray ) for d in d_lst if d * ray > 0]
             for m1 in new_dct['m1_lst']:
@@ -164,7 +169,7 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             mat_lst += get_base_changes( rank, new_d_lst, new_dct )
 
         # if not recursively called by itself, cache output value
-        if div_dct == None:
+        if first_call:
             nt.get_tool_dct()[key] = mat_lst
             nt.save_tool_dct()
 
@@ -232,7 +237,7 @@ def get_real_base_changes( dpl ):
 
         # add matrix and adapted lattice
         mat_lst += [mat]
-        dpl_lst += [ dpl.change_basis( mat ) ]
+        dpl_lst += [ dpl.get_basis_change( mat ) ]
 
     nt.get_tool_dct()[key] = mat_lst, dpl_lst
     nt.save_tool_dct()
@@ -242,31 +247,30 @@ def get_real_base_changes( dpl ):
 
 if __name__ == '__main__':
 
+    # determine equivalence class
     rank = 6
-    num_fam = 6
+    num_real_fam = 6
+    Mtype = '2A1'
+    type = 'A0'
 
-    #
-    my_dlp = None
-    for dpl in DPLattice.get_cls_real_dp( 6, False )[rank]:
-        if dpl.get_numbers()[5] == num_fam:
-            my_dlp = dpl
+    print DPLattice.get_cls_real_dp( 6 )
 
-    nt.p( my_dlp )
-    nt.p( 50 * '#' )
+    # find DPLattice representative for this equivalence class
+    found_dpl = None
+    for dpl in DPLattice.get_cls_real_dp( 6 )[rank]:
+        if dpl.get_numbers()[5] == num_real_fam and dpl.Mtype == Mtype and dpl.type == type:
+            found_dpl = dpl
 
-    for ( M, Md_lst ) in get_involutions( rank ):
+    # output
+    nt.p( found_dpl )
 
-        # check whether involution M preserves d_lst
-        dm_lst = [ d.mat_mul( M ) for d in my_dlp.d_lst ]
-        if sorted( dm_lst ) != sorted( my_dlp.d_lst ):
-            continue
+    # find a base change in order to construct example
+    mat_lst, dpl_lst = get_real_base_changes( found_dpl )
+    for i in range( len( mat_lst ) ):
+       mat = mat_lst[i]
+       dpl = dpl_lst[i]
+       nt.p( str( dpl ) + '\n' + str( mat.T ) + '\n\n' + str( list( mat ) ) )
 
-        new_dlp = DPLattice.init( my_dlp.d_lst, Md_lst, M )
-        mat_lst, dpl_lst = get_real_base_changes( my_dlp )
-
-        for i in range( len( dpl_lst ) ):
-            if dpl_lst[i].m1_lst[0].int_mat != matrix( [( 0, 1, 0, 0, 0, 0 ), ( 1, 0, 0, 0, 0, 0 ), ( 0, 0, -1, 0, 0, 0 ), ( 0, 0, 0, -1, 0, 0 ), ( 0, 0, 0, 0, -1, 0 ), ( 0, 0, 0, 0, 0, -1 )] ):
-                nt.p( dpl_lst[i], '\n' + str( mat_lst[i].T ) + '\n' )
 
     print
     print 'The End ns_basis'

@@ -3,7 +3,10 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 8, 2017
 @author: Niels Lubbes
 '''
-from ns_lattice import *
+
+from sage.all import *
+
+from ns_lattice.dp_involutions import *
 
 
 class TestDPInvolutions():

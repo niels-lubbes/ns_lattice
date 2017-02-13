@@ -80,7 +80,7 @@ def get_ext_graph( d_lst, M ):
           Two orthogonal vertices are connected 
     '''
     G = Graph()
-    G.add_vertices( range( len( d_lst ) ) );
+    G.add_vertices( range( len( d_lst ) ) )
 
     for i in range( len( d_lst ) ):
         for j in range( len( d_lst ) ):
@@ -97,9 +97,11 @@ def get_ext_graph( d_lst, M ):
 def get_dynkin_type( d_lst ):
     '''
     INPUT:
-        - "d_lst" -- A list of lists of "Div" objects "d", 
-                     such that d*d=-2 and d*(-3h+e1+...+er)=0 
-                     where r=rank-1 and rank in [3,...,7].  
+        - "d_lst" -- A list of lists of "Div" objects "d" 
+                     of the same rank, such that 
+                         d*d=-2 and d*(-3h+e1+...+er)=0 
+                     where 
+                         r=rank-1 and rank in [3,...,9].  
                      We assume that "is_root_basis(d_lst)==True":
                      linear independent, self intersection number -2
                      and pairwise product either 0 or 1.            
@@ -116,12 +118,23 @@ def get_dynkin_type( d_lst ):
     '''
     if d_lst == []: return 'A0'
 
-    key = "get_dynkin_type"
-    if not key in nt.get_tool_dct():
-        nt.p( 'Constructing list of Dynkin types...' )
+    # check whether values are cached
+    #
+    construct_dynkin_types = True
+    max_r = d_lst[0].rank() - 1
+    key = 'get_dynkin_type_' + str( max_r )
+    for r in range( max_r, 8 + 1 ):
+        if 'get_dynkin_type_' + str( r ) in nt.get_tool_dct():
+            key = 'get_dynkin_type_' + str( r )
+            construct_dynkin_types = False
+
+    # construct list of dynkin types if values are not cached
+    #
+    if construct_dynkin_types:
+        nt.p( 'Constructing list of Dynkin types... max_r =', max_r )
 
         ade_lst = []
-        for comb_lst in Combinations( 8 * ['A', 'D', 'E'], 8 ):
+        for comb_lst in Combinations( max_r * ['A', 'D', 'E'], max_r ):
             for perm_lst in Permutations( comb_lst ):
                 ade_lst += [perm_lst]
         #
@@ -140,11 +153,11 @@ def get_dynkin_type( d_lst ):
         type_lst = []
         ts_lst = []
         for ade in ade_lst:
-            for r in range( 1, 8 + 1 ):
-                for p_lst in Partitions( r + 8, length = 8 ):
+            for r in range( 1, max_r + 1 ):
+                for p_lst in Partitions( r + max_r, length = max_r ):
 
                     # obtain type list
-                    t_lst = [( ade[i], p_lst[i] - 1 ) for i in range( 8 ) if  p_lst[i] != 1]
+                    t_lst = [( ade[i], p_lst[i] - 1 ) for i in range( max_r ) if  p_lst[i] != 1]
                     t_lst.sort()
 
                     # obtain Root system
@@ -193,8 +206,8 @@ def get_dynkin_type( d_lst ):
         nt.save_tool_dct()
 
     # end if
-
-    type_lst = nt.get_tool_dct()[key]
+    else:
+        type_lst = nt.get_tool_dct()[key]
     G1 = get_graph( d_lst )
 
     # loop through all types and check equivalence
@@ -202,7 +215,7 @@ def get_dynkin_type( d_lst ):
         if G1.is_isomorphic( G2 ):
             return ts
 
-    return False
+    raise ValueError( 'Could not recognize Dynkin type: ', d_lst )
 
 
 def get_orthogonal_roots( d_lst ):
@@ -349,7 +362,9 @@ def get_root_bases( rank ):
           and thus of the form <ij>, <1ijk>, <2ij>, <30i>
           with i<j<k. For example '15' and '1124' 
           but not '-15' or '-1124' 
-          (see "Div.get_label()" for notation).          
+          (see "Div.get_label()" for notation).  
+          
+          The list is sorted with respect to the string of the Dynkin type.        
     '''
     key = 'get_root_bases_' + str( rank )
 

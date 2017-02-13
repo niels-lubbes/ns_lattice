@@ -193,7 +193,7 @@ class DPLattice:
                  len( self.real_fam_lst ) )
 
 
-    def change_basis( self, B ):
+    def get_basis_change( self, B ):
         '''
         INPUT:
             
@@ -249,6 +249,11 @@ class DPLattice:
                         * DPLattice.d_lst
                     The remaining attributes of DPLattice can be computed 
                     from these attributes.
+                    
+                    In order for this object to make sense, it is
+                    required that the involution "M" preserves "d_lst"
+                    as a set. Geometrically this means that the involution
+                    sends isolated singularities to isolated singularities.                     
         '''
         dpl = DPLattice()
 
@@ -269,13 +274,12 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_real_dp( max_rank = 7, provable = True ):
+    def get_cls_real_dp( max_rank = 7 ):
         '''
         See [http://arxiv.org/abs/1302.6678] for more info.
     
         INPUT:
-            - "max_rank" -- An integer in [3,...,9].
-            - "provable" -- A boolean.
+            - "max_rank" -- An integer in [3,...,7].           
     
         OUTPUT:
             - A dictionary "cls_dct" such that 
@@ -293,66 +297,47 @@ class DPLattice:
               We classify for rank in [3,...,max_rank].
               For rank 8 and 9 this classification method 
               will not terminate within reasonable time.
-        
-              If "provable==True" then a slow version
-              of the classification algorithm will be used.
-              Otherwise, a faster version will be used 
-              which has the advantage that the number of 
-              different involutions M is minimized.  
         '''
-        key = 'get_cls_real_dp'
-        if not provable:
-            key += '_' + str( provable )
+        # TODO: REMOVE
+        return nt.get_tool_dct()['get_cls_real_dp_False']
+        # END REMOVE
 
-        if key in nt.get_tool_dct():
-            return nt.get_tool_dct()[key]
+        # classification of involutions in cache?
+        for rank in range( max_rank, 9 + 1 ):
+            key = 'get_cls_real_dp_' + str( rank )
+            if key in nt.get_tool_dct():
+                return nt.get_tool_dct()[key]
+        key = 'get_cls_real_dp_' + str( max_rank )
 
-        nt.p( 'max_rank =', max_rank, ', provable =', provable )
+
+        nt.p( 'max_rank =', max_rank )
         dp_cls_dct = {}
         for rank in range( 3, max_rank + 1 ):
             dpl_lst = []
             nt.p( 'rank =', rank )
 
-            if provable:
-                #
-                # slow version of algorithm
-                #
-                for d_lst in get_cls_root_bases( max_rank )[rank]:
-                    nt.p( 'd_lst =', d_lst )
-                    for ( M, Md_lst ) in get_involutions( rank ):
+            #
+            # We fix an involution up to equivalence and
+            # go through all possible subset of indecomposable positive
+            # roots, that form a root base. Note that any root system
+            # admits a base of positive roots.
+            #
+            for ( M, Md_lst ) in get_cls_involutions( max_rank )[rank]:
+                nt.p( 'Md_lst =', Md_lst )
+                for d_lst in get_root_bases( rank ):
 
-                        # check whether involution M preserves d_lst
-                        dm_lst = [ d.mat_mul( M ) for d in d_lst ]
-                        if sorted( dm_lst ) != sorted( d_lst ):
-                            continue
+                    # check whether involution M preserves d_lst
+                    dm_lst = [ d.mat_mul( M ) for d in d_lst ]
+                    if sorted( dm_lst ) != sorted( d_lst ):
+                        continue
 
-                        # setup DPLattice object
-                        dpl = DPLattice.init( d_lst, Md_lst, M )
+                    # setup DPLattice object
+                    dpl = DPLattice.init( d_lst, Md_lst, M )
 
-                        # add to classification if not equivalent to objects in list
-                        # see "DPLattice.__eq__(self)".
-                        if dpl not in dpl_lst:
-                            dpl_lst += [dpl]
-            else:
-                #
-                # fast version of algorithm with nice representatives of dpl's
-                #
-                for ( M, Md_lst ) in get_cls_involutions( max_rank )[rank]:
-                    nt.p( 'Md_lst =', Md_lst )
-                    for d_lst in get_root_bases( rank ):
-
-                        # check whether involution M preserves d_lst
-                        dm_lst = [ d.mat_mul( M ) for d in d_lst ]
-                        if sorted( dm_lst ) != sorted( d_lst ):
-                            continue
-
-                        # setup DPLattice object
-                        dpl = DPLattice.init( d_lst, Md_lst, M )
-
-                        # add to classification if not equivalent to objects in list
-                        # see "DPLattice.__eq__(self)".
-                        if dpl not in dpl_lst:
-                            dpl_lst += [dpl]
+                    # add to classification if not equivalent to objects in list
+                    # see "DPLattice.__eq__(self)".
+                    if dpl not in dpl_lst:
+                        dpl_lst += [dpl]
 
             # end of classification for given rank.
             # add to classification dictionary
@@ -385,7 +370,6 @@ class DPLattice:
 \\\\\\hline\\hline
 \\endhead'''
 
-        abbr = True  # True if divisor classes should be abbreviated
         col_len = [10, 15, 15]  # bound for character length of column
         real_tex = '\\underline'  # Tex command for displaying real classes
 
@@ -436,7 +420,7 @@ class DPLattice:
                         while idx < len( lst2 ) and len_s <= col_len[col_idx]:
 
                             # get non abbreviated label
-                            ts = lst2[idx].get_label( abbr )
+                            ts = lst2[idx].get_abbr_label()
 
                             # display real divisors in bold
                             real_div = ( lst2[idx].mat_mul( dpl.M ) == lst2[idx] )
@@ -450,7 +434,7 @@ class DPLattice:
                             # determine length of next string
                             len_s = len( s.replace( real_tex + '{', '' ).replace( '}', '' ).replace( '$', '' ).replace( ',', '' ) )
                             if idx < len( lst2 ):
-                                len_s += len( lst2[idx].get_label( abbr ) )
+                                len_s += len( lst2[idx].get_abbr_label() )
 
                         lst3 += [s]
                     if len( lst3 ) > 0 and lst3[-1].endswith( ', ' ):

@@ -193,7 +193,7 @@ class Div:
         return len( lst )
 
 
-    def change_basis( self, B ):
+    def get_basis_change( self, B ):
         '''
         INPUT:
             
@@ -272,6 +272,48 @@ class Div:
 
         return lbl
 
+    def get_abbr_label( self ):
+        '''
+        OUTPUT:
+        
+            - We describe the output label in terms of  examples.
+            
+                > e1                --->  'e1'
+                > e1-e2             --->  'e12'                  
+                > 2h-e1-e2-e4-e5    --->  '2e1245'
+                > h-e1              --->  '1e1'  
+        
+              This options only works for special cases.
+              The cases which are covered are (-1)- and (-2)-classes, 
+              and classes of conical families on weak Del Pezzo surfaces,
+              with respect to the basis with intersection product
+              defined by the diagonal matrix with diagonal (1,-1,...,-1).
+                            
+        '''
+        np1 = len( [e for e in self.e_lst[1:] if e == 1] )
+        nm1 = len( [e for e in self.e_lst[1:] if e == -1] )
+        n01 = len( [e for e in self.e_lst[1:] if e > 1 or e < -1] )
+
+        if n01 == 0 and self[0] in range( 0, 10 ):
+
+            # e1
+            if self[0] == 0 and np1 == 1 and nm1 == 0:
+                return 'e' + str( self.e_lst.index( 1 ) )
+
+            # e1-e2
+            if self[0] == 0 and np1 == 1 and nm1 == 1:
+                return 'e' + str( self.e_lst.index( 1 ) ) + str( self.e_lst.index( -1 ) )
+
+            # 2h-e1-e2-e3-e4-e5 or h-e1
+            if self[0] in range( 0, 10 ) and np1 == 0 and nm1 > 0:
+                lbl = str( self[0] ) + 'e'
+                for i in range( 1, len( self.e_lst ) ):
+                    if self[i] != 0:
+                        lbl += str( i )
+                return lbl
+
+        raise ValueError( 'Input is not treated by this function (use get_label() instead):', self.e_lst )
+
 
     def get_label( self, abbr = False ):
         '''
@@ -281,21 +323,8 @@ class Div:
         OUTPUT:
         
             - We describe the output label in terms of examples.
-            
-            * If "abbr==True": 
-              
-                > e1                --->  'e1'
-                > e1-e2             --->  'e12'                  
-                > 2h-e1-e2-e4-e5    --->  '2e1245'
-                > h-e1              --->  '1e1'  
-        
-              This options only works for special cases and for 
-              the remaining case this algorithm returns 
-              as if "abbr==False". The cases which are covered
-              are (-1)- and (-2)-classes, and classes of conical
-              families on weak Del Pezzo surfaces.
                 
-            * If "abbr==False" and self*self==-2 and self.rank()<=9:
+            * If "abbr==True" and self*self==-2 and self.rank()<=9:
             
                 >  e1-e2               ---> '12'
                 > -e1+e2               ---> '-12'
@@ -312,31 +341,9 @@ class Div:
 
         divK = Div( [-3] + ( self.rank() - 1 ) * [1] )
 
-        if abbr:
-
-            np1 = len( [e for e in self.e_lst[1:] if e == 1] )
-            nm1 = len( [e for e in self.e_lst[1:] if e == -1] )
-            n01 = len( [e for e in self.e_lst[1:] if e > 1 or e < -1] )
-
-            if n01 == 0 and self[0] in range( 0, 10 ):
-
-                # e1
-                if self[0] == 0 and np1 == 1 and nm1 == 0:
-                    return 'e' + str( self.e_lst.index( 1 ) )
-
-                # e1-e2
-                if self[0] == 0 and np1 == 1 and nm1 == 1:
-                    return 'e' + str( self.e_lst.index( 1 ) ) + str( self.e_lst.index( -1 ) )
-
-                # 2h-e1-e2-e3-e4-e5 or h-e1
-                if self[0] in range( 0, 10 ) and np1 == 0 and nm1 > 0:
-                    lbl = str( self[0] ) + 'e'
-                    for i in range( 1, len( self.e_lst ) ):
-                        if self[i] != 0:
-                            lbl += str( i )
-                    return lbl
-
-        elif self * self == -2 and self.rank() <= 9 and self * divK == 0:
+        # treat cases for (-2)-label
+        #
+        if abbr and self * self == -2 and self.rank() <= 9 and self * divK == 0:
             return self.__get_minus_two_label()
 
 

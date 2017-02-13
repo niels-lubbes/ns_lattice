@@ -155,8 +155,11 @@ def get_involutions( rank ):
           where <M> is a matrix and <b_lst> a list of Div objects. 
           Each matrix <M> corresponds to a unimodular involution 
           of ZZ<h,e1,...,er> where r=rank-1.
-          Conversely, each such involution is contained in the list
-          (so all involutions for each equivalence class).
+          Up to isomorphism of the eigenspace of 1, 
+          each such involution is contained.   
+          In order to include all involutions the method 
+          "complete_basis()" should be replaced by a methods
+          which computes all possible completions of a basis.
     '''
     key = 'get_involutions_' + str( rank )
 

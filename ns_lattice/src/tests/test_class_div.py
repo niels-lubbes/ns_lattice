@@ -47,10 +47,10 @@ class TestClassDiv:
 
 
     def test__lt( self ):
-        assert Div.new( '1124' ) < Div.new( '1123' )
+        assert Div.new( '1123' ) < Div.new( '1124' )
         assert Div.new( '12' ) < Div.new( '1123' )
-        assert Div.new( '13' ) < Div.new( '12' )
-        assert Div.new( '34' ) < Div.new( '12' )
+        assert Div.new( '12' ) < Div.new( '13' )
+        assert Div.new( '12' ) < Div.new( '34' )
 
 
     def test__get_basis_change( self ):

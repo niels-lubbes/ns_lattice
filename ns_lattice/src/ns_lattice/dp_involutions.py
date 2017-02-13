@@ -32,17 +32,17 @@ def complete_basis( d_lst ):
         - We explain with 3 examples where the dotted (:) vertical lines 
           denote which columns are appended. 
           
-          |  0  0 : 1  0  0  0 | | 0  0  0 : 1  0  0 | | 1  0  0  0 :  3  0 |  
-          |  0  0 : 0 -1  0  0 | | 0  0  0 : 0 -1  0 | |-1  1  0  0 : -1  0 |
-          |  0  0 : 0  0 -1  0 | | 1  0  0 : 0  0 -1 | |-1 -1  1  0 : -1  0 |
-          |  1  0 : 0  0  0 -1 | |-1  1  0 : 0  0 -1 | |-1  0 -1  0 : -1  0 |
-          | -1  1 : 0  0  0 -1 | | 0 -1  1 : 0  0 -1 | | 0  0  0  1 :  0 -1 |
-          |  0 -1 : 0  0  0 -1 | | 0  0 -1 : 0  0 -1 | | 0  0  0 -1 :  0 -1 |
+          | 0  0 : 1  0  0  0 | | 0  0  0 : 1  0  0 | | 0  0  0  1 : -3  0 |  
+          | 0  0 : 0 -1  0  0 | | 0  0  0 : 0 -1  0 | | 1  0  0 -1 :  1  0 |
+          | 0  0 : 0  0 -1  0 | | 1  0  0 : 0  0 -1 | |-1  1  0 -1 :  1  0 |
+          | 1  0 : 0  0  0 -1 | |-1  1  0 : 0  0 -1 | | 0 -1  0 -1 :  1  0 |
+          |-1  1 : 0  0  0 -1 | | 0 -1  1 : 0  0 -1 | | 0  0  1  0 :  0  1 |
+          | 0 -1 : 0  0  0 -1 | | 0  0 -1 : 0  0 -1 | | 0  0 -1  0 :  0  1 |
              
     '''
     # sort
     d_lst = copy( d_lst )
-    d_lst.sort( reverse = True )
+    d_lst.sort()
 
     # extend with orthogonal vectors
     row_lst = [ d.e_lst for d in d_lst]
@@ -185,7 +185,7 @@ def get_involutions( rank ):
             # construct involution if b_lst is a root basis
             if is_root_basis( b_lst ):
 
-                b_lst.sort( reverse = True )
+                b_lst.sort()
 
                 l = len( b_lst )
                 V = complete_basis( b_lst )

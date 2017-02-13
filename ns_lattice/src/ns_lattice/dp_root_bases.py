@@ -8,7 +8,6 @@ Classification of root subsystems of root systems
 of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
 from sage.all import *
-
 from div_set import *
 from class_ns_tools import NSTools
 from class_div import Div
@@ -340,10 +339,11 @@ def is_equal_root_lst( d_lst1, d_lst2 ):
     return True
 
 
-def get_root_bases( rank ):
+def get_root_bases( rank, positive = False ):
     '''
     INPUT: 
         - "rank" -- An integer between 3 and 9.
+        - "positive" -- A Boolean.
     OUTPUT:
         - Returns a list of lists of "Div" objects "d", 
           such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
@@ -358,13 +358,15 @@ def get_root_bases( rank ):
           Note that the root systems live in the vector space 
           associated to the Neron-Severi lattice of a weak Del Pezzo surface.          
           
-          The roots in the basis are all positive
+          If "positive==True" then the 
+          roots in the basis are all positive
           and thus of the form <ij>, <1ijk>, <2ij>, <30i>
           with i<j<k. For example '15' and '1124' 
           but not '-15' or '-1124' 
           (see "Div.get_label()" for notation).  
           
-          The list is sorted with respect to the string of the Dynkin type.        
+          The output list is sorted with respect to the string of the Dynkin type.
+          Each root basis in the list is sorted as a list of Div objects.         
     '''
     key = 'get_root_bases_' + str( rank )
 
@@ -376,6 +378,8 @@ def get_root_bases( rank ):
     # Loop through all subsets of (-2)-classes of length at most rank-1.
     d_lst_lst = [[]]
     m2_lst = get_m2_classes( rank, True )
+    if not positive:
+        m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
     for r in range( 1, rank ):
         nt.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
         for idx_lst in Subsets( range( len( m2_lst ) ), r ):
@@ -385,7 +389,7 @@ def get_root_bases( rank ):
 
             # add if root basis
             if is_root_basis( d_lst1 ):
-                d_lst1.sort( reverse = True )
+                d_lst1.sort()
                 d_lst_lst += [d_lst1]
 
     # cache output

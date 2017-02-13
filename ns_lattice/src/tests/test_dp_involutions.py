@@ -44,12 +44,13 @@ class TestDPInvolutions():
         rank = 6
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         mat = complete_basis( d_lst )
-        assert mat == matrix( [( 1, 0, 0, 0, -3, 0 ),
-                               ( -1, 1, 0, 0, 1, 0 ),
-                               ( -1, -1, 1, 0, 1, 0 ),
-                               ( -1, 0, -1, 0, 1, 0 ),
-                               ( 0, 0, 0, 1, 0, 1 ),
-                               ( 0, 0, 0, -1, 0, 1 ) ] )
+        print mat
+        assert mat == matrix( [( 0, 0, 0, 1, -3, 0 ),
+                               ( 1, 0, 0, -1, 1, 0 ),
+                               ( -1, 1, 0, -1, 1, 0 ),
+                               ( 0, -1, 0, -1, 1, 0 ),
+                               ( 0, 0, 1, 0, 0, 1 ),
+                               ( 0, 0, -1, 0, 0, 1 ) ] )
 
 
     def test__complete_basis__1145_23_rank6( self ):
@@ -57,12 +58,13 @@ class TestDPInvolutions():
         rank = 6
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         mat = complete_basis( d_lst )
-        assert mat == matrix( [( 1, 0, -1, 0, 0, 0 ),
-                               ( -1, 0, 0, 1, 0, 0 ),
-                               ( 0, 1, 0, 0, 1, 0 ),
-                               ( 0, -1, 0, 0, 1, 0 ),
-                               ( -1, 0, 0, 0, 0, 1 ),
-                               ( -1, 0, 1, -1, 0, -1 ) ] )
+        print mat
+        assert mat == matrix( [( 0, 1, -1, 0, 0, 0 ),
+                               ( 0, -1, 0, 1, 0, 0 ),
+                               ( 1, 0, 0, 0, 1, 0 ),
+                               ( -1, 0, 0, 0, 1, 0 ),
+                               ( 0, -1, 0, 0, 0, 1 ),
+                               ( 0, -1, 1, -1, 0, -1 ) ] )
 
 
 

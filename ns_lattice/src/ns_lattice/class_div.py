@@ -417,22 +417,14 @@ class Div:
 
         a = self.e_lst
         b = other.e_lst
+        a = [a[0]] + [ -elt for elt in reversed( a[1:] )]
+        b = [b[0]] + [ -elt for elt in reversed( b[1:] )]
 
-        if a[0] != 0 and b[0] != 0:
-            if a[0] != b[0]:
-                return a[0] < b[0]  # example: 1123 < 308
-            else:
-                return a[1:] > b[1:]  # example: 1124 < 1123
+        # examples:
+        # 1123 < 308,  1123 < 1124
+        # 12 < 1123, 12 < 13, 12 < 34
 
-        if ( a[0], b[0] ) != ( 0, 0 ):
-            return a[0] < b[0]  # example: 12 < 1123
-
-        # a[0]==b[0]==0
-
-        if a.index( 1 ) == b.index( 1 ):
-            return a > b  # example 13 < 12
-
-        return a < b  # example: 34 < 12
+        return a < b  # lexicographic order
 
 
     # operator overloading for *

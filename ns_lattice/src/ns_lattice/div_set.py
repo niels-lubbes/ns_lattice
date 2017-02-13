@@ -23,7 +23,7 @@ def get_div_set( d, dc, cc, perm = False ):
         - "perm"  -- Boolean.  
               
     OUTPUT:
-        - Returns a list of "Div" objects
+        - Returns a sorted list of "Div" objects
         
             * c = c0*h + c1*e1 +...+ cr*er
           
@@ -104,7 +104,7 @@ def get_div_set( d, dc, cc, perm = False ):
                 out_lst += [c]
 
     # sort list of "Div" objects
-    out_lst.sort( reverse = True )
+    out_lst.sort()
 
 
     # cache output
@@ -120,7 +120,7 @@ def get_m2_classes( rank, perm = False ):
         - "rank" -- An integer between 2 and 9.
         - "perm" -- A boolean.
     OUTPUT:
-        - Returns a list of "Div" objects that 
+        - Returns a sorted list of "Div" objects that 
           represent (-2)-classes on a 
           weak del Pezzo surface of rank (10-<rank>).
 
@@ -164,7 +164,7 @@ def get_m2_classes( rank, perm = False ):
     else:
         m2_lst += [ Div.new( '12', rank ) ]
 
-    m2_lst.sort( reverse = True )
+    m2_lst.sort()
 
     # cache generated data in file
     nt.get_tool_dct()[key] = m2_lst
@@ -185,7 +185,7 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
                      product of these divisors is a diagonal matrix
                      with signature (-1,1,...,1).        
     OUTPUT:
-        - Returns a list of "Div" objects "q", 
+        - Returns a sorted list of "Div" objects "q", 
           such that 
               q*q=q*(-3h+e1+...+er)=-1 
           and q*d >=0 for all d in "d_lst".
@@ -217,7 +217,7 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
         if indecomp:
             m1_lst += [m1t]
 
-    m1_lst.sort( reverse = True )
+    m1_lst.sort()
 
     # cache generated data in file
     nt.get_tool_dct()[key] = m1_lst
@@ -238,7 +238,7 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
                      product of these divisors is a diagonal matrix
                      with signature (-1,1,...,1).        
     OUTPUT:
-        - Returns a list of "Div" objects "f", 
+        - Returns a sorted list of "Div" objects "f", 
           such that 
               f*f=0 and f*(3h-e1-...-er)=2 
           and f*d >=0 for all d in "d_lst".
@@ -266,7 +266,7 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
         if indecomp:
             f_lst += [f]
 
-    f_lst.sort( reverse = True )
+    f_lst.sort()
 
     # cache generated data in file
     nt.get_tool_dct()[key] = f_lst

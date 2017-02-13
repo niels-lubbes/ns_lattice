@@ -1,6 +1,11 @@
 #! /bin/bash
 
-#export PATH=$PATH:.
+#
+# This script can be used to run this package on a remote server,
+# via an ssh session. the standard/error output is written
+# in the files err/out respectively.
+#
+
 export PYTHONPATH=$PYTHONPATH:../src/
 export OUTPUT_PATH=/home/LOCAL/nlubbes/OUTPUT/
 

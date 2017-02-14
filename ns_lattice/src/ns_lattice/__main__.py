@@ -49,14 +49,27 @@ def usecase__get_tool_dct():
         nt.p( ts, t_lst, G )
 
 
-def usecase__get_root_bases():
+def usecase__get_root_bases( max_rank ):
     '''
-    Compute root bases for rank 6  NS-lattice of a degree 4 Del Pezzo.
+    Compute all root bases for Neron-Severi lattices 
+    of weak Del Pezzo surfaces, up to rank "max_rank".  
     
     See "dp_root_bases.get_root_bases()".
     '''
+    bnd_max_rank = min( max_rank, 6 )
+    for d_lst in get_root_bases( bnd_max_rank ):
+        nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
-    for d_lst in get_root_bases( 6 ):
+
+def usecase__cls_root_bases( max_rank ):
+    '''
+    Compute classification of 
+    root bases up to rank "max_rank".  
+    
+    See "dp_root_bases.get_cls_root_bases()".
+    '''
+
+    for d_lst in get_cls_root_bases( max_rank ):
         nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
 
@@ -223,7 +236,8 @@ if __name__ == '__main__':
 
     usecase__get_cls_root_bases( max_rank )
     usecase__get_tool_dct()
-    usecase__get_root_bases()
+    usecase__get_root_bases( max_rank )
+    usecase__get_cls_root_bases( max_rank )
     usecase__get_cls_involutions( max_rank )
     usecase__get_involutions()
     usecase__get_cls_real_dp( max_rank )

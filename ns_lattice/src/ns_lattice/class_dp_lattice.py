@@ -314,9 +314,8 @@ class DPLattice:
 
             #
             # We fix an involution up to equivalence and
-            # go through all possible subset of indecomposable positive
-            # roots, that form a root base. Note that any root system
-            # admits a base of positive roots.
+            # go through all possible subset of indecomposable
+            # roots, that form a root base.
             #
             for ( M, Md_lst ) in get_cls_involutions( max_rank )[rank]:
                 nt.p( 'Md_lst =', Md_lst )

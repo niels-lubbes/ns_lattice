@@ -167,34 +167,20 @@ def get_involutions( rank ):
     if key in nt.get_tool_dct():
         return nt.get_tool_dct()[key]
 
-    # construct list of all (-2)-classes (also negative)
-    m2_lst = get_m2_classes( rank, True )
-    m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
-
     # construct list of all involutions
     MB_lst = [( identity_matrix( ZZ, rank ), [] )]  # include identity involution
     for r in range( 1, rank ):
+        for d_lst in get_root_bases( r, False ):
 
-        # go through all possible root bases of length r
-        nt.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
-        for idx_lst in Subsets( range( len( m2_lst ) ), r ):
+            # construct involution matrix corresponding to root basis
+            l = len( d_lst )
+            V = complete_basis( d_lst )
+            D = diagonal_matrix( l * [-1] + ( rank - l ) * [1] )
+            M = V * D * V.inverse()  # MV=VD
 
-            # construct sub-list
-            b_lst = [ m2_lst[idx] for idx in idx_lst ]
-
-            # construct involution if b_lst is a root basis
-            if is_root_basis( b_lst ):
-
-                b_lst.sort()
-
-                l = len( b_lst )
-                V = complete_basis( b_lst )
-                D = diagonal_matrix( l * [-1] + ( rank - l ) * [1] )
-                M = V * D * V.inverse()  # MV=VD
-
-                # if unimodular then store involution
-                if is_integral_involution( M ):
-                    MB_lst += [( M, b_lst )]
+            # if unimodular then store involution
+            if is_integral_involution( M ):
+                MB_lst += [( M, b_lst )]
 
 
     # store involutions

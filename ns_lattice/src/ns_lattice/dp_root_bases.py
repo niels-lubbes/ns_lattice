@@ -375,12 +375,16 @@ def get_root_bases( rank, positive = False ):
 
     nt.p( 'Constructing root bases for rank', rank, '...' )
 
-    # Loop through all subsets of (-2)-classes of length at most rank-1.
+    # construct list of (-2)-classes
     d_lst_lst = [[]]
     m2_lst = get_m2_classes( rank, True )
     if not positive:
         m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
+
+    # loop through all subsets of list of (-2)-classes of length at most rank-1.
     for r in range( 1, rank ):
+
+        # go through all possible root bases of length r
         nt.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
         for idx_lst in Subsets( range( len( m2_lst ) ), r ):
 

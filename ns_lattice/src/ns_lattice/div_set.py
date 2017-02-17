@@ -200,7 +200,6 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
     # construct (-1) classes
     d = Div( [3] + ( rank - 1 ) * [-1] )
     m1t_lst = copy( get_div_set( d, 1, -1, perm ) )
-    nt.p( m1t_lst )
     if perm:
         m1t_lst += [Div.new( 'e' + str( i ), rank ) for i in range( 1, rank )]
     else:
@@ -218,6 +217,7 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
             m1_lst += [m1t]
 
     m1_lst.sort()
+    nt.p( 'd_lst =', d_lst, ', m1_lst =', m1_lst )
 
     # cache generated data in file
     nt.get_tool_dct()[key] = m1_lst

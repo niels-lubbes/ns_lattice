@@ -169,18 +169,23 @@ def get_involutions( rank ):
 
     # construct list of all involutions
     MB_lst = [( identity_matrix( ZZ, rank ), [] )]  # include identity involution
-    for r in range( 1, rank ):
-        for d_lst in get_root_bases( r, False ):
+    for d_lst in get_root_bases( rank, False ):
 
-            # construct involution matrix corresponding to root basis
-            l = len( d_lst )
-            V = complete_basis( d_lst )
-            D = diagonal_matrix( l * [-1] + ( rank - l ) * [1] )
-            M = V * D * V.inverse()  # MV=VD
+        # identity matrix already included
+        if d_lst == []:
+            continue
 
-            # if unimodular then store involution
-            if is_integral_involution( M ):
-                MB_lst += [( M, b_lst )]
+        nt.p( 'rank =', rank, 'd_lst = ', d_lst )
+
+        # construct involution matrix corresponding to root basis
+        l = len( d_lst )
+        V = complete_basis( d_lst )
+        D = diagonal_matrix( l * [-1] + ( rank - l ) * [1] )
+        M = V * D * V.inverse()  # M*V==V*D
+
+        # if unimodular then store involution
+        if is_integral_involution( M ):
+            MB_lst += [( M, d_lst )]
 
 
     # store involutions

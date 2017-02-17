@@ -57,8 +57,11 @@ def usecase__get_root_bases( max_rank ):
     See "dp_root_bases.get_root_bases()".
     '''
     bnd_max_rank = min( max_rank, 6 )
-    for d_lst in get_root_bases( bnd_max_rank ):
-        nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
+    d_lst_lst = get_root_bases( bnd_max_rank )
+    if False:
+        for d_lst in d_lst_lst:
+            nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
+    nt.p( 'number of all possible root bases = ', len( d_lst_lst ) )
 
 
 def usecase__cls_root_bases( max_rank ):

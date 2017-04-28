@@ -211,15 +211,15 @@ class DPLattice:
         '''
         dpl = DPLattice()
         dpl.M = ~( B.T ) * self.M * ( B.T )  # ~B is inverse of B
-        dpl.Md_lst = [ Md.change_basis( B ) for Md in self.Md_lst ]
+        dpl.Md_lst = [ Md.get_basis_change( B ) for Md in self.Md_lst ]
         dpl.Mtype = self.Mtype
-        dpl.d_lst = [ d.change_basis( B ) for d in self.d_lst ]
+        dpl.d_lst = [ d.get_basis_change( B ) for d in self.d_lst ]
         dpl.type = self.type
-        dpl.m1_lst = [ m1.change_basis( B ) for m1 in self.m1_lst ]
-        dpl.fam_lst = [ fam.change_basis( B ) for fam in self.fam_lst ]
-        dpl.real_d_lst = [ d.change_basis( B ) for d in self.real_d_lst ]
-        dpl.real_m1_lst = [ m1.change_basis( B ) for m1 in self.real_m1_lst ]
-        dpl.real_fam_lst = [ fam.change_basis( B ) for fam in self.real_fam_lst ]
+        dpl.m1_lst = [ m1.get_basis_change( B ) for m1 in self.m1_lst ]
+        dpl.fam_lst = [ fam.get_basis_change( B ) for fam in self.fam_lst ]
+        dpl.real_d_lst = [ d.get_basis_change( B ) for d in self.real_d_lst ]
+        dpl.real_m1_lst = [ m1.get_basis_change( B ) for m1 in self.real_m1_lst ]
+        dpl.real_fam_lst = [ fam.get_basis_change( B ) for fam in self.real_fam_lst ]
 
         return dpl
 
@@ -470,6 +470,10 @@ class DPLattice:
 
     # overloading of "=="
     def __eq__( self, other ):
+
+        # compared with None?
+        if type( self ) != type( other ):
+            return False
 
         # Dynkin type real structures agree?
         if self.Mtype != other.Mtype:

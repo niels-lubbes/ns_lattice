@@ -36,12 +36,11 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                         matrix with diagonal (1,-1,...,-1). 
 
         - "div_dct" --  A dictionary representing the current NS-lattice 
-                        and either has the following entries:
+                        with the following entries:
          
                             * div_dct['ray_lst']: 
-                              List of Div objects of (-1) classes that
-                              were contracted. First in list in contracted
-                              last.
+                              List of Div objects of (-1) classes that were contracted. 
+                              First in list was contracted last.
 
                             * div_dct['k']: 
                               The canonical divisor class.
@@ -57,8 +56,8 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                               to (-1)-classes that can be contracted.
                               See also "div_set.get_m1_classes()"
                                                                                   
-                        For initial call the default is None,
-                        and used for recursive calls of this method.                              
+                        For initial call the default is None. 
+                        This parameter is used for recursive calls of this method.                              
     
     OUTPUT:
         - Returns a list rank*rank matrices over ZZ, such that the 
@@ -249,11 +248,10 @@ if __name__ == '__main__':
 
     # determine equivalence class
     rank = 6
-    num_real_fam = 6
+    num_real_fam = 2
     Mtype = '2A1'
-    type = 'A0'
+    type = '2A1+A3'
 
-    print DPLattice.get_cls_real_dp( 6 )
 
     # find DPLattice representative for this equivalence class
     found_dpl = None
@@ -263,6 +261,9 @@ if __name__ == '__main__':
 
     # output
     nt.p( found_dpl )
+    if found_dpl == None:
+        nt.p( 'exiting...' )
+        sys.exit()
 
     # find a base change in order to construct example
     mat_lst, dpl_lst = get_real_base_changes( found_dpl )

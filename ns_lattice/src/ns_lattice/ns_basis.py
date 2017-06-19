@@ -248,9 +248,9 @@ if __name__ == '__main__':
 
     # determine equivalence class
     rank = 6
-    num_real_fam = 2
+    num_real_fam = 4
     Mtype = '2A1'
-    type = '2A1+A3'
+    type = '4A1'
 
 
     # find DPLattice representative for this equivalence class

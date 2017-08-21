@@ -69,15 +69,15 @@ class TestDPRootBasis():
 
     def test__get_root_bases_4( self ):
         NSTools.set_enable_tool_dct( False )
-        chk_chk_lst = [ ['e1-e2', 'h-e1-e2-e3'],
-                        ['e2-e3', 'h-e1-e2-e3'],
-                        ['e1-e3', 'h-e1-e2-e3'],
+        chk_chk_lst = [ ['e1-e2', 'e0-e1-e2-e3'],
+                        ['e2-e3', 'e0-e1-e2-e3'],
+                        ['e1-e3', 'e0-e1-e2-e3'],
                         [],
                         ['e1-e2'],
                         ['e2-e3'],
                         ['e1-e3'],
-                        ['h-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3', 'h-e1-e2-e3'],
+                        ['e0-e1-e2-e3'],
+                        ['e1-e2', 'e2-e3', 'e0-e1-e2-e3'],
                         ['e1-e2', 'e2-e3']]
         d_lst_lst = get_root_bases( 4, True )
         print d_lst_lst
@@ -97,10 +97,10 @@ class TestDPRootBasis():
         NSTools.set_enable_tool_dct( False )
         chk_chk_lst = [ [],
                         ['e1-e2'],
-                        ['h-e1-e2-e3'],
+                        ['e0-e1-e2-e3'],
                         ['e1-e2', 'e2-e3'],
-                        ['e1-e2', 'h-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3', 'h-e1-e2-e3'] ]
+                        ['e1-e2', 'e0-e1-e2-e3'],
+                        ['e1-e2', 'e2-e3', 'e0-e1-e2-e3'] ]
         dct = get_cls_root_bases( 4 )
         print dct
         assert dct[3] == [[], [Div.new( 'e1-e2', 3 )]]

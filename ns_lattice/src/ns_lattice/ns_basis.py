@@ -85,9 +85,9 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                 such that h*e1==1, e2**2==-1,...er**2==-1, 
                 and the remaining intersections are zero.      
                 Thus the matrix corresponding to this
-                bilinear intersection product is
-                the identity matrix with the first two 
-                columns switched.  
+                bilinear intersection product is the
+                diagonal matrix (1, 1, -1,...,-1) with the 
+                first two columns switched.  
                                       
     '''
 
@@ -138,7 +138,7 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             gen_lst = div_dct['fam_lst'] + div_dct['ray_lst']
 
         else:
-            # fiber bundle
+            # projective line bundle
             return []
 
         mat = matrix( ZZ, [ gen.e_lst for gen in gen_lst ] )  # rows form new basis
@@ -247,10 +247,13 @@ def get_real_base_changes( dpl ):
 if __name__ == '__main__':
 
     # determine equivalence class
-    rank = 6
-    num_real_fam = 4
-    Mtype = '2A1'
-    type = '4A1'
+    #
+    # rank, num_real_fam, Mtype, type = ( 6, 5, '2A1', '2A1' ) # Perseus
+    # rank, num_real_fam, Mtype, type = ( 6, 6, '2A1', 'A0' ) # Blum
+    rank, num_real_fam, Mtype, type = ( 6, 3, '2A1', '3A1' )  # CH1
+    # rank, num_real_fam, Mtype, type = ( 6, 4, '2A1', '4A1' )  # Clifford
+    # rank, num_real_fam, Mtype, type = ( 6, 3, '2A1', 'A3' )  # EY
+    # rank, num_real_fam, Mtype, type = ( 6, 2, '3A1', 'A1' )  # E and EH2
 
 
     # find DPLattice representative for this equivalence class

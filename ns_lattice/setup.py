@@ -11,19 +11,14 @@ https://pypi.python.org/pypi?%3Aaction=list_classifiers
 from setuptools import setup
 
 
-def readme():
-    with open( 'README.md' ) as f:
-        return f.read()
-
-
 setup( name = 'ns_lattice',
-       version = '1.0',
-       description = 'Algorithms for Neron-Severi lattice',
-       long_description = readme(),
+       version = '0',
+       description = 'Algorithms for computing in Neron-Severi lattice',
        classifiers = [
            'Development Status :: 3 - Alpha',
            'License :: OSI Approved :: MIT License',
-           'Programming Language :: Python :: 2.7',
+           'Programming Language :: Python :: 2',
+           'Programming Language :: Python :: 3',
            'Topic :: Scientific/Engineering :: Mathematics',
            ],
       keywords = 'Neron-Severi-lattice',
@@ -31,9 +26,8 @@ setup( name = 'ns_lattice',
       author = 'Niels Lubbes',
       license = 'MIT',
       package_dir = {'': 'src'},
-      packages = ['linkage'],
-      # install_requires = ['markdown'],
-      # dependency_links = ['http://github.com/niels-lubbes/linear_series/tarball/master#egg=package-1.0'],
+      packages = ['ns_lattice'],
+      install_requires = ['linear_series'],
       test_suite = 'nose.collector',
       tests_require = ['nose'],
       entry_points = {

@@ -13,19 +13,18 @@ nt = NSTools()
 def get_div_set( d, dc, cc, perm = False ):
     '''
     INPUT: 
-        - "d"     -- "Div" object  d0*h + d1*e1 +...+ dr*er such that 
+        - "d"     -- "Div" object  d0*e0 + d1*e1 +...+ dr*er such that 
                         * product signature equals (1,d.rank()-1)
                         * d0>0
                         * d1,...,dr<=0                         
         - "dc"    -- A positive integer.
-        - "cc"    -- An integer.
-        - "rank"  -- A positive integer. 
+        - "cc"    -- An integer.        
         - "perm"  -- Boolean.  
               
     OUTPUT:
         - Returns a sorted list of "Div" objects
         
-            * c = c0*h + c1*e1 +...+ cr*er
+            * c = c0*e0 + c1*e1 +...+ cr*er
           
           such that 
                         
@@ -90,11 +89,18 @@ def get_div_set( d, dc, cc, perm = False ):
             valid_part = True
             c_tail = []  # =[c1,...,cr]
             for i in range( 0, len( p_lst ) ):
-                quo, rem = ZZ( p_lst[i] ).quo_rem( d[i + 1] )
-                if rem != 0:
-                    valid_part = False
+                nt.p( p_lst[i], d[i + 1] )
+                if p_lst[i] == 0:
+                    c_tail += [0]
+                elif d[i + 1] == 0:
+                    c_tail += [p_lst[i]]
                 else:
-                    c_tail += [ quo ]
+                    quo, rem = ZZ( p_lst[i] ).quo_rem( d[i + 1] )
+                    if rem != 0:
+                        valid_part = False
+                        break  # out of for-loop
+                    else:
+                        c_tail += [ quo ]
             if not valid_part:
                 continue
 
@@ -130,12 +136,12 @@ def get_m2_classes( rank, perm = False ):
           
           Thus we return classes f such that 
               
-              f*f==-2 and (-3h+e1+...+er)*f==0
+              f*f==-2 and (-3e0+e1+...+er)*f==0
           
           with r=rank-1.
           The (positive) root classes are of the form either
           
-            c0*h-c1*e1-...-cr*er               
+            c0*e0-c1*e1-...-cr*er               
             
             or              
             
@@ -179,7 +185,7 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
         - "rank" -- An integer between 3 and 9.
         - "perm" -- A boolean.
         - "d_lst" -- A list of lists of "Div" objects "d", 
-                     such that d*d=-2 and d*(3h-e1-...-er)=0 
+                     such that d*d=-2 and d*(3e0-e1-...-er)=0 
                      where r=rank-1.
                      We assume that the matrix of the intersection
                      product of these divisors is a diagonal matrix
@@ -187,7 +193,7 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
     OUTPUT:
         - Returns a sorted list of "Div" objects "q", 
           such that 
-              q*q=q*(-3h+e1+...+er)=-1 
+              q*q=q*(-3e0+e1+...+er)=-1 
           and q*d >=0 for all d in "d_lst".
     '''
     if rank not in range( 3, 9 + 1 ):
@@ -232,7 +238,7 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
         - "rank"  -- An integer between 3 and 9.
         - "perm"  -- A boolean.
         - "d_lst" -- A list of lists of "Div" objects "d", 
-                     such that d*d=-2 and d*(-3h+e1+...+er)=0 
+                     such that d*d=-2 and d*(-3e0+e1+...+er)=0 
                      where r=rank-1.
                      We assume that the matrix of the intersection
                      product of these divisors is a diagonal matrix
@@ -240,7 +246,7 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
     OUTPUT:
         - Returns a sorted list of "Div" objects "f", 
           such that 
-              f*f=0 and f*(3h-e1-...-er)=2 
+              f*f=0 and f*(3e0-e1-...-er)=2 
           and f*d >=0 for all d in "d_lst".
     '''
     if rank not in range( 3, 9 + 1 ):

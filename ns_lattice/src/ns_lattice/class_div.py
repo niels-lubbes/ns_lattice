@@ -12,7 +12,7 @@ class Div:
     
     In the documentation of this class we denote the standard basis
     as:
-        <h,e1,e2,...>
+        <e0,e1,e2,...>
     '''
 
     # static variable
@@ -71,21 +71,21 @@ class Div:
 
         c = Div( rank * [0] )  # zero divisor class
 
-        if 'e' in lbl or 'h' in lbl:
+        if 'e' in lbl:
 
             s = lbl
-            if 'h' in s:
+            if 'e0' in s:
 
-                # cases: 'h...', '-h...', '3h...' or '-2h...'
-                if s[0] == 'h':
+                # cases: 'e0...', '-e0...', '3e0...' or '-2e0...'
+                if s[0:2] == 'e0':
                     c.e_lst = [1]
-                    s = s[1:]
-                elif s[0:2] == '-h':
-                    c.e_lst = [-1]
                     s = s[2:]
-                else:  # '3h...' or '-2h...'
-                    c.e_lst = [ int( s.split( 'h' )[0] ) ]  # [4] if lbl='4h+3e...'
-                    s = s.split( 'h' )[1]  # for example '+3e2-2e5+6e7+e8'
+                elif s[0:3] == '-e0':
+                    c.e_lst = [-1]
+                    s = s[3:]
+                else:  # '3e0...' or '-2e0...'
+                    c.e_lst = [ int( s.split( 'e0' )[0] ) ]  # [4] if lbl='4h+3e...'
+                    s = s.split( 'e0' )[1]  # for example '+3e2-2e5+6e7+e8'
 
             else:
                 c.e_lst = [0]
@@ -128,14 +128,14 @@ class Div:
                 c.e_lst[ int( lbl[0] ) ] = 1
                 c.e_lst[ int( lbl[1] ) ] = -1
 
-            # '1123' ---> h-e1-e2-e3
+            # '1123' ---> e0-e1-e2-e3
             elif len( lbl ) == 4 and lbl[0] == '1':
                 c.e_lst[0] = int( lbl[0] )
                 c.e_lst[ int( lbl[1] ) ] = -1
                 c.e_lst[ int( lbl[2] ) ] = -1
                 c.e_lst[ int( lbl[3] ) ] = -1
 
-            # '212' ---> 2h-e3-e4-...-e8
+            # '212' ---> 2e0-e3-e4-...-e8
             elif len( lbl ) == 3 and lbl[0] == '2':
                 c.e_lst = 9 * [-1]
                 c.e_lst[0] = int( lbl[0] )
@@ -145,7 +145,7 @@ class Div:
                     raise ValueError( 'Rank too low for label: ', rank, lbl )
                 c.e_lst = c.e_lst[:rank]
 
-            # '308' ---> 3h-e1-e2-...-e7-2e8
+            # '308' ---> 3e0-e1-e2-...-e7-2e8
             elif len( lbl ) == 3 and lbl[0] == '3' and lbl[1] == '0':
                 c.e_lst = 9 * [-1]
                 c.e_lst[0] = int( lbl[0] )
@@ -181,9 +181,9 @@ class Div:
             - The minimal rank of the "Div" object with a given label.
         
         EXAMPLE:
-            - "get_rank('78')    == 9  "
-            - "get_rank('301')   == 9  "
-            - "get_rank('12')    == 3  "
+            - "get_min_rank('78')    == 9  "
+            - "get_min_rank('301')   == 9  "
+            - "get_min_rank('12')    == 3  "
         '''
         d = Div.new( lbl )
         lst = copy( d.e_lst )
@@ -246,21 +246,21 @@ class Div:
                 if tmp[i] != 0:
                     lbl += str( i )
 
-        # h-e1-e2-e3 ---> '1123'
+        # e0-e1-e2-e3 ---> '1123'
         elif tmp[0] == 1 and oset == set( 3 * [-1] ):
             lbl = '1'
             for i in range( 1, len( tmp ) ):
                 if tmp[i] != 0:
                     lbl += str( i )
 
-        # 2h-e3-e4-...-e8 ---> '212'
+        # 2e0-e3-e4-...-e8 ---> '212'
         elif tmp[0] == 2 and oset == set( 6 * [-1 ] ):
             lbl = '2'
             for i in range( 1, len( tmp ) ):
                 if tmp[i] == 0:
                     lbl += str( i )
 
-        # 3h-e1-e2-...-e7-2e8 ---> '308'
+        # 3e0-e1-e2-...-e7-2e8 ---> '308'
         elif tmp[0] == 3 and oset == set( 7 * [-1 ] + [-2] ):
             lbl = '30'
             for i in range( 1, len( tmp ) ):
@@ -272,6 +272,7 @@ class Div:
 
         return lbl
 
+
     def get_abbr_label( self ):
         '''
         OUTPUT:
@@ -280,8 +281,8 @@ class Div:
             
                 > e1                --->  'e1'
                 > e1-e2             --->  'e12'                  
-                > 2h-e1-e2-e4-e5    --->  '2e1245'
-                > h-e1              --->  '1e1'  
+                > 2e0-e1-e2-e4-e5   --->  '2e1245'
+                > e0-e1             --->  '1e1'  
         
               This options only works for special cases.
               The cases which are covered are (-1)- and (-2)-classes, 
@@ -326,16 +327,16 @@ class Div:
                 
             * If "abbr==True" and self*self==-2 and self.rank()<=9:
             
-                >  e1-e2               ---> '12'
-                > -e1+e2               ---> '-12'
-                >   h-e1-e2-e3         ---> '1123'
-                >  2h-e3-e4-...-e8     ---> '212'
-                >  3h-e1-e2-...-e7-2e8 ---> '308'
-                > -3h+e1+e2+...+e7+2e8 ---> '-308'  
+                >  e1-e2                ---> '12'
+                > -e1+e2                ---> '-12'
+                >  e0-e1-e2-e3          ---> '1123'
+                >  2e0-e3-e4-...-e8     ---> '212'
+                >  3e0-e1-e2-...-e7-2e8 ---> '308'
+                > -3e0+e1+e2+...+e7+2e8 ---> '-308'  
                 
             * For the remaining cases not treated above:
             
-                > 3h-2e1-13e2-4e3  ---> '3h-2e1-13e2-4e3'                                
+                > 3e0-2e1-13e2-4e3  ---> '3e0-2e1-13e2-4e3'                                
                     
         '''
 
@@ -363,10 +364,7 @@ class Div:
                         lbl += '+'
                     lbl += str( val )
 
-                if i == 0:
-                    lbl += 'h'
-                else:
-                    lbl += 'e' + str( i )
+                lbl += 'e' + str( i )
 
         return lbl
 
@@ -477,6 +475,6 @@ class Div:
             return str( self.e_lst )
 
 
-    # overloading "repr" as well, since python call this for Div objects in a list
+    # overloading "__repr__()" as well, since python call this for Div objects in a list
     def __repr__( self ):
         return self.__str__()

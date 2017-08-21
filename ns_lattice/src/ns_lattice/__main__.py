@@ -1,5 +1,8 @@
 '''
+Use of this source code is governed by a MIT-style license that can be found in the LICENSE file.
+
 Created on Aug 11, 2016
+
 @author: Niels Lubbes
 '''
 
@@ -13,6 +16,11 @@ from ns_basis import *
 from class_ns_tools import NSTools
 from class_div import Div
 from class_dp_lattice import DPLattice
+
+
+# from linear_series.class_poly_ring import PolyRing
+# from linear_series.class_base_points import BasePointTree
+# from linear_series.class_linear_series import LinearSeries
 
 
 nt = NSTools()
@@ -103,9 +111,11 @@ def usecase__get_involutions():
     '''
     List all compatible involutions for a fixed root basis.
     '''
-    d_lst = [12, 34]  # root basis
+
     rank = 6  # rank of NS-lattice
-    Mtype = '2A1'  # root system corresponding to involution is of type D4
+    # d_lst = [12, 34]  # root basis
+    d_lst = []
+    Mtype = 'D4'  # root system corresponding to involution is of this type
 
     d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     for ( M, Md_lst ) in get_involutions( rank ):
@@ -164,8 +174,8 @@ def usecase__get_cls_real_dp__celestials( max_rank ):
     table = []
     for rank in range( 3, bnd_max_rank + 1 ):
         for dpl in sorted( dp_cls_dct[rank] ):
+            # no real lines and two families of conics
             if len( dpl.real_fam_lst ) >= 2 and len( dpl.real_m1_lst ) == 0:
-                # no real lines and two families of conics
 
                 nt.p( dpl )
 
@@ -191,7 +201,7 @@ def usecase__get_cls_real_dp__celestials( max_rank ):
 
     row_format = "{:<8}" * len( table[0] )
     for row in table:
-        print row_format.format( *row )
+        print( row_format.format( *row ) )
 
     for rank in celestial_dct:
         nt.p( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
@@ -213,15 +223,109 @@ def usecase__get_cls_real_dp__tex( max_rank ):
                     celestial_dct[rank] = []
                 celestial_dct[rank] += [dpl]
 
-    print DPLattice.get_tex_table( celestial_dct )
+    print( DPLattice.get_tex_table( celestial_dct ) )
+
+
+def usecase__circles():
+    '''
+    An example for how to compute circles on rational surface 
+    '''
+
+    # Blowup of projective plane in 3 colinear points
+    # and 2 infinitly near points. The image of the
+    # map associated to the linear series is a quartic
+    # del Pezzo surface with 5 families of conics.
+    # Moreover the surface contains 8 straight lines.
+    #
+    ring = PolyRing( 'x,y,z', True )
+    p1 = ( -1, 0 )
+    p2 = ( 0, 0 )
+    p3 = ( 1, 0 )
+    p4 = ( 0, 1 )
+    p5 = ( 2, 0 )
+    bp_tree = BasePointTree()
+    bp_tree.add( 'z', p1, 1 )
+    bp_tree.add( 'z', p2, 1 )
+    bp_tree.add( 'z', p3, 1 )
+    bp = bp_tree.add( 'z', p4, 1 )
+    bp.add( 't', p5, 1 )
+    ls = LinearSeries.get( 3, bp_tree )
+    NSTools.p( ls.get_bp_tree() )
+    NSTools.p( ls.get_implicit_image() )
+
+
+    # compose map associated to linear series "ls"
+    # with the inverse stereographic projection "Pinv".
+    #
+    R = PolynomialRing( QQ, 'y0,y1,y2,y3,y4,x,y,z' )
+    y0, y1, y2, y3, y4, x, y, z = R.gens()
+    delta = y1 ** 2 + y2 ** 2 + y3 ** 2 + y4 ** 2
+    Pinv = [ y0 ** 2 + delta, 2 * y0 * y1, 2 * y0 * y2, 2 * y0 * y3, 2 * y0 * y4, -y0 ** 2 + delta]
+    H = sage_eval( str( ls.pol_lst ), R.gens_dict() )
+    PinvH = [ elt.subs( {y0:H[0], y1:H[1], y2:H[2], y3:H[3], y4:H[4]} ) for elt in Pinv ]
+    NSTools.p( 'Pinv        =', Pinv )
+    NSTools.p( 'H           =', H )
+    NSTools.p( 'Pinv o H    =', PinvH )
+
+    # In order to compute the NS-lattice of the image
+    # of "PinvH" we do a base point analysis
+    #
+    #
+    ls2 = LinearSeries( [str( elt ) for elt in PinvH], ring )
+    NSTools.p( 'ls2         =', ls2.get_bp_tree() )
+
+
+def usecase__conjecture():
+    '''
+    Try to find counter examples for the following 
+    conjecture:
+    
+    Real minimal families that are not minimal over 
+    the complex numbers form complete linear series 
+    of dimension at most three.
+    '''
+
+    rnk_bound = 10
+    h0_bound = 10
+    hi_bound = 5
+    ff_bound = 5
+
+
+    for rnk in range( 3, rnk_bound ):
+        for h0 in range( 2, h0_bound ):
+            S = Subsets( ( rnk - 1 ) * range( hi_bound ), rnk - 1, submultiset = True )
+            for h_lst in S:
+                h_lst.reverse()
+                h_lst = [h0] + [-h for h in h_lst]
+                if h_lst[1] == 0 or h_lst[1] != h_lst[2]:
+                    continue
+
+                h = Div( h_lst )
+                k = Div( [-3] + ( rnk - 1 ) * [-1] )
+                if h * h < 0 or h * h - h * k < 6:
+                    continue
+
+                for hf in range( 1, h[0] + 1 ):
+                    f_lst = []
+                    for ff in range( 0, ff_bound ):
+                        f_lst = get_div_set( h, hf, ff, True )
+                        f_lst = [f for f in f_lst if f[1] == f[2] ]
+                        f_lst = [f for f in f_lst if ff - f * k > 1 ]
+                        if len( f_lst ) > 0:
+                            break  # out of ff-loop
+                    if len( f_lst ) > 0:
+                        NSTools.p( 'h=', h, ', hf=', hf, ', ff=', ff, ', len(f_lst)=', len( f_lst ) )
+                        for f in f_lst:
+                            NSTools.p( '\t\t', f )
+                        break  # out of hf-loop
 
 
 if __name__ == '__main__':
 
     #  Debug output settings
     #
-    # nt.filter( '__main__.py' ) # only print if output by module <file_name>
-    nt.filter( None )
+    nt.filter( '__main__.py' )  # only print if output by module <file_name>
+    # nt.filter( None )
     nt.start_timer()
 
     #
@@ -229,23 +333,25 @@ if __name__ == '__main__':
     # computes classifications up to rank "max_rank".
     # If max_rank==9 then the computations take about 4 hours.
     #
-    max_rank = 6
+    max_rank = 4
 
     #########################################
     #                                       #
-    # Uncomment one or more use cases       #
+    # (Un)comment one or more use cases     #
     #                                       #
     #########################################
 
-    usecase__get_cls_root_bases( max_rank )
-    usecase__get_tool_dct()
-    usecase__get_root_bases( max_rank )
-    usecase__get_cls_root_bases( max_rank )
-    usecase__get_cls_involutions( max_rank )
-    usecase__get_involutions()
-    usecase__get_cls_real_dp( max_rank )
-    usecase__get_cls_real_dp__celestials( max_rank )
-    usecase__get_cls_real_dp__tex( max_rank )
+    # usecase__get_cls_root_bases( max_rank )
+    # usecase__get_tool_dct()
+    # usecase__get_root_bases( max_rank )
+    # usecase__get_cls_root_bases( max_rank )
+    # usecase__get_cls_involutions( max_rank )
+    # usecase__get_involutions()
+    # usecase__get_cls_real_dp( max_rank )
+    # usecase__get_cls_real_dp__celestials( max_rank )
+    # usecase__get_cls_real_dp__tex( max_rank )
+    # usecase__circles()
+    usecase__conjecture()
 
     #########################################
     #                                       #
@@ -256,8 +362,8 @@ if __name__ == '__main__':
     # end timing
     nt.end_timer()
 
-    print
-    print 'The End'
+    print()
+    print( 'The End' )
 
 
 

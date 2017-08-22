@@ -146,9 +146,9 @@ def get_m2_classes( rank, perm = False ):
           
           The classes are '12', '1123', '212', '308'
           and if "perm=True" then also permutations of 
-          the 'ei' coefficients (with the restriction that j>i).  
-          See "Div.get_label()" for the notation.
-                   
+          the 'ei' coefficients (with the restriction that 
+          j>i>0 for ei-ej). See "Div.get_label()" for the 
+          notation.                
     '''
     if rank not in range( 2, 9 + 1 ):
         raise ValueError( 'Rank expected an integer between 2 and 9:', rank )
@@ -190,6 +190,13 @@ def get_m1_classes( rank, perm = False, d_lst = [] ):
           such that 
               q*q=q*(-3e0+e1+...+er)=-1 
           and q*d >=0 for all d in "d_lst".
+          
+          If perm==False then only one representative
+          for each q is returned up to permutation of 
+          ei for i>0. For example, e0-e1-e2 and e0-e1-e3
+          are considered equivalent, and only e0-e1-e2
+          is returned, since e0-e1-e2>e0-e1-e3 
+          (see "get_div_set()" for the ordering).            
     '''
     if rank not in range( 3, 9 + 1 ):
         raise ValueError( 'Rank expected an integer between 3 and 9:', rank )
@@ -243,6 +250,13 @@ def get_fam_classes( rank, perm = False, d_lst = [] ):
           such that 
               f*f=0 and f*(3e0-e1-...-er)=2 
           and f*d >=0 for all d in "d_lst".
+                    
+          If perm==False then only one representative
+          for each f is returned up to permutation of 
+          ei for i>0. For example, e0-e1 and e0-e2
+          are considered equivalent, and only e0-e1
+          is returned, since e0-e1>e0-e2  
+          (see "get_div_set()" for the ordering). .             
     '''
     if rank not in range( 3, 9 + 1 ):
         raise ValueError( 'Rank expected an integer between 3 and 9:', rank )

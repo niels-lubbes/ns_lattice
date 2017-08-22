@@ -28,7 +28,7 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
 
         - "d_lst"   --  A list of "Div" objects of the same rank==r+1
                         such that 
-                            (3h-e1-...-er)*d==0 and d^2==-2
+                            (3e0-e1-...-er)*d==0 and d^2==-2
                         for all d in "d_lst". Thus such divisors 
                         represent effective (-2)-classes.
                         The intersection matrix of the Div objects
@@ -47,7 +47,7 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
 
                             * div_dct['fam_lst']:
                               List of Div objects f such that 
-                               (3h-e1-...-3r)*f==2 and f^2==0
+                               (3e0-e1-...-3r)*f==2 and f^2==0
                               for all f in the list.
                               See also "div_set.get_fam_classes()"
                             
@@ -69,8 +69,8 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                 and the remaining rows have self-intersection 
                 minus one. This basis corresponds to a basis 
                 of the Neron-Severi lattice of the projective 
-                plane P^2 blown up in points: <h,e1,...,er> 
-                such h^2==1 and e1**2==-1,...er**2==-1,
+                plane P^2 blown up in points: <e0,...,er> 
+                such e0^2==1 and e1**2==-1,...er**2==-1,
                 and the remaining intersections are zero.
                 Thus the diagonal matrix corresponding to 
                 this bilinear intersection product has 
@@ -81,8 +81,8 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
                 have self-intersection minus one.
                 This basis corresponds to a basis of 
                 the Neron-Severi lattice of P^1xP^1
-                blown up in points: <h,e1,...,er>
-                such that h*e1==1, e2**2==-1,...er**2==-1, 
+                blown up in points: <e0,...,er>
+                such that e0*e1==1, e2**2==-1,...er**2==-1, 
                 and the remaining intersections are zero.      
                 Thus the matrix corresponding to this
                 bilinear intersection product is the
@@ -128,9 +128,9 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
         if len( div_dct['fam_lst'] ) == 0:
 
             # P^2
-            ck_lst = div_dct['k'].e_lst  # k=-3h
-            h = Div( [-ck / 3 for ck in ck_lst ] )
-            gen_lst = [h] + div_dct['ray_lst']
+            ck_lst = div_dct['k'].e_lst  # k=-3e0
+            e0 = Div( [-ck / 3 for ck in ck_lst ] )
+            gen_lst = [e0] + div_dct['ray_lst']
 
         elif len( div_dct['fam_lst'] ) == 2:
 
@@ -163,7 +163,6 @@ def get_base_changes( rank, d_lst = [], div_dct = None ):
             for m1 in new_dct['m1_lst']:
                 if m1 * m1 != -1 or m1 * new_dct['k'] != -1 or m1 * ray != 0:
                     raise Exception( 'Expect only (-1)-curves orthogonal to ray.' )
-
 
             mat_lst += get_base_changes( rank, new_d_lst, new_dct )
 
@@ -275,8 +274,5 @@ if __name__ == '__main__':
        dpl = dpl_lst[i]
        nt.p( str( dpl ) + '\n' + str( mat.T ) + '\n\n' + str( list( mat ) ) )
 
-
-    print
-    print 'The End ns_basis'
 
 

@@ -275,6 +275,12 @@ def usecase__circles():
     NSTools.p( 'ls2         =', ls2.get_bp_tree() )
 
 
+def usecase__bases():
+    '''
+    Compute bases for NS-lattice.
+    '''
+
+
 def usecase__conjecture():
     '''
     Try to find counter examples for the following 
@@ -301,23 +307,27 @@ def usecase__conjecture():
                     continue
 
                 h = Div( h_lst )
-                k = Div( [-3] + ( rnk - 1 ) * [-1] )
+                k = Div( [-3] + ( rnk - 1 ) * [1] )
                 if h * h < 0 or h * h - h * k < 6:
                     continue
 
+                mindeg = None
                 for hf in range( 1, h[0] + 1 ):
+                    if mindeg != None:
+                        continue
                     f_lst = []
                     for ff in range( 0, ff_bound ):
+                        # NSTools.set_enable_tool_dct( False )
                         f_lst = get_div_set( h, hf, ff, True )
+                        # NSTools.set_enable_tool_dct( True )
+                        # print( h, hf, ff, f_lst )
                         f_lst = [f for f in f_lst if f[1] == f[2] ]
-                        f_lst = [f for f in f_lst if ff - f * k > 1 ]
                         if len( f_lst ) > 0:
-                            break  # out of ff-loop
-                    if len( f_lst ) > 0:
-                        NSTools.p( 'h=', h, ', hf=', hf, ', ff=', ff, ', len(f_lst)=', len( f_lst ) )
-                        for f in f_lst:
-                            NSTools.p( '\t\t', f )
-                        break  # out of hf-loop
+                            NSTools.p( 'h=', h, ', hh=', h * h, ', hf=', hf, ', ff=', ff, ', len(f_lst)=', len( f_lst ) )
+                            for f in f_lst:
+                                NSTools.p( '\t\t', f )
+                            mindeg = hf
+
 
 
 if __name__ == '__main__':

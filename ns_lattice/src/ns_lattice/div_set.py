@@ -63,14 +63,12 @@ def get_div_set( d, dc, cc, perm = False ):
         cc_tail = c0 ** 2 - cc  #      = c1^2  +...+ cr^2
 
         # not possible according to io-specs.
-        if dc_tail < 0:
+        if dc_tail < 0 or dd_tail < 0 or cc_tail < 0:
             continue
 
         # Cauchy-Schwarz inequality holds?
         if dc_tail * dc_tail > dd_tail * cc_tail:
             break  # out of while loop
-
-        nt.p( c0, dc_tail )
 
         # obtain all possible [d1*c1+1,...,dr*cr+1]
         r = d.rank() - 1
@@ -89,16 +87,13 @@ def get_div_set( d, dc, cc, perm = False ):
             valid_part = True
             c_tail = []  # =[c1,...,cr]
             for i in range( 0, len( p_lst ) ):
-                nt.p( p_lst[i], d[i + 1] )
-                if p_lst[i] == 0:
-                    c_tail += [0]
-                elif d[i + 1] == 0:
+                if p_lst[i] == 0 or d[i + 1] == 0:
                     c_tail += [p_lst[i]]
                 else:
                     quo, rem = ZZ( p_lst[i] ).quo_rem( d[i + 1] )
                     if rem != 0:
                         valid_part = False
-                        break  # out of for-loop
+                        break  # out of i-for-loop
                     else:
                         c_tail += [ quo ]
             if not valid_part:
@@ -106,7 +101,7 @@ def get_div_set( d, dc, cc, perm = False ):
 
             # add to out list if valid
             c = Div( [c0] + c_tail )
-            if c.rank() == d.rank() and  dc == d * c and cc == c * c:
+            if c.rank() == d.rank() and dc == d * c and cc == c * c:
                 out_lst += [c]
 
     # sort list of "Div" objects

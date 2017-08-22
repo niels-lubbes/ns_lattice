@@ -9,6 +9,17 @@ from ns_lattice.div_set import *
 
 class TestDivSet:
 
+    def test__get_div_set__211_2_2( self ):
+        NSTools.set_enable_tool_dct( False )
+        d = Div.new( '2e0-e1-e2' )
+        dc = 2
+        cc = 2
+        c_lst = get_div_set( d, dc, cc, True )
+        assert [c.get_label() for c in c_lst ] == [ '2e0-e1-e2' ]
+        NSTools.set_enable_tool_dct( True )
+
+
+
     def test__get_div_set__3p4tm1_1_m1( self ):
         NSTools.set_enable_tool_dct( False )
         chk_lst = ['e0-e1-e2', 'e0-e1-e3', 'e0-e2-e3', 'e0-e1-e4', 'e0-e2-e4', 'e0-e3-e4']
@@ -16,7 +27,6 @@ class TestDivSet:
         d = Div( [3] + 4 * [-1] )
         for div in get_div_set( d, 1, -1, True ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -43,7 +53,6 @@ class TestDivSet:
         out_lst = []
         for div in get_m1_classes( 3, True, [] ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -54,7 +63,6 @@ class TestDivSet:
         out_lst = []
         for div in get_m1_classes( 4, True, [] ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -66,7 +74,6 @@ class TestDivSet:
         out_lst = []
         for div in get_m1_classes( 5, True, [] ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -83,7 +90,6 @@ class TestDivSet:
         out_lst = []
         for div in get_m1_classes( 9, False, [] ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -95,7 +101,6 @@ class TestDivSet:
         m2_lst = get_m2_classes( 5, True )
         for div in m2_lst:
             out_lst += [ int( div.get_label( True ) ) ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -106,7 +111,6 @@ class TestDivSet:
         out_lst = []
         for div in get_fam_classes( 6, False, [] ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -124,6 +128,13 @@ class TestDivSet:
         out_lst = []
         for div in get_fam_classes( 6, True, [] ):
             out_lst += [ div.get_label() ]
-        print out_lst
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
+
+
+
+if __name__ == '__main__':
+
+    NSTools.filter( None )
+
+    TestDivSet().test__get_div_set__211_2_2()

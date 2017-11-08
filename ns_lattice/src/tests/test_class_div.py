@@ -3,10 +3,12 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 8, 2017
 @author: Niels Lubbes
 '''
-from nose import with_setup  # optional
 
-from sage.all import *
+from ns_lattice.sage_interface import sage_ZZ
+from ns_lattice.sage_interface import sage_matrix
+
 from ns_lattice.class_div import Div
+
 
 class TestClassDiv:
 
@@ -55,12 +57,12 @@ class TestClassDiv:
 
     def test__get_basis_change( self ):
 
-        B = matrix( ZZ, [( 1, -1, 0, 0, 0, 0 ),
-                         ( 1, 0, -1, 0, 0, 0 ),
-                         ( 1, -1, -1, 0, 0, 0 ),
-                         ( 0, 0, 0, 1, 0, 0 ),
-                         ( 0, 0, 0, 0, 1, 0 ),
-                         ( 0, 0, 0, 0, 0, 1 )] )
+        B = sage_matrix( sage_ZZ, [( 1, -1, 0, 0, 0, 0 ),
+                                   ( 1, 0, -1, 0, 0, 0 ),
+                                   ( 1, -1, -1, 0, 0, 0 ),
+                                   ( 0, 0, 0, 1, 0, 0 ),
+                                   ( 0, 0, 0, 0, 1, 0 ),
+                                   ( 0, 0, 0, 0, 0, 1 )] )
 
         # (-2)-classes
         assert Div.new( '1123', 6 ).get_basis_change( B ).get_label() == 'e2-e3'

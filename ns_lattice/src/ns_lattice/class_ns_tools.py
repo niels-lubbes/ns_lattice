@@ -40,14 +40,16 @@ class NSTools():
     @staticmethod
     def filter( filter_fname ):
         '''
-        It is adviced to access this method 
-        as NSTools.filter().  
+        It is adviced to access this method as NSTools.filter().  
         
-        INPUT:
-            - "filter_fname" -- File name 
+        Parameters
+        ----------
+        filter_fname : str 
+            File name. 
         '''
         NSTools.__filter_fname = filter_fname
         NSTools.__prev_filter_fname = filter_fname
+
 
     @staticmethod
     def filter_unset():
@@ -56,6 +58,7 @@ class NSTools():
         '''
         NSTools.__filter_fname = None
 
+
     @staticmethod
     def filter_reset():
         '''
@@ -63,23 +66,28 @@ class NSTools():
         '''
         NSTools.__filter_fname = NSTools.__prev_filter_fname
 
+
     @staticmethod
     def p( *arg_lst ):
         '''
-        INPUT:
-            - "*arg_lst" -- List of arguments.
-        OUTPUT:
-            - If ".filter_on(<fname>)" has been called and the file name
-              of the calling module does not coincide with <fname>
-              then the output is surpressed and "None" is returned.
+        Parameters
+        ----------
+        *arg_lst
+            Variable length argument list.
+        
+        Returns
+        -------
+        string
+            If ".filter_on(<fname>)" has been called and the file name
+            of the calling module does not coincide with <fname>,
+            then the output is surpressed and "None" is returned.
                             
-              Otherwise, this method prints arguments to "sys.stdout" 
-              together with reflection info from "inspect.stack()".
-              Additional returns the output string.
+            Otherwise, this method prints arguments to "sys.stdout" 
+            together with reflection info from "inspect.stack()".
+            Additional returns the output string.
               
-              Call ".filter_off()" to turn off filter, such that
-              all output is send to "sys.stdout".  
-                                   
+            Call ".filter_off()" to turn off filter, such that
+            all output is send to "sys.stdout".                                     
         '''
         # collect relevant info from stack trace
         sk_lst_lst = inspect.stack()
@@ -98,7 +106,7 @@ class NSTools():
             s += str( arg ) + ' '
 
         # print output
-        print s
+        print( s )
         sys.stdout.flush()
 
         return s
@@ -111,15 +119,20 @@ class NSTools():
     @staticmethod
     def get_tool_dct( fname = 'ns_tools' ):
         '''
-        INPUT:
-            - "fname" -- Name of file without extension.
-        OUTPUT:
-            - Sets static private variable "__tool_dct" 
-              in memory from file "<local path>/<fname>.sobj"
-              if called for the first time.
+        Parameters
+        ----------
+        fname : str
+            Name of file without extension.
+        
+        Returns
+        -------
+        dct
+            Sets static private variable "__tool_dct" 
+            in memory from file "<local path>/<fname>.sobj"
+            if called for the first time.
               
-            - Returns ".__tool_dct" if ".__enable_tool_dct==True" 
-              and "{}" otherwise.
+            Returns ".__tool_dct" if ".__enable_tool_dct==True" 
+            and "{}" otherwise.
         '''
         if not NSTools.__enable_tool_dct:
             NSTools.filter_unset()
@@ -150,16 +163,15 @@ class NSTools():
     @staticmethod
     def save_tool_dct( fname = 'ns_tools' ):
         '''
-        INPUT:
-            - "fname" -- Name of file without extension.        
-        OUTPUT:
-            - Saves ".__tool_dct" to  "fname" if ".enable_tool_dct==True" 
-              otherwise do nothing.
+        Saves ".__tool_dct" to  "fname" if ".enable_tool_dct==True" 
+        otherwise do nothing.
+        
+        Parameters
+        ----------
+        fname : str
+            Name of file without extension.
         '''
         if not NSTools.__enable_tool_dct:
-            NSTools.filter_unset()
-            NSTools.p( 'Data is not saved to disk!' )
-            NSTools.filter_reset()
             return
 
         path = os.path.dirname( os.path.abspath( __file__ ) ) + '/'
@@ -175,8 +187,7 @@ class NSTools():
     @staticmethod
     def start_timer():
         '''
-        OUTPUT:
-            - Prints the current time and starts timer.
+        Prints the current time and starts timer.
         '''
         # get time
         NSTools.__start_time = time.clock()  # set static variable.
@@ -189,8 +200,7 @@ class NSTools():
     @staticmethod
     def end_timer():
         '''
-        OUTPUT:
-            - Prints time passed since last call of ".start_timer()".
+        Prints time passed since last call of ".start_timer()".
         '''
         NSTools.__end_time = time.clock()
         passed_time = NSTools.__end_time - NSTools.__start_time

@@ -6,16 +6,23 @@ This module is for classifying real structures and singularities
 of weak Del Pezzo surfaces of degree between 1 and 7.
 
 '''
-from sage.all import *
 
-from div_set import *
-from dp_root_bases import *
-from dp_involutions import *
+from sage_interface import sage_identity_matrix
+from sage_interface import sage_ZZ
+
+from div_in_lattice import get_divs
+from div_in_lattice import get_indecomp_divs
+from div_in_lattice import get_ak
+
+from dp_root_bases import get_ext_graph
+from dp_root_bases import get_dynkin_type
+from dp_root_bases import get_root_bases
+
+from dp_involutions import get_cls_involutions
 
 from class_ns_tools import NSTools
-from class_div import Div
 
-nt = NSTools()
+from class_div import Div
 
 
 class DPLattice:
@@ -43,133 +50,124 @@ class DPLattice:
         k=-2*(h+e1).
     The intersection product is in this case -h*e1=e2^2=...=er^2=-1 with
     remaining intersections zero.         
+    
+
+    
+    Attributes
+    ----------
+    M : sage_matrix<sage_ZZ>
+        A matrix which correspond to an involution of the lattice
+        <h,e1,...,er> with r=rank-1 and 2 <= r <= 8.
+    
+    Md_lst : list<Div>
+        A list of "Div" objects that correspond to the eigenvectors
+        of eigenvalue 1 of M. These "Div" objects form a basis of
+        a root subsystem.
+
+    Mtype : string
+        A String that denotes the  Dynkin type of "Md_lst".
+        
+    d_lst : list<Div>
+        A list of "Div" objects d such that d*d==-2 and d*k=0
+        where k denotes the canonical class. These elements 
+        represent effective (-2)-classes.
+
+    type : string
+        A String that denotes the Dynkin type of "d_lst".
+ 
+    m1_lst : list<Div>
+        A list of "Div" objects "m" such that
+        m*m==-1==m*k and m*d>=0 for all d in d_lst, 
+        where k denotes the canonical class.        
+        These elements represent (-1)-classes that cannot be written 
+        as the sum of two effective classes. 
+        In other words, the classes are indecomposable.
+        
+    fam_lst : list<Div>
+        A list of "Div" objects "f" such that 
+        f*f==0, f*(-k)==2 and m*d>=0 
+        for all d in d_lst, where k denotes the canonical class.
+                
+    real_d_lst : list<Div>
+        A list "Div" objects that represent indecomposable and 
+        real (-2)-classes. Thus these classes are send to itself by M.
+        Geometrically these classes correspond to real isolated singularities.
+        
+        
+    real_m1_lst : list<Div>
+        A list "Div" objects that represent indecomposable and 
+        real (-1)-classes. Thus these classes are send to itself by M.
+        Geometrically these classes correspond to real lines.
+        
+        
+    self.real_fam_lst : list<Div>
+        A list "Div" objects that represent real classes in "self.fam_lst".
+        Thus these classes are send to itself by M.
+        Geometrically these classes correspond to a real families of conics        
     '''
 
 
     def __init__( self ):
         '''
         Constructor.
+        
+        Returns
+        -------
+        DPLattice
         '''
-
-        #
-        # A matrix which correspond to an
-        # involution of the lattice
-        #     <h,e1,...,er>
-        # with r=rank-1 and 2 <= r <= 8.
-        #
         self.M = None
-
-        #
-        # A list of "Div" objects that
-        # correspond to the eigenvectors
-        # of eigenvalue 1 of M.
-        # These "Div" objects form a basis of
-        # a root subsystem.
-        #
         self.Md_lst = None
-
-        #
-        # A String that denotes the  Dynkin type of "Md_lst".
-        #
         self.Mtype = None
-
-        #
-        # A list of "Div" objects d such that
-        # d*d==-2 and d*k=0
-        # where k denotes the canonical class.
-        #
-        # These elements represent effective
-        # (-2)-classes.
-        #
         self.d_lst = None
-
-        #
-        # A String that denotes the Dynkin type of "d_lst".
-        #
         self.type = None
-
-        #
-        # A list of "Div" objects "m" such
-        # that
-        #        m*m==-1==m*k
-        # and
-        #        m*d>=0
-        # for all d in d_lst, where k denotes
-        # the canonical class.
-        #
-        # These elements represent (-1)-classes
-        # that cannot be written as the sum of
-        # two effective classes. In other words,
-        # the classes are indecomposable.
-        #
         self.m1_lst = None
-
-        #
-        # A list of "Div" objects "f" such
-        # that f*f==0, f*(-k)==2
-        # and m*d>=0 for all d in d_lst,
-        # where k denotes the canonical class.
-        #
         self.fam_lst = None
-
-        #
-        # A list "Div" objects that represent
-        # indecomposable and real (-2)-classes.
-        # Thus these classes are send to itself by M.
-        #
-        # Geometrically these classes correspond to
-        # real isolated singularities.
-        #
         self.real_d_lst = None
-
-        #
-        # A list "Div" objects that represent
-        # indecomposable and real (-1)-classes.
-        # Thus these classes are send to itself by M.
-        #
-        # Geometrically these classes correspond
-        # to real lines.
-        #
         self.real_m1_lst = None
-
-        #
-        # A list "Div" objects that represent
-        # real classes in "self.fam_lst".
-        # Thus these classes are send to itself by M.
-        #
-        # Geometrically these classes correspond to
-        # a real families of conics
-        #
         self.real_fam_lst = None
 
 
     def get_rank( self ):
         '''
-        INPUT:
-            - "self" -- We expect self.M != None.
-        OUTPUT:
-            - Integer denoting rank of lattice.
+        Parameters
+        ----------
+        self : DPLattice
+            We expect self.M != None.
+        
+        Returns
+        -------
+        int
+            Integer denoting rank of lattice.
         '''
         return self.M.dimensions()[0]
 
 
     def get_degree( self ):
         '''
-        INPUT:
-            - "self" -- We expect self.M != None.        
-        OUTPUT:
-            - Integer denoting the degree of weak del Pezzo surface with
-              "self" the corresponding Neron-Severi lattice.
+        Parameters
+        ----------
+        self : DPLattice
+            We expect self.M != None.        
+        
+        Returns
+        -------
+        int
+            Integer denoting the degree of weak del Pezzo surface with
+            "self" its corresponding Neron-Severi lattice.
         '''
         return 10 - self.get_rank()
 
 
     def get_numbers( self ):
         '''
-        INPUT:
-            - "self" --
-        OUTPUT:
-            - List of 6 integers:
+        Parameters
+        ----------
+        self : DPLattice
+        
+        Returns
+        -------
+        list<int>
+            List of 6 integers:
                 
                 0: #indecomposable (-2)-classes 
                 1: #indecomposable (-1)-classes
@@ -195,18 +193,21 @@ class DPLattice:
 
     def get_basis_change( self, B ):
         '''
-        INPUT:
+        Parameters
+        ----------
+        self : DPLattice
             
-            - "self" -- "DPLattice" object.
-            
-            - "B"    -- A matrix whose rows correspond to generators of 
-                        a new basis. We assume that the intersection
-                        matrix for this basis is the default
-                        diagonal matrix with diagonal (1,-1,...,-1).
-        OUTPUT:
+        B : sage_matrix<sage_ZZ>   
+            A matrix whose rows correspond to generators of 
+            a new basis. We assume that the intersection
+            matrix for this basis is the default
+            diagonal matrix with diagonal (1,-1,...,-1).
         
-            - A new "DPLattice" object, which represents the current  
-              lattice with respect to a new basis.
+        Returns
+        -------
+        DPLattice
+            A new "DPLattice" object, which represents the current  
+            lattice with respect to a new basis.
                 
         '''
         dpl = DPLattice()
@@ -227,33 +228,38 @@ class DPLattice:
     @staticmethod
     def init( d_lst, Md_lst, M ):
         '''
-        INPUT:
-            - "d_lst"  -- A list of Div objects of rank 2<=r<=9,
-                          such that the matrix of the intersection 
-                          product is the default diagonal matrix with 
-                          signature (1,r).
+        Parameters
+        ----------
+        d_lst : list<Div> 
+            A list of Div objects of rank 2<=r<=9, such that the matrix 
+            of the intersection product is the default diagonal matrix with 
+            signature (1,r).
                             
-            - "Md_lst" -- A list of Div objects of rank r,
-                          such that the matrix of the intersection 
-                          product is the default diagonal matrix with 
-                          signature (1,r).  
+        Md_lst : list<Div> 
+            A list of Div objects of rank r,
+            such that the matrix of the intersection 
+            product is the default diagonal matrix with 
+            signature (1,r).  
             
-            - "M"      -- An r*r unimodular involutary matrix whose 
-                          eigenspace for -1 is generated by "Md_lst"
-                          and M(d_lst)=d_lst.
-        OUTPUT:
-            - "" -- A DPLattice class whose attributes are set 
-                    according to input:
-                        * DPLattice.M
-                        * DPLattice.Md_lst
-                        * DPLattice.d_lst
-                    The remaining attributes of DPLattice can be computed 
-                    from these attributes.
+        M : sage_matrix<sage_ZZ>      
+            An r*r unimodular involutary matrix whose eigenspace for -1 is 
+            generated by "Md_lst" and with the property that M(d_lst)=d_lst.
+        
+        
+        Returns
+        -------
+        DPLattice
+            A DPLattice class whose attributes are set according to input:
+                * DPLattice.M
+                * DPLattice.Md_lst
+                * DPLattice.d_lst
+            The remaining attributes of DPLattice can be computed 
+            from these attributes.
                     
-                    In order for this object to make sense, it is
-                    required that the involution "M" preserves "d_lst"
-                    as a set. Geometrically this means that the involution
-                    sends isolated singularities to isolated singularities.                     
+            In order for this object to make sense, it is required that the 
+            involution "M" preserves "d_lst" as a set. Geometrically this 
+            means that the involution sends isolated singularities to isolated 
+            singularities.                     
         '''
         dpl = DPLattice()
 
@@ -263,8 +269,12 @@ class DPLattice:
         dpl.type = get_dynkin_type( d_lst )
 
         dpl.d_lst = d_lst
-        dpl.m1_lst = get_m1_classes( dpl.get_rank(), True, d_lst )
-        dpl.fam_lst = get_fam_classes( dpl.get_rank(), True, d_lst )
+
+        m1_lst = get_divs( get_ak( dpl.get_rank() ), 1, -1, True )
+        dpl.m1_lst = get_indecomp_divs( m1_lst, d_lst )
+
+        fam_lst = get_divs( get_ak( dpl.get_rank() ), 2, 0, True )
+        dpl.fam_lst = get_indecomp_divs( fam_lst, d_lst )
 
         dpl.real_d_lst = [ d for d in dpl.d_lst if d.mat_mul( M ) == d ]
         dpl.real_m1_lst = [ m1 for m1 in dpl.m1_lst if m1.mat_mul( M ) == m1 ]
@@ -276,41 +286,40 @@ class DPLattice:
     @staticmethod
     def get_cls_real_dp( max_rank = 7 ):
         '''
-        See [http://arxiv.org/abs/1302.6678] for more info.
+        Parameters
+        ----------
+        max_rank : int
+            An integer in [3,...,7].           
     
-        INPUT:
-            - "max_rank" -- An integer in [3,...,7].           
-    
-        OUTPUT:
-            - A dictionary "cls_dct" such that 
-              "cls_dct[rank]" is a list of DPLattice
-              objects corresponding the enhanced 
-              Neron-Severi lattice of weak Del Pezzo
-              surfaces of degree (10-rank). 
+        Returns
+        -------
+        dict
+            A dictionary "cls_dct" such that "cls_dct[rank]" 
+            is a list of DPLattice objects corresponding the enhanced 
+            Neron-Severi lattice of weak Del Pezzo surfaces of degree 
+            (10-rank). 
               
-              All the Div objects referenced in 
-              the DPLattice objects of the output
-              have the default intersection matrix:
-              diagonal matrix with diagonal: 
-                  (1,-1,...,-1). 
+            All the Div objects referenced in the DPLattice objects of 
+            the output have the default intersection matrix:
+                diagonal matrix with diagonal: (1,-1,...,-1). 
                             
-              We classify for rank in [3,...,max_rank].
-              For rank 8 and 9 this classification method 
-              will not terminate within reasonable time.
+            We classify for rank in [3,...,max_rank].
+            For rank 8 and 9 this classification method will not 
+            terminate within reasonable time.
         '''
         # classification of involutions in cache?
         for rank in range( max_rank, 9 + 1 ):
             key = 'get_cls_real_dp_' + str( rank )
-            if key in nt.get_tool_dct():
-                return nt.get_tool_dct()[key]
+            if key in NSTools.get_tool_dct():
+                return NSTools.get_tool_dct()[key]
         key = 'get_cls_real_dp_' + str( max_rank )
 
 
-        nt.p( 'max_rank =', max_rank )
+        NSTools.p( 'max_rank =', max_rank )
         dp_cls_dct = {}
         for rank in range( 3, max_rank + 1 ):
             dpl_lst = []
-            nt.p( 'rank =', rank )
+            NSTools.p( 'rank =', rank )
 
             #
             # We fix an involution up to equivalence and
@@ -318,7 +327,7 @@ class DPLattice:
             # roots, that form a root base.
             #
             for ( M, Md_lst ) in get_cls_involutions( max_rank )[rank]:
-                nt.p( 'Md_lst =', Md_lst )
+                NSTools.p( 'Md_lst =', Md_lst )
                 for d_lst in get_root_bases( rank ):
 
                     # check whether involution M preserves d_lst
@@ -339,8 +348,8 @@ class DPLattice:
             dp_cls_dct[rank] = dpl_lst
 
         # store classification
-        nt.get_tool_dct()[key] = dp_cls_dct
-        nt.save_tool_dct()
+        NSTools.get_tool_dct()[key] = dp_cls_dct
+        NSTools.save_tool_dct()
 
         return dp_cls_dct
 
@@ -348,13 +357,17 @@ class DPLattice:
     @staticmethod
     def get_tex_table( cls_dct ):
         '''
-        INPUT: 
-            - "cls_dct" -- A dictionary with each key an integer 
-                           corresponding to rank and each value 
-                           corresponds to a list of DPLattice objects
-                           of given rank.  
-        OUTPUT:
-            - A String in Tex format, representing a table of "cls_dct"
+        Parameters
+        ----------
+        cls_dct : dict
+            A dictionary with each key an integer corresponding 
+            to rank and each value corresponds to a list of DPLattice objects
+            of given rank.  
+        
+        Returns
+        -------
+        string
+            A String in Tex format, representing a table of "cls_dct"
         '''
 
         tex = '''
@@ -370,6 +383,9 @@ class DPLattice:
 
         row_idx = 1
         for rank in [4, 6]:
+            if rank not in cls_dct:
+                continue
+
             for dpl in cls_dct[rank]:
 
                 # strings for first 3 columns
@@ -498,18 +514,18 @@ class DPLattice:
             return False
 
         # check incidence graphs
-        all_m1_lst = get_m1_classes( self.get_rank(), True )
+        all_m1_lst = get_divs( get_ak( self.get_rank() ), 1, -1, True )
         G1 = get_ext_graph( self.d_lst + all_m1_lst, self.M )
         G2 = get_ext_graph( other.d_lst + all_m1_lst, other.M )
         if not G1.is_isomorphic( G2, edge_labels = True ):
-            nt.p( 'Non isomorphic graphs (unexpected position): ', self, other )
+            NSTools.p( 'Non isomorphic graphs (unexpected position): ', self, other )
             return False
 
         # check incidence graphs including fam_lst classes
         G1 = get_ext_graph( self.d_lst + all_m1_lst + self.fam_lst, self.M )
         G2 = get_ext_graph( other.d_lst + all_m1_lst + other.fam_lst, other.M )
         if not G1.is_isomorphic( G2, edge_labels = True ):
-            nt.p( 'Non isomorphic graphs including fam_lst (unexpected position): ', self, other )
+            NSTools.p( 'Non isomorphic graphs including fam_lst (unexpected position): ', self, other )
             return False
 
         return True
@@ -558,7 +574,7 @@ class DPLattice:
         arrow = '  --->  '
 
         s += 'Real involution:\n'
-        b_lst = [Div( row ) for row in identity_matrix( ZZ, self.get_rank() ).rows() ]
+        b_lst = [Div( row ) for row in sage_identity_matrix( sage_ZZ, self.get_rank() ).rows() ]
         for b in b_lst:
             s += '\t' + str( b ) + arrow + str( b.mat_mul( self.M ) ) + '\n'
 

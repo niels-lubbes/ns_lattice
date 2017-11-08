@@ -1,29 +1,27 @@
 '''
 Use of this source code is governed by a MIT-style license that can be found in the LICENSE file.
-
 Created on Aug 11, 2016
-
 @author: Niels Lubbes
+
 '''
 
-from sage.all import *
-
-from div_set import *
-from dp_involutions import *
-from dp_root_bases import *
-from ns_basis import *
+from sage_interface import sage_ZZ
+from sage_interface import sage_identity_matrix
 
 from class_ns_tools import NSTools
+from dp_root_bases import get_root_bases
+from dp_root_bases import get_cls_root_bases
+from dp_root_bases import get_dynkin_type
+from dp_involutions import get_involutions
+from dp_involutions import get_cls_involutions
+
 from class_div import Div
 from class_dp_lattice import DPLattice
 
+from linear_series.class_poly_ring import PolyRing
+from linear_series.class_base_points import BasePointTree
+from linear_series.class_linear_series import LinearSeries
 
-# from linear_series.class_poly_ring import PolyRing
-# from linear_series.class_base_points import BasePointTree
-# from linear_series.class_linear_series import LinearSeries
-
-
-nt = NSTools()
 
 
 def usecase__get_cls_root_bases( max_rank ):
@@ -31,16 +29,22 @@ def usecase__get_cls_root_bases( max_rank ):
     Obtain classification of root bases of rank at most "max_rank".
     
     See "dp_root_bases.get_cls_root_bases(max_rank)".
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system in classification.
     '''
 
     for rank in range( 3, max_rank + 1 ):
+
         d_lst_lst = get_cls_root_bases( max_rank )[rank]
-        nt.p( 10 * '-' )
+        NSTools.p( 10 * '-' )
         i = 1
         for d_lst in d_lst_lst:
-            nt.p( i, '<' + str( rank ) + '>', ': ', get_dynkin_type( d_lst ), '\t\t', d_lst )
+            NSTools.p( i, '<' + str( rank ) + '>', ': ', get_dynkin_type( d_lst ), '\t\t', d_lst )
             i += 1
-        nt.p( '# =', len( d_lst_lst ) )
+        NSTools.p( '# =', len( d_lst_lst ) )
 
 
 def usecase__get_tool_dct():
@@ -49,46 +53,64 @@ def usecase__get_tool_dct():
     '''
 
     # list keys
-    for key in nt.get_tool_dct():
-        nt.p( 'key =', key )
+    for key in NSTools.get_tool_dct():
+        NSTools.p( 'key =', key )
 
     # See "dp_root_bases.get_dynkin_type()".
-    for ( G, ts, t_lst ) in nt.get_tool_dct()['get_dynkin_type_4']:
-        nt.p( ts, t_lst, G )
+    for ( G, ts, t_lst ) in NSTools.get_tool_dct()['get_dynkin_type_4']:
+        NSTools.p( ts, t_lst, G )
 
 
 def usecase__get_root_bases( max_rank ):
     '''
-    Compute all root bases for Neron-Severi lattices 
+    Prints a list of all root bases for Neron-Severi lattices 
     of weak Del Pezzo surfaces, up to rank "max_rank".  
     
     See "dp_root_bases.get_root_bases()".
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system in classification.
     '''
+
     bnd_max_rank = min( max_rank, 6 )
     d_lst_lst = get_root_bases( bnd_max_rank )
     if False:
         for d_lst in d_lst_lst:
-            nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
-    nt.p( 'number of all possible root bases = ', len( d_lst_lst ) )
+            NSTools.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
+    NSTools.p( 'number of all possible root bases = ', len( d_lst_lst ) )
 
 
 def usecase__cls_root_bases( max_rank ):
     '''
-    Compute classification of 
-    root bases up to rank "max_rank".  
+    Computes and prints a classification of root bases 
+    up to rank "max_rank".  
     
     See "dp_root_bases.get_cls_root_bases()".
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system in classification.    
     '''
 
     for d_lst in get_cls_root_bases( max_rank ):
-        nt.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
+        NSTools.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
 
 def usecase__get_cls_involutions( max_rank ):
     '''
-    Obtain classification of involutions.
+    Obtain classification of involutions so that the 
+    associated root system is of rank at most "max_rank".
     
     See "dp_involutions.get_cls_involutions(max_rank)".
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system associated to involution in 
+        classification.      
     '''
 
     # rank = rank of NS-lattice
@@ -97,25 +119,36 @@ def usecase__get_cls_involutions( max_rank ):
 
     invo_cls_dct = get_cls_involutions( max_rank )
     for rank in range( 3, max_rank + 1 ):
-        nt.p( 10 * '-' )
+        NSTools.p( 10 * '-' )
         for ( M, d_lst ) in invo_cls_dct[rank]:
 
-            nt.p( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
+            NSTools.p( rank, get_dynkin_type( d_lst ), d_lst, list( M ) )
 
             # (h,e1,e2) |--> (?,?,?)
-            b_lst = [Div( row ) for row in identity_matrix( ZZ, rank ).rows() ]
-            nt.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
+            b_lst = [Div( row ) for row in sage_identity_matrix( sage_ZZ, rank ).rows() ]
+            NSTools.p( '\t', [b.mat_mul( M ).get_label( True ) for b in b_lst] )
 
 
-def usecase__get_involutions():
+def usecase__get_involutions( rank = 6, d_lst = [12, 34], Mtype = 'D4' ):
     '''
-    List all compatible involutions for a fixed root basis.
+    List all compatible involutions for a fixed root basis
+    for singularities. The involution is required to preserve 
+    the root bases for the singularities.
+    
+    Parameters
+    ----------
+    rank : int
+        Rank for the root system of the singularities.
+    d_lst : int[]
+        Basis for the root system associated to the singularities.
+    M_type : str
+        Dynkin type of the root system of the involution.
     '''
 
-    rank = 6  # rank of NS-lattice
+    # rank = 6  # rank of NS-lattice
     # d_lst = [12, 34]  # root basis
-    d_lst = []
-    Mtype = 'D4'  # root system corresponding to involution is of this type
+    # d_lst = []
+    # Mtype = 'D4'  # root system corresponding to involution is of this type
 
     d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
     for ( M, Md_lst ) in get_involutions( rank ):
@@ -129,7 +162,7 @@ def usecase__get_involutions():
         if dpl.Mtype != Mtype:
             continue
 
-        nt.p( dpl )
+        NSTools.p( dpl )
 
         k = Div( [-3] + ( rank - 1 ) * [1] )
         if k.mat_mul( M ) != k:
@@ -138,34 +171,46 @@ def usecase__get_involutions():
 
 def usecase__get_cls_real_dp( max_rank ):
     '''
-    Classify real NS-lattices of weak Del Pezzo surfaces
-    
+    List classification of real NS-lattices of weak Del Pezzo surfaces.
+
     See "DPLattice.get_cls_real_dp()".
+
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system associated to singularities and
+        involutions of weak del Pezzo surfaces.
     '''
     bnd_max_rank = min( max_rank, 7 )
-    nt.p( 'max_rank =', max_rank )
+    NSTools.p( 'max_rank =', max_rank )
 
     # print all equivalence classes
     #
     dp_cls_dct = DPLattice.get_cls_real_dp( bnd_max_rank )
     for rank in range( 3, bnd_max_rank + 1 ):
         for dpl in dp_cls_dct[rank]:
-            nt.p( dpl )
+            NSTools.p( dpl )
 
     # print out a formatted table
     #
     for rank in range( 3, bnd_max_rank + 1 ):
         for dpl in dp_cls_dct[rank]:
             # (#families, degree ), involution, isolated singularities
-            nt.p( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
+            NSTools.p( ( len( dpl.real_fam_lst ), dpl.get_degree() ), dpl.Mtype, dpl.type )
 
 
 def usecase__get_cls_real_dp__celestials( max_rank ):
     '''
     Classification NS-lattices of surfaces with 
-    at least 2 real families of circles and no real lines.
+    at least two real families of circles and no real lines.
     
     See "DPLattice.get_cls_real_dp()".  
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system associated to singularities and
+        involutions of weak del Pezzo surfaces.    
     '''
     bnd_max_rank = min( max_rank, 7 )
 
@@ -174,10 +219,11 @@ def usecase__get_cls_real_dp__celestials( max_rank ):
     table = []
     for rank in range( 3, bnd_max_rank + 1 ):
         for dpl in sorted( dp_cls_dct[rank] ):
+
             # no real lines and two families of conics
             if len( dpl.real_fam_lst ) >= 2 and len( dpl.real_m1_lst ) == 0:
 
-                nt.p( dpl )
+                NSTools.p( dpl )
 
                 if rank not in celestial_dct:
                     celestial_dct[rank] = []
@@ -204,13 +250,19 @@ def usecase__get_cls_real_dp__celestials( max_rank ):
         print( row_format.format( *row ) )
 
     for rank in celestial_dct:
-        nt.p( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
+        NSTools.p( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
 
 
 def usecase__get_cls_real_dp__tex( max_rank ):
     '''
-    We construct a Tex string for a table with 
+    Construct a Tex string for a table with 
     a classification of celestials.
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank for the root system associated to singularities and
+        involutions of weak del Pezzo surfaces.      
     '''
     bnd_max_rank = min( max_rank, 7 )
 
@@ -229,6 +281,8 @@ def usecase__get_cls_real_dp__tex( max_rank ):
 def usecase__circles():
     '''
     An example for how to compute circles on rational surface 
+    
+    Requires the linear_series package.
     '''
 
     # Blowup of projective plane in 3 colinear points
@@ -275,75 +329,21 @@ def usecase__circles():
     NSTools.p( 'ls2         =', ls2.get_bp_tree() )
 
 
-def usecase__bases():
-    '''
-    Compute bases for NS-lattice.
-    '''
-
-
-def usecase__conjecture():
-    '''
-    Try to find counter examples for the following 
-    conjecture:
-    
-    Real minimal families that are not minimal over 
-    the complex numbers form complete linear series 
-    of dimension at most three.
-    '''
-
-    rnk_bound = 10
-    h0_bound = 10
-    hi_bound = 5
-    ff_bound = 5
-
-
-    for rnk in range( 3, rnk_bound ):
-        for h0 in range( 2, h0_bound ):
-            S = Subsets( ( rnk - 1 ) * range( hi_bound ), rnk - 1, submultiset = True )
-            for h_lst in S:
-                h_lst.reverse()
-                h_lst = [h0] + [-h for h in h_lst]
-                if h_lst[1] == 0 or h_lst[1] != h_lst[2]:
-                    continue
-
-                h = Div( h_lst )
-                k = Div( [-3] + ( rnk - 1 ) * [1] )
-                if h * h < 0 or h * h - h * k < 6:
-                    continue
-
-                mindeg = None
-                for hf in range( 1, h[0] + 1 ):
-                    if mindeg != None:
-                        continue
-                    f_lst = []
-                    for ff in range( 0, ff_bound ):
-                        # NSTools.set_enable_tool_dct( False )
-                        f_lst = get_div_set( h, hf, ff, True )
-                        # NSTools.set_enable_tool_dct( True )
-                        # print( h, hf, ff, f_lst )
-                        f_lst = [f for f in f_lst if f[1] == f[2] ]
-                        if len( f_lst ) > 0:
-                            NSTools.p( 'h=', h, ', hh=', h * h, ', hf=', hf, ', ff=', ff, ', len(f_lst)=', len( f_lst ) )
-                            for f in f_lst:
-                                NSTools.p( '\t\t', f )
-                            mindeg = hf
-
-
 
 if __name__ == '__main__':
 
     #  Debug output settings
     #
-    nt.filter( '__main__.py' )  # only print if output by module <file_name>
-    # nt.filter( None )
-    nt.start_timer()
+    # NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
+    NSTools.filter( None )
+    NSTools.start_timer()
 
     #
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     # If max_rank==9 then the computations take about 4 hours.
     #
-    max_rank = 4
+    max_rank = 9
 
     #########################################
     #                                       #
@@ -351,7 +351,7 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    # usecase__get_cls_root_bases( max_rank )
+    usecase__get_cls_root_bases( max_rank )
     # usecase__get_tool_dct()
     # usecase__get_root_bases( max_rank )
     # usecase__get_cls_root_bases( max_rank )
@@ -360,8 +360,8 @@ if __name__ == '__main__':
     # usecase__get_cls_real_dp( max_rank )
     # usecase__get_cls_real_dp__celestials( max_rank )
     # usecase__get_cls_real_dp__tex( max_rank )
-    # usecase__circles()
-    usecase__conjecture()
+    # usecase__circles() # takes a long time to terminate
+
 
     #########################################
     #                                       #
@@ -370,7 +370,7 @@ if __name__ == '__main__':
     #########################################
 
     # end timing
-    nt.end_timer()
+    NSTools.end_timer()
 
     print()
     print( 'The End' )

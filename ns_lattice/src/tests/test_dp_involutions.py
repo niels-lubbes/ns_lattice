@@ -4,9 +4,16 @@ Created on Feb 8, 2017
 @author: Niels Lubbes
 '''
 
-from sage.all import *
+from ns_lattice.sage_interface import sage_vector
+from ns_lattice.sage_interface import sage_matrix
+from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_diagonal_matrix
 
-from ns_lattice.dp_involutions import *
+from ns_lattice.dp_involutions import complete_basis
+from ns_lattice.dp_involutions import is_integral_involution
+from ns_lattice.class_div import Div
+
+from ns_lattice.class_ns_tools import NSTools
 
 
 class TestDPInvolutions():
@@ -16,12 +23,12 @@ class TestDPInvolutions():
         rank = 6
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         mat = complete_basis( d_lst )
-        assert mat == matrix( [( 0, 0, -1, 0, 0, 0 ),
-                               ( 0, 0, 0, 1, 0, 0 ),
-                               ( 0, 0, 0, 0, 1, 0 ),
-                               ( 1, 0, 0, 0, 0, 1 ),
-                               ( -1, 1, 0, 0, 0, 1 ),
-                               ( 0, -1, 0, 0, 0, 1 )] )
+        assert mat == sage_matrix( [( 0, 0, -1, 0, 0, 0 ),
+                                    ( 0, 0, 0, 1, 0, 0 ),
+                                    ( 0, 0, 0, 0, 1, 0 ),
+                                    ( 1, 0, 0, 0, 0, 1 ),
+                                    ( -1, 1, 0, 0, 0, 1 ),
+                                    ( 0, -1, 0, 0, 0, 1 )] )
 
 
     def test__complete_basis__23_34_45_rank6( self ):
@@ -30,12 +37,12 @@ class TestDPInvolutions():
         rank = 6
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         mat = complete_basis( d_lst )
-        assert mat == matrix( [( 0, 0, 0, -1, 0, 0 ),
-                               ( 0, 0, 0, 0, 1, 0 ),
-                               ( 1, 0, 0, 0, 0, 1 ),
-                               ( -1, 1, 0, 0, 0, 1 ),
-                               ( 0, -1, 1, 0, 0, 1 ),
-                               ( 0, 0, -1, 0, 0, 1 )] )
+        assert mat == sage_matrix( [( 0, 0, 0, -1, 0, 0 ),
+                                    ( 0, 0, 0, 0, 1, 0 ),
+                                    ( 1, 0, 0, 0, 0, 1 ),
+                                    ( -1, 1, 0, 0, 0, 1 ),
+                                    ( 0, -1, 1, 0, 0, 1 ),
+                                    ( 0, 0, -1, 0, 0, 1 )] )
 
 
     def test__complete_basis__1123_12_23_45_rank6( self ):
@@ -44,13 +51,13 @@ class TestDPInvolutions():
         rank = 6
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         mat = complete_basis( d_lst )
-        print mat
-        assert mat == matrix( [( 0, 0, 0, 1, -3, 0 ),
-                               ( 1, 0, 0, -1, 1, 0 ),
-                               ( -1, 1, 0, -1, 1, 0 ),
-                               ( 0, -1, 0, -1, 1, 0 ),
-                               ( 0, 0, 1, 0, 0, 1 ),
-                               ( 0, 0, -1, 0, 0, 1 ) ] )
+        print( mat )
+        assert mat == sage_matrix( [( 0, 0, 0, 1, -3, 0 ),
+                                    ( 1, 0, 0, -1, 1, 0 ),
+                                    ( -1, 1, 0, -1, 1, 0 ),
+                                    ( 0, -1, 0, -1, 1, 0 ),
+                                    ( 0, 0, 1, 0, 0, 1 ),
+                                    ( 0, 0, -1, 0, 0, 1 ) ] )
 
 
     def test__complete_basis__1145_23_rank6( self ):
@@ -58,26 +65,26 @@ class TestDPInvolutions():
         rank = 6
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         mat = complete_basis( d_lst )
-        print mat
-        assert mat == matrix( [( 0, 1, -1, 0, 0, 0 ),
-                               ( 0, -1, 0, 1, 0, 0 ),
-                               ( 1, 0, 0, 0, 1, 0 ),
-                               ( -1, 0, 0, 0, 1, 0 ),
-                               ( 0, -1, 0, 0, 0, 1 ),
-                               ( 0, -1, 1, -1, 0, -1 ) ] )
+        print( mat )
+        assert mat == sage_matrix( [( 0, 1, -1, 0, 0, 0 ),
+                                    ( 0, -1, 0, 1, 0, 0 ),
+                                    ( 1, 0, 0, 0, 1, 0 ),
+                                    ( -1, 0, 0, 0, 1, 0 ),
+                                    ( 0, -1, 0, 0, 0, 1 ),
+                                    ( 0, -1, 1, -1, 0, -1 ) ] )
 
 
     def test__complete_basis__12_23_rank4( self ):
         d_lst = [ 12, 23 ]
-        rank = 4        
+        rank = 4
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         V = complete_basis( d_lst )
-        D = diagonal_matrix( [-1, -1, 1, 1] )
-        J = diagonal_matrix( [1, -1, -1, -1] )
-        M = V * D * ~V            
+        D = sage_diagonal_matrix( [-1, -1, 1, 1] )
+        J = sage_diagonal_matrix( [1, -1, -1, -1] )
+        M = V * D * ~V
         assert str( list( M ) ) == "[(1, 0, 0, 0), (0, -1/3, 2/3, 2/3), (0, 2/3, -1/3, 2/3), (0, 2/3, 2/3, -1/3)]"
-        assert M * M == identity_matrix( 4 )
-        assert M.T*J*M==J        
+        assert M * M == sage_identity_matrix( 4 )
+        assert M.T * J * M == J
         assert is_integral_involution( M ) == False
 
 
@@ -87,18 +94,18 @@ class TestDPInvolutions():
         rank = 4
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         V = complete_basis( d_lst )
-        D = diagonal_matrix( [-1, -1, -1, 1] )
-        J = diagonal_matrix( [1, -1, -1, -1] )
-        M = V * D * ~V    
-        print ~V*vector([1,-1,-1,-1])                
-        print ~V*vector([0,1,0,-1])
-        print ~V*vector([0,0,1,-1])
-        print V
+        D = sage_diagonal_matrix( [-1, -1, -1, 1] )
+        J = sage_diagonal_matrix( [1, -1, -1, -1] )
+        M = V * D * ~V
+        print( ~V * sage_vector( [1, -1, -1, -1] ) )
+        print( ~V * sage_vector( [0, 1, 0, -1] ) )
+        print( ~V * sage_vector( [0, 0, 1, -1] ) )
+        print( V )
         assert str( list( V ) ) == "[(0, 0, 1, -3), (1, 0, -1, 1), (-1, 1, -1, 1), (0, -1, -1, 1)]"
-        assert str(list(~V)) =="[(0, 2/3, -1/3, -1/3), (0, 1/3, 1/3, -2/3), (-1/2, -1/2, -1/2, -1/2), (-1/2, -1/6, -1/6, -1/6)]"
-        assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, -4/3, -1/3, -1/3), (-1, -1/3, -4/3, -1/3), (-1, -1/3, -1/3, -4/3)]"        
-        assert M * M == identity_matrix( 4 )
-        assert M.T*J*M==J        
+        assert str( list( ~V ) ) == "[(0, 2/3, -1/3, -1/3), (0, 1/3, 1/3, -2/3), (-1/2, -1/2, -1/2, -1/2), (-1/2, -1/6, -1/6, -1/6)]"
+        assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, -4/3, -1/3, -1/3), (-1, -1/3, -4/3, -1/3), (-1, -1/3, -1/3, -4/3)]"
+        assert M * M == sage_identity_matrix( 4 )
+        assert M.T * J * M == J
         assert is_integral_involution( M ) == False
 
 
@@ -107,12 +114,12 @@ class TestDPInvolutions():
         rank = 4
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         V = complete_basis( d_lst )
-        D = diagonal_matrix( [-1, 1, 1, 1] )
-        J = diagonal_matrix( [1, -1, -1, -1] )
-        M = V * D * ~V                    
+        D = sage_diagonal_matrix( [-1, 1, 1, 1] )
+        J = sage_diagonal_matrix( [1, -1, -1, -1] )
+        M = V * D * ~V
         assert str( list( M ) ) == "[(1, 0, 0, 0), (0, 0, 1, 0), (0, 1, 0, 0), (0, 0, 0, 1)]"
-        assert M * M == identity_matrix( 4 )
-        assert M.T*J*M==J        
+        assert M * M == sage_identity_matrix( 4 )
+        assert M.T * J * M == J
         assert is_integral_involution( M ) == True
 
 
@@ -121,12 +128,12 @@ class TestDPInvolutions():
         rank = 4
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         V = complete_basis( d_lst )
-        D = diagonal_matrix( [-1, 1, 1, 1] )
-        J = diagonal_matrix( [1, -1, -1, -1] )
-        M = V * D * ~V               
+        D = sage_diagonal_matrix( [-1, 1, 1, 1] )
+        J = sage_diagonal_matrix( [1, -1, -1, -1] )
+        M = V * D * ~V
         assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, 0, -1, -1), (-1, -1, 0, -1), (-1, -1, -1, 0)]"
-        assert M * M == identity_matrix( 4 )
-        assert M.T*J*M == J       
+        assert M * M == sage_identity_matrix( 4 )
+        assert M.T * J * M == J
         assert is_integral_involution( M ) == True
 
 
@@ -135,17 +142,19 @@ class TestDPInvolutions():
         rank = 4
         d_lst = [ Div.new( str( d ), rank ) for d in d_lst ]
         V = complete_basis( d_lst )
-        D = diagonal_matrix( [-1, -1, 1, 1] )
-        J = diagonal_matrix( [1, -1, -1, -1] )
-        M = V * D * ~V                    
+        D = sage_diagonal_matrix( [-1, -1, 1, 1] )
+        J = sage_diagonal_matrix( [1, -1, -1, -1] )
+        M = V * D * ~V
         assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, -1, 0, -1), (-1, 0, -1, -1), (-1, -1, -1, 0)]"
-        assert M * M == identity_matrix( 4 )
-        assert M.T*J*M==J        
+        assert M * M == sage_identity_matrix( 4 )
+        assert M.T * J * M == J
         assert is_integral_involution( M ) == True
 
 
 
 if __name__ == '__main__':
+
+    NSTools.filter( None )
 
     # TestDPInvolutions().test__complete_basis__12_23_rank4()
     TestDPInvolutions().test__complete_basis__1123_12_23_rank4()

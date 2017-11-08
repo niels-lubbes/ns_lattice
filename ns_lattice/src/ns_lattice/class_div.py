@@ -2,17 +2,38 @@
 Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
-from sage.all import *
+
+from sage_interface import sage_ZZ
+from sage_interface import sage_diagonal_matrix
+from sage_interface import sage_vector
 
 
 class Div:
-    '''
-    The class represents an element in the Neron-Severi group.
-    Thus a divisor class up to numerical equivalence.
+    '''Element in Neron-Severi lattice.
     
-    In the documentation of this class we denote the standard basis
-    as:
+    The class represents an element in the Neron-Severi lattice
+    with respect to the standard basis:
         <e0,e1,e2,...>
+    
+
+    Parameters
+    ----------
+    e_lst : list<sage_ZZ>
+        A list of integers presents 
+    
+    int_mat : list<sage_matrix> 
+        A matrix over ZZ of rank "len(e_lst)" represents
+        the unimodular intersection product for divisor.                                  
+    
+    
+    Attributes
+    ----------            
+    e_lst : list<Integer>
+        List describes a divisor in terms of a standard basis. 
+    
+    int_mat : sage_matrix<sage_ZZ>
+        Matrix defines the intersection product.
+        
     '''
 
     # static variable
@@ -26,17 +47,16 @@ class Div:
 
 
     def __init__( self, e_lst = 9 * [0], int_mat = None ):
-        '''
-        INPUT:
-            - "e_lst "  -- A list of elements in ZZ.
-            - "int_mat" -- A matrix over ZZ of rank "len(e_lst)".                                 
-        OUTPUT:
-            - Constructor (called when instantiating object).
+        '''        
+        Return
+        ------
+        Div
+            Constructor (called when instantiating object).
               
-              If "int_mat==None" then the default 
-              diagonal matrix has signature (+-...-). 
-              This matrix determines the intersection
-              product of divisors.
+            If "int_mat==None" then the default 
+            diagonal matrix has signature (+-...-). 
+            This matrix determines the intersection
+            product of divisors.
         '''
 
         self.e_lst = list( e_lst )
@@ -49,7 +69,7 @@ class Div:
         # to be on the safe side.
         #
         if int_mat == None:
-            int_mat = diagonal_matrix( ZZ, [1] + ( self.rank() - 1 ) * [-1] )
+            int_mat = sage_diagonal_matrix( sage_ZZ, [1] + ( self.rank() - 1 ) * [-1] )
         if int_mat not in Div.int_mat_lst:
             Div.int_mat_lst += [int_mat]
         idx = Div.int_mat_lst.index( int_mat )
@@ -60,13 +80,18 @@ class Div:
     @staticmethod
     def new( lbl, rank = 9 ):
         '''
-        INPUT:
-            - "lbl"  -- A string with format as output of "self.get_label()".
-            - "rank" -- Integer representing rank of Neron-Severi lattice
-                        in which "Div" lives.
-        OUTPUT:
-            - The "Div" corresponding to the label 
-              such that "len(self.e_lst)>=rank".
+        Parameters
+        ----------
+        lbl : string 
+            A string with format as output of "self.get_label()".
+        
+        rank : int 
+            Integer representing rank of Neron-Severi lattice in which "Div" lives.
+        
+        Returns
+        -------
+            The "Div" corresponding to the label 
+            such that "len(self.e_lst)>=rank".
         '''
 
         c = Div( rank * [0] )  # zero divisor class
@@ -175,18 +200,29 @@ class Div:
     @staticmethod
     def get_min_rank( lbl ):
         '''
-        INPUT:
-            - "lbl"  -- A string with format as output of "self.get_label()".
-        OUTPUT:
-            - The minimal rank of the "Div" object with a given label.
+        Parameters
+        ----------
+        lbl : string
+            A string with format as output of "self.get_label()".
         
-        EXAMPLE:
-            - "get_min_rank('78')    == 9  "
-            - "get_min_rank('301')   == 9  "
-            - "get_min_rank('12')    == 3  "
+        Returns
+        -------
+        int
+            The minimal rank of the "Div" object with a given label.
+        
+        Examples
+        --------
+        >>> get_min_rank('78')
+        9
+            
+        >>> get_min_rank('301')
+        9
+            
+        >>> get_min_rank('12')
+        3
         '''
         d = Div.new( lbl )
-        lst = copy( d.e_lst )
+        lst = [ e for e in d.e_lst ]
         while lst[-1] == 0 and lst != []:
             lst.pop()
 
@@ -195,19 +231,19 @@ class Div:
 
     def get_basis_change( self, B ):
         '''
-        INPUT:
-            
-            - "self" -- "Div" object.
-            
-            - "B"    -- A matrix whose rows correspond to generators of 
-                        a new basis. We assume that the intersection
-                        matrix for this basis is the default
-                        diagonal matrix with diagonal (1,-1,...,-1).
-        OUTPUT:
+        Parameters
+        ----------
+        B : sage_matrix   
+            A matrix whose rows correspond to generators of 
+            a new basis. We assume that the intersection matrix 
+            for this basis is the default diagonal matrix with 
+            diagonal (1,-1,...,-1).
         
-            - A new "Div" object, which represents the current divisor  
-              with respect to a new basis.
-                
+        Returns
+        -------
+        Div
+            A new "Div" object, which represents the current divisor  
+            with respect to a new basis.                
         '''
         new_int_mat = B * self.int_mat * B.T
         new_e_lst = self.mat_mul( ~( B.T ) )
@@ -218,10 +254,16 @@ class Div:
     def __get_minus_two_label( self ):
         '''
         Private helper method for "get_label()"
-        INPUT:
-            - "self" -- self*self==-2 and self.rank<=9.
-        OUTPUT: 
-            - See output documents for self.get_label()
+        
+        Parameters
+        ----------
+            self : Div 
+                self*self==-2 and self.rank<=9.
+        
+        Returns
+        -------
+        string 
+            See output documents for self.get_label()
         '''
 
         if self * self != -2 or self.rank() > 9:
@@ -275,21 +317,21 @@ class Div:
 
     def get_abbr_label( self ):
         '''
-        OUTPUT:
-        
-            - We describe the output label in terms of  examples.
+        Returns
+        -------
+        string        
+            We describe the output label in terms of  examples.
             
                 > e1                --->  'e1'
                 > e1-e2             --->  'e12'                  
                 > 2e0-e1-e2-e4-e5   --->  '2e1245'
                 > e0-e1             --->  '1e1'  
         
-              This options only works for special cases.
-              The cases which are covered are (-1)- and (-2)-classes, 
-              and classes of conical families on weak Del Pezzo surfaces,
-              with respect to the basis with intersection product
-              defined by the diagonal matrix with diagonal (1,-1,...,-1).
-                            
+            This options only works for special cases.
+            The cases which are covered are (-1)- and (-2)-classes, 
+            and classes of conical families on weak Del Pezzo surfaces,
+            with respect to the basis with intersection product
+            defined by the diagonal matrix with diagonal (1,-1,...,-1).                        
         '''
         np1 = len( [e for e in self.e_lst[1:] if e == 1] )
         nm1 = len( [e for e in self.e_lst[1:] if e == -1] )
@@ -318,14 +360,16 @@ class Div:
 
     def get_label( self, abbr = False ):
         '''
-        INPUT:
-            - "abbr" -- A Boolean. 
-        
-        OUTPUT:
-        
-            - We describe the output label in terms of examples.
+        Parameters
+        ----------
+            abbr : boolean 
+            
+        Returns
+        -------
+        string
+            We describe the output label in terms of examples.
                 
-            * If "abbr==True" and self*self==-2 and self.rank()<=9:
+            If "abbr==True" and self*self==-2 and self.rank()<=9:
             
                 >  e1-e2                ---> '12'
                 > -e1+e2                ---> '-12'
@@ -334,10 +378,9 @@ class Div:
                 >  3e0-e1-e2-...-e7-2e8 ---> '308'
                 > -3e0+e1+e2+...+e7+2e8 ---> '-308'  
                 
-            * For the remaining cases not treated above:
+            For the remaining cases not treated above:
             
-                > 3e0-2e1-13e2-4e3  ---> '3e0-2e1-13e2-4e3'                                
-                    
+                > 3e0-2e1-13e2-4e3  ---> '3e0-2e1-13e2-4e3'                                                    
         '''
 
         divK = Div( [-3] + ( self.rank() - 1 ) * [1] )
@@ -371,28 +414,35 @@ class Div:
 
     def mat_mul( self, M ):
         '''
-        INPUT:
-            - "self" -- A "Div" object.
-            - "M"    -- A matrix with self.rank() columns.
-        OUTPUT:
-            - Returns a "Div" object that is a result of 
-              applying the linear transformation corresponding
-              to "M" to itself. 
+        Parameters
+        ----------
+            M : sage_matrix
+                A matrix with self.rank() columns.
+        
+        Returns
+        -------
+        Div
+            Returns a "Div" object that is a result of 
+            applying the linear transformation corresponding
+            to "M" to itself. 
         '''
-        v = vector( self.e_lst ).column()
+        v = sage_vector( self.e_lst ).column()
         return Div( ( M * v ).list() )
 
 
     def int_mul( self, n ):
         '''
-        INPUT:
-            - "self" -- "Div" object.
-            - "n"    -- An integer.
-        OUTPUT:
-            - Returns a "Div" object that is a result of 
-              multiplying with the scalar "n". 
+        Parameters
+        ----------
+            n : int
+        
+        Returns
+        -------
+        Div
+            Returns a "Div" object that is a result of multiplying 
+            with the scalar "n". 
         '''
-        return self.mat_mul( diagonal_matrix( self.rank() * [n] ) )
+        return self.mat_mul( sage_diagonal_matrix( self.rank() * [n] ) )
 
 
     # operator overloading for ==
@@ -409,18 +459,37 @@ class Div:
     # Used for sorting lists of "Div"-objects:
     #     <http://stackoverflow.com/questions/1227121/compare-object-instances-for-equality-by-their-attributes-in-python>
     def __lt__( self, other ):
+        '''
+        Parameters
+        ----------
+            other : Div
 
+        Returns
+        -------
+        bool
+ 
+            Here are some examples to explain 
+            the ordering we use for div classes
+                            
+            e1 < e2
+            e0-e1-e2 < e0-e1-e3
+            1123 < 308  
+            1123 < 1124
+            12 < 1123 
+            12 < 13
+            12 < 34
+        '''
         if self.rank() != other.rank():
            return self.rank() < other.rank()
 
         a = self.e_lst
         b = other.e_lst
+
+        if sum( a ) == sum( b ) == 1 and set( a ) == set( b ) == {0, 1}:
+            return b < a  # e1 < e2
+
         a = [a[0]] + [ -elt for elt in reversed( a[1:] )]
         b = [b[0]] + [ -elt for elt in reversed( b[1:] )]
-
-        # examples:
-        # 1123 < 308,  1123 < 1124
-        # 12 < 1123, 12 < 13, 12 < 34
 
         return a < b  # lexicographic order
 
@@ -428,17 +497,20 @@ class Div:
     # operator overloading for *
     def __mul__( self, div ):
         '''
-        INPUT:
-            - "div" -- A "Div" object.
-        OUTPUT:
-            - The intersection product of "self" and 
-              "div" wrt. to matrix "self.int_mat".
+        Parameters
+        ----------
+        div : Div
+        
+        Returns
+        -------
+        Div
+            The intersection product of "self" and 
+            "div" wrt. to matrix "self.int_mat".
         '''
 
-        row_vec = vector( ZZ, self.e_lst ).row()
-        col_vec = vector( ZZ, div.e_lst ).column()
+        row_vec = sage_vector( sage_ZZ, self.e_lst ).row()
+        col_vec = sage_vector( sage_ZZ, div.e_lst ).column()
         mat = self.int_mat
-
 
         v = row_vec * mat * col_vec
 
@@ -447,13 +519,13 @@ class Div:
 
     # operator overload for +
     def __add__( self, div ):
-        v = vector( ZZ, self.e_lst ) + vector( ZZ, div.e_lst )
+        v = sage_vector( sage_ZZ, self.e_lst ) + sage_vector( sage_ZZ, div.e_lst )
         return Div( list( v ) )
 
 
     # operator overload for -
     def __sub__( self, div ):
-        v = vector( ZZ, self.e_lst ) - vector( ZZ, div.e_lst )
+        v = sage_vector( sage_ZZ, self.e_lst ) - sage_vector( sage_ZZ, div.e_lst )
         return Div( list( v ) )
 
 
@@ -478,3 +550,8 @@ class Div:
     # overloading "__repr__()" as well, since python call this for Div objects in a list
     def __repr__( self ):
         return self.__str__()
+
+
+    # so that lists of this object can be used with set()
+    def __hash__( self ):
+        return hash( self.__str__() + '__' + str( self.rank() ) )

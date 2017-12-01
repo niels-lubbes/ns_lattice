@@ -97,6 +97,7 @@ class TestDivInLattice:
         out_lst = []
         for div in get_divs( get_ak( 6 ), 2, 0, True ):
             out_lst += [ div.get_label() ]
+        print( out_lst )
         assert out_lst == chk_lst
         NSTools.set_enable_tool_dct( True )
 
@@ -130,4 +131,5 @@ if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    TestDivInLattice().test__get_divs__minus_2_classes__rank_5__perm_true()
+    TestDivInLattice().test__get_divs__fam_classes__rank_6__perm_true()
+    # TestDivInLattice().test__get_divs__minus_2_classes__rank_5__perm_true()

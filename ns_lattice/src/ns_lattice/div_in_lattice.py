@@ -16,6 +16,7 @@ from sage_interface import sage_Combinations
 from sage_interface import sage_Compositions
 from sage_interface import sage_Partitions
 from sage_interface import sage_ZZ
+from sage_interface import sage_Permutations
 
 from class_ns_tools import NSTools
 from class_div import Div
@@ -38,7 +39,7 @@ def get_divs( d, dc, cc, perm = False ):
         Self intersection.
         
     perm : boolean
-        If True then generators are permuted.      
+        If True, then generators are permuted.      
     
     Returns
     -------
@@ -61,7 +62,7 @@ def get_divs( d, dc, cc, perm = False ):
             * c == ei        for i>0, or          
             * c0 > 0,   c1,...,cr <= 0
                            
-        If "perm" is False then then only one representative
+        If "perm" is False, then then only one representative
         for each c is returned up to permutation of ei for i>0. 
         For example, e0-e1-e2 and e0-e1-e3 are considered equivalent, 
         and only e0-e1-e2 is returned, since e0-e1-e2>e0-e1-e3 
@@ -83,7 +84,7 @@ def get_divs( d, dc, cc, perm = False ):
         ei for i>0. For example, e0-e1-e2 and e0-e1-e3
         are considered equivalent, and only e0-e1-e2
         is returned, since e0-e1-e2>e0-e1-e3 
-        (see "get_div_set()" for the ordering).             
+        (see "Div.__lt__()" for the ordering).             
     '''
 
     # check if input was already computed
@@ -153,9 +154,11 @@ def get_divs( d, dc, cc, perm = False ):
             break  # out of while loop
 
         # obtain all possible [d1*c1+1,...,dr*cr+1]
+        # if d1==d2==...==dr and perm==True, then
+        # we do the permutations at
         #
         r = d.rank() - 1
-        if perm:
+        if perm and len( set( d[1:] ) ) != 1:
             p_lst_lst = sage_Compositions( dc_tail + r, length = r )
         else:
             p_lst_lst = sage_Partitions( dc_tail + r, length = r )
@@ -187,7 +190,13 @@ def get_divs( d, dc, cc, perm = False ):
             #
             c = Div( [c0] + c_tail )
             if c.rank() == d.rank() and ( dc, cc ) == ( d * c, c * c ):
-                out_lst += [c]
+                if perm and len( set( d[1:] ) ) == 1:
+                    # since d1==...==dr we do not have to
+                    # check each permutation.
+                    for pc_tail in sage_Permutations( c_tail ):
+                        out_lst += [Div( [c0] + list( pc_tail ) )]
+                else:
+                    out_lst += [c]
 
     # sort list of "Div" objects
     out_lst.sort()

@@ -119,7 +119,7 @@ def get_cls_involutions( max_rank = 9 ):
     Returns
     -------
     dct
-        Returns a dictionary "invo_cls_dct" with keys in [3,...,max_rank+1].
+        Returns a dictionary "invo_cls_dct" with keys in [3,...,max_rank].
         The values for each key consist of a list of matrices over
         ZZ that correspond to (non-equivalent) involutions of 
             ZZ<h,e1,...,er>

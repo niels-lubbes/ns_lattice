@@ -26,19 +26,19 @@ from linear_series.class_linear_series import LinearSeries
 
 def usecase__get_cls_root_bases( max_rank ):
     '''
-    Obtain classification of root bases of rank at most "max_rank".
-    
-    See "dp_root_bases.get_cls_root_bases(max_rank)".
+    Obtain classification of root bases of root systems
+    that have rank at most "max_ring". 
+    See "dp_root_bases.get_cls_root_bases()".
     
     Parameters
     ----------
     max_rank : int
-        Maximal rank for the root system in classification.
+        Maximal rank for the root system in classification.    
     '''
 
     for rank in range( 3, max_rank + 1 ):
 
-        d_lst_lst = get_cls_root_bases( max_rank )[rank]
+        d_lst_lst = get_cls_root_bases()[rank]
         NSTools.p( 10 * '-' )
         i = 1
         for d_lst in d_lst_lst:
@@ -57,8 +57,8 @@ def usecase__get_tool_dct():
         NSTools.p( 'key =', key )
 
     # See "dp_root_bases.get_dynkin_type()".
-    for ( G, ts, t_lst ) in NSTools.get_tool_dct()['get_dynkin_type_4']:
-        NSTools.p( ts, t_lst, G )
+    # for ( G, ts, t_lst ) in NSTools.get_tool_dct()['get_dynkin_type_4']:
+    #    NSTools.p( ts, t_lst, G )
 
 
 def usecase__get_root_bases( max_rank ):
@@ -80,23 +80,6 @@ def usecase__get_root_bases( max_rank ):
         for d_lst in d_lst_lst:
             NSTools.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
     NSTools.p( 'number of all possible root bases = ', len( d_lst_lst ) )
-
-
-def usecase__cls_root_bases( max_rank ):
-    '''
-    Computes and prints a classification of root bases 
-    up to rank "max_rank".  
-    
-    See "dp_root_bases.get_cls_root_bases()".
-    
-    Parameters
-    ----------
-    max_rank : int
-        Maximal rank for the root system in classification.    
-    '''
-
-    for d_lst in get_cls_root_bases( max_rank ):
-        NSTools.p( get_dynkin_type( d_lst ), '\t\t\t', d_lst )
 
 
 def usecase__get_cls_involutions( max_rank ):
@@ -277,6 +260,39 @@ def usecase__get_cls_real_dp__tex( max_rank ):
 
     print( DPLattice.get_tex_table( celestial_dct ) )
 
+def usecase__get_classes_dp1():
+    '''
+    Computes classes in the Neron-Severi lattice with
+    of a degree 1 del Pezzo surface that predefined
+    self-intersection and intersection with the 
+    canonical class.
+    '''
+
+    # canonical class
+    d = Div.new( '3e0-e1-e2-e3-e4-e5-e6-e7-e8' )
+
+    dc = 2
+    cc = 0
+    NSTools.p( dc, cc )
+    c_lst = get_div_set( d, dc, cc, False )
+    for c in c_lst:
+        NSTools.p( c.get_label() )
+
+    dc = 2
+    cc = 2
+    NSTools.p( dc, cc )
+    c_lst = get_div_set( d, dc, cc, False )
+    for c in c_lst:
+        NSTools.p( c.get_label() )
+
+    dc = 2
+    cc = 4
+    NSTools.p( dc, cc )
+    c_lst = get_div_set( d, dc, cc, False )
+    for c in c_lst:
+        NSTools.p( c.get_label() )
+
+
 
 def usecase__circles():
     '''
@@ -334,7 +350,7 @@ if __name__ == '__main__':
 
     #  Debug output settings
     #
-    # NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
+    NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
     NSTools.filter( None )
     NSTools.start_timer()
 
@@ -352,14 +368,14 @@ if __name__ == '__main__':
     #########################################
 
     usecase__get_cls_root_bases( max_rank )
-    # usecase__get_tool_dct()
-    # usecase__get_root_bases( max_rank )
-    # usecase__get_cls_root_bases( max_rank )
-    # usecase__get_cls_involutions( max_rank )
-    # usecase__get_involutions()
-    # usecase__get_cls_real_dp( max_rank )
-    # usecase__get_cls_real_dp__celestials( max_rank )
-    # usecase__get_cls_real_dp__tex( max_rank )
+    usecase__get_tool_dct()
+    usecase__get_root_bases( max_rank )
+    usecase__get_cls_involutions( max_rank )
+    usecase__get_involutions()
+    usecase__get_cls_real_dp( max_rank )
+    usecase__get_cls_real_dp__celestials( max_rank )
+    usecase__get_cls_real_dp__tex( max_rank )
+    usecase__get_classes_dp1()
     # usecase__circles() # takes a long time to terminate
 
 
@@ -372,8 +388,7 @@ if __name__ == '__main__':
     # end timing
     NSTools.end_timer()
 
-    print()
-    print( 'The End' )
+    print( '\nThe End' )
 
 
 

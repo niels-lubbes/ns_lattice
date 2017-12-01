@@ -500,7 +500,7 @@ def get_cls_root_bases( max_rank = 9 ):
     Parameters
     ----------
     max_rank : int
-        An integer in [3,...,9].
+        An integer in [3,...,9].    
     
     Returns
     -------
@@ -508,8 +508,7 @@ def get_cls_root_bases( max_rank = 9 ):
         A dictionary "bases_cls_dct" such that 
         "bases_cls_dct[rank]" is a list of lists of "Div" objects "d", 
         such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
-        The empty list is included.
-        We classify for rank in [3,...,max_rank].
+        The empty list is included and rank<=max_rank.
          
         The list of "Div" objects represent a list of (-2)-classes
         that form a basis for a root subsystem of the root system
@@ -524,49 +523,101 @@ def get_cls_root_bases( max_rank = 9 ):
         representative for all root subsystems up to equivalence.         
     '''
     # classification of root bases in cache?
-    for rank in range( max_rank, 9 + 1 ):
-        key = 'get_cls_root_bases_' + str( rank )
-        if key in NSTools.get_tool_dct():
-            return NSTools.get_tool_dct()[key]
     key = 'get_cls_root_bases_' + str( max_rank )
+    if key in NSTools.get_tool_dct():
+        return NSTools.get_tool_dct()[key]
 
 
     A = [ 12, 23, 34, 45, 56, 67, 78]
+    B = [ 1123, 1456, 1567, 278, 1678, 1145 ]
+    C = [ 234, 308, 278, 1567, 1347, 1127 ]
+    D = [1123, 1345, 1156, 1258, 1367, 1247, 1468, 1178 ]
 
-    #################
-    # maximal bases #
-    #################
+    d_lst_lst = []
+    for ( lst1, lst2 ) in [ ( A, [] ), ( A, B ), ( A, C ), ( [], D ) ]:
 
+        # restrict to divisors in list, that are of rank at most "max_rank"
+        lst1 = [ e for e in lst1 if max_rank >= Div.get_min_rank( str( e ) ) ]
+        lst2 = [ e for e in lst2 if max_rank >= Div.get_min_rank( str( e ) ) ]
+
+        # loop through the lists
+        for idx2_lst in sage_Subsets( range( len( lst2 ) ) ):
+            NSTools.p( 'inside loop: ', lst1, lst2, idx2_lst )
+            for idx1_lst in sage_Subsets( range( len( lst1 ) ) ):
+
+                # construct d_lst as a union
+                d_lst = []
+                d_lst += [ lst1[idx1] for idx1 in idx1_lst ]
+                d_lst += [ lst2[idx2] for idx2 in idx2_lst ]
+
+                # check whether d_lst is a root basis
+                # and whether it is not isomorphic to
+                # a root base obtained before.
+                d_lst = [  Div.new( str( d ), max_rank ) for d in d_lst ]
+                if not is_root_basis( d_lst ):
+                    continue
+                found_new_d_lst = True
+                for d_lst2 in d_lst_lst:
+                    if is_equal_root_bases( d_lst, d_lst2 ):
+                        found_new_d_lst = False
+                        break
+
+                # add if new d_lst is found
+                if found_new_d_lst:
+                    d_lst_lst += [d_lst]
+
+    # construct dictionary by taking for each rank
+    # the d_lst in d_lst_lst such that d_lst only consists
+    # of Div objects of rank at most the given rank
+    bases_cls_dct = {}
+    for rank in range( 3, max_rank + 1 ):
+        rank_d_lst_lst = []
+        for d_lst in d_lst_lst:
+            new_d_lst = [ d for d in d_lst if rank >= Div.get_min_rank( d.get_label() ) ]
+            if len( new_d_lst ) == len( d_lst ):
+                rank_d_lst_lst += [[Div.new( d.get_label(), rank ) for d in d_lst]]  # set current rank
+        bases_cls_dct[rank] = rank_d_lst_lst
+
+
+    # cache output
+    NSTools.get_tool_dct()[key] = bases_cls_dct
+    NSTools.save_tool_dct()
+
+    return bases_cls_dct
+
+
+    #     #################
+    #     # maximal bases #
+    #     #################
     #
-    # A{k}+A{n-k-1}, A{k}
-    # E7: A1+D6
-    # E8: E8
+    #     #
+    #     # A{k}+A{n-k-1}, A{k}
+    #     # E7: A1+D6
+    #     # E8: E8
+    #     #
+    #     Z1 = A + [1123, 1145]
     #
-    Z1 = A + [1123, 1145]
-
+    #     #
+    #     # E6: E6, D5, A1+A5, 3A2
+    #     # E7: E7, A2+A5
+    #     # E8: E7+A1,  A2+E6,
+    #     #
+    #     Z2 = A + [1123, 1456]
     #
-    # E6: E6, D5, A1+A5, 3A2
-    # E7: E7, A2+A5
-    # E8: E7+A1,  A2+E6,
+    #     # E7: A7
+    #     Z3 = A[:-1] + [278]
     #
-    Z2 = A + [1123, 1456]
-
-    # E7: A7
-    Z3 = A[:-1] + [278]
-
-    # E8: A8
-    Z4 = A + [1123, 1567]
-
-    # E8: 2A4
-    Z5 = A + [278, 1678]
-
-    Z_lst = [Z1, Z2, Z3, Z4, Z5]
-
-    #################
-    # END           #
-    #################
-
-
+    #     # E8: A8
+    #     Z4 = A + [1123, 1567]
+    #
+    #     # E8: 2A4
+    #     Z5 = A + [278, 1678]
+    #
+    #     Z_lst = [Z1, Z2, Z3, Z4, Z5]
+    #
+    #     #################
+    #     # END           #
+    #     #################
     # A = [ 12, 23, 34, 45, 56, 67, 78]
     # Z1 = A + [ 1123 ]
     # Z2 = A + [ 1123, 1145, 1678, 234 ]
@@ -586,52 +637,6 @@ def get_cls_root_bases( max_rank = 9 ):
     # Z_lst += [ Z_lst[0] + [1127, 1347, 1567, 278, 308 ]]
     # Z_lst += [ Z_lst[0] + [1123, 1145, 1347, 1456, 1678 ]]
     # Z_lst += [[ 1123, 1345, 1165, 1285, 1673, 1274, 1684, 1178 ]]
-
-
-    bases_cls_dct = {}
-    for rank in range( 3, max_rank + 1 ):
-
-        d_lst_lst = [[]]  # include empty list
-        for Z in Z_lst:
-
-            # consider all subsets of Z of length at most rank-1
-            NSTools.p( 'rank =', rank )
-            NSTools.p( 'Z before =', Z )
-            Z = [ Div.new( str( z ), rank ) for z in Z if rank >= Div.get_min_rank( str( z ) )]
-            NSTools.p( 'Z after  =', Z )
-            for i in range( 1, rank ):
-
-                NSTools.p( '\trank subsystem =', i, '\trank =', rank, )
-                for idx_lst in sage_Subsets( range( len( Z ) ), i ):
-
-                    # recover subset of Z from indices
-                    d_lst1 = [ Z[idx] for idx in idx_lst ]
-
-                    # check whether d_lst1 is a root basis
-                    if not is_root_basis( d_lst1 ):
-                        continue
-
-                    # check whether d_lst1 is new
-                    new_d_lst = True
-                    for d_lst2 in d_lst_lst:
-                        if is_equal_root_bases( d_lst1, d_lst2 ):
-                            new_d_lst = False
-                            break
-
-                    # add if new d_lst is found
-                    if new_d_lst:
-                        d_lst_lst += [d_lst1]
-
-        # add list to dictionary
-        bases_cls_dct[rank] = d_lst_lst
-
-    # cache output
-    NSTools.get_tool_dct()[key] = bases_cls_dct
-    NSTools.save_tool_dct()
-
-    return bases_cls_dct
-
-
 
 
 

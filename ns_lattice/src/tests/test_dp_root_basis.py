@@ -146,8 +146,8 @@ class TestDPRootBasis():
         NSTools.set_enable_tool_dct( False )
         chk_chk_lst = [ [],
                         ['e1-e2'],
-                        ['e0-e1-e2-e3'],
                         ['e1-e2', 'e2-e3'],
+                        ['e0-e1-e2-e3'],
                         ['e1-e2', 'e0-e1-e2-e3'],
                         ['e1-e2', 'e2-e3', 'e0-e1-e2-e3'] ]
         dct = get_cls_root_bases( 4 )
@@ -161,5 +161,7 @@ if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    TestDPRootBasis().test__get_ext_graph()
+    # TestDPRootBasis().test__get_cls_root_bases__rank_4()
+    TestDPRootBasis().test__get_root_bases__rank_4__pos_true__fast_true()
+    # TestDPRootBasis().test__get_ext_graph()
 

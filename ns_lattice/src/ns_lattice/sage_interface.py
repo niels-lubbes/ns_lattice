@@ -21,6 +21,22 @@ two examples. The interface method for
 method for "sage_eval()" is not called 
 "sage_sage_eval()" but instead "sage__eval()". 
 The variable "ZZ" is called "sage_ZZ".
+
+
+For the Parameters section in the documentation 
+of types we will use the following abbrevations:
+
+sage_POLY: 
+    sage.rings.polynomial.multi_polynomial_element.MPolynomial_polydict
+    The type of an element in sage_PolynomialRing 
+
+sage_RING:
+    sage.rings.*
+    The type of a ring. For example sage_QQ or sage_ZZ or sage_NumberField.
+
+sage_GRAPH:
+    sage.graphs.graph
+    The type of a Graph.
 '''
 
 from sage.all import *

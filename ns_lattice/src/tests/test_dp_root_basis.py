@@ -12,12 +12,10 @@ from ns_lattice.class_ns_tools import NSTools
 from ns_lattice.class_div import Div
 
 from ns_lattice.dp_root_bases import is_root_basis
+from ns_lattice.dp_root_bases import get_graph
 from ns_lattice.dp_root_bases import get_ext_graph
 from ns_lattice.dp_root_bases import get_dynkin_type
-from ns_lattice.dp_root_bases import get_root_bases
-from ns_lattice.dp_root_bases import get_cls_root_bases
-from ns_lattice.dp_root_bases import is_equal_root_bases
-from ns_lattice.dp_root_bases import get_graph
+from ns_lattice.dp_root_bases import get_root_bases_orbit
 
 
 class TestDPRootBasis():
@@ -68,11 +66,6 @@ class TestDPRootBasis():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__is_equal_root_bases( self ):
-        assert is_equal_root_bases( [Div.new( '23', 4 )], [Div.new( '1123', 4 )] ) == False
-        assert is_equal_root_bases( [Div.new( '23', 4 )], [Div.new( '12', 4 )] ) == True
-
-
     def test__get_dynkin_type( self ):
         NSTools.set_enable_tool_dct( False )
         bas_lst = [12, 23, 34 ]
@@ -82,78 +75,37 @@ class TestDPRootBasis():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_root_bases__rank_3__pos_false( self ):
+    def test__get_root_bases_orbit__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
-        d_lst_lst = get_root_bases( 3, False )
+
+        d_lst = [12]
+        d_lst = [Div.new( str( d ), 3 ) for d in d_lst]
+
+        d_lst_lst = get_root_bases_orbit( d_lst, False )
         print( d_lst_lst )
-        assert str( d_lst_lst ) == '[[], [e1-e2], [-e1+e2]]'
-        NSTools.set_enable_tool_dct( True )
+        assert str( d_lst_lst ) == '[[e1-e2], [-e1+e2]]'
 
-
-    def test__get_root_bases__rank_3__pos_true( self ):
-        NSTools.set_enable_tool_dct( False )
-        d_lst_lst = get_root_bases( 3, True )
+        d_lst_lst = get_root_bases_orbit( d_lst, True )
         print( d_lst_lst )
-        assert str( d_lst_lst ) == '[[], [e1-e2]]'
+        assert str( d_lst_lst ) == '[[e1-e2]]'
+
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_root_bases__rank_4__pos_true__fast_true( self ):
+    def test__get_root_bases_orbit__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
-        chk_chk_lst = [ ['e1-e2', 'e0-e1-e2-e3'],
-                        ['e1-e3', 'e0-e1-e2-e3'],
-                        ['e2-e3', 'e0-e1-e2-e3'],
-                        [],
-                        ['e1-e2'],
-                        ['e1-e3'],
-                        ['e2-e3'],
-                        ['e0-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3', 'e0-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3']]
-        d_lst_lst = get_root_bases( 4, True, True )
+
+        d_lst = [12]
+        d_lst = [Div.new( str( d ), 4 ) for d in d_lst]
+
+        d_lst_lst = get_root_bases_orbit( d_lst, False )
         print( d_lst_lst )
-        assert d_lst_lst == [ [Div.new( chk, 4 ) for chk in chk_lst ] for chk_lst in chk_chk_lst ]
-        NSTools.set_enable_tool_dct( True )
+        assert str( d_lst_lst ) == '[[e1-e2], [-e1+e2], [e1-e3], [-e2+e3], [-e1+e3], [e2-e3]]'
 
-
-    def test__get_root_bases__rank_4__pos_true__fast_false( self ):
-        NSTools.set_enable_tool_dct( False )
-        chk_chk_lst = [ ['e1-e2', 'e0-e1-e2-e3'],
-                        ['e2-e3', 'e0-e1-e2-e3'],
-                        ['e1-e3', 'e0-e1-e2-e3'],
-                        [],
-                        ['e1-e2'],
-                        ['e2-e3'],
-                        ['e1-e3'],
-                        ['e0-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3', 'e0-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3']]
-        d_lst_lst = get_root_bases( 4, True, False )
+        d_lst_lst = get_root_bases_orbit( d_lst, True )
         print( d_lst_lst )
-        assert d_lst_lst == [ [Div.new( chk, 4 ) for chk in chk_lst ] for chk_lst in chk_chk_lst ]
-        NSTools.set_enable_tool_dct( True )
+        assert str( d_lst_lst ) == '[[e1-e2], [e1-e3], [e2-e3]]'
 
-
-    def test__get_cls_root_bases__rank_3( self ):
-        NSTools.set_enable_tool_dct( False )
-        dct = get_cls_root_bases( 3 )
-        print( dct )
-        assert str( dct[3] ) == '[[], [e1-e2]]'
-        NSTools.set_enable_tool_dct( True )
-
-
-    def test__get_cls_root_bases__rank_4( self ):
-        NSTools.set_enable_tool_dct( False )
-        chk_chk_lst = [ [],
-                        ['e1-e2'],
-                        ['e1-e2', 'e2-e3'],
-                        ['e0-e1-e2-e3'],
-                        ['e1-e2', 'e0-e1-e2-e3'],
-                        ['e1-e2', 'e2-e3', 'e0-e1-e2-e3'] ]
-        dct = get_cls_root_bases( 4 )
-        print( dct )
-        assert dct[3] == [[], [Div.new( 'e1-e2', 3 )]]
-        assert dct[4] == [ [Div.new( chk, 4 ) for chk in chk_lst ] for chk_lst in chk_chk_lst ]
         NSTools.set_enable_tool_dct( True )
 
 
@@ -161,7 +113,7 @@ if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    # TestDPRootBasis().test__get_cls_root_bases__rank_4()
-    TestDPRootBasis().test__get_root_bases__rank_4__pos_true__fast_true()
     # TestDPRootBasis().test__get_ext_graph()
+    # TestDPRootBasis().test__get_root_bases_orbit__rank_3()
+    TestDPRootBasis().test__get_root_bases_orbit__rank_4()
 

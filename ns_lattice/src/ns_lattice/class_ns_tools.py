@@ -114,7 +114,11 @@ class NSTools():
 
     @staticmethod
     def set_enable_tool_dct( enable_tool_dct ):
+        NSTools.filter_unset()
+        NSTools.p( 'Caching enabled? ', enable_tool_dct )
+        NSTools.filter_reset()
         NSTools.__enable_tool_dct = enable_tool_dct
+
 
     @staticmethod
     def get_tool_dct( fname = 'ns_tools' ):
@@ -135,9 +139,6 @@ class NSTools():
             and "{}" otherwise.
         '''
         if not NSTools.__enable_tool_dct:
-            NSTools.filter_unset()
-            NSTools.p( 'Caching is disabled!' )
-            NSTools.filter_reset()
             return {}
 
         path = os.path.dirname( os.path.abspath( __file__ ) ) + '/'
@@ -187,10 +188,10 @@ class NSTools():
     @staticmethod
     def start_timer():
         '''
-        Prints the current time and starts timer.
+        Prints the current wall clock time and starts timer.
         '''
         # get time
-        NSTools.__start_time = time.clock()  # set static variable.
+        NSTools.__start_time = time.time()  # set static variable.
 
         NSTools.filter_unset()
         NSTools.p( 'start time =', NSTools.__start_time )
@@ -200,15 +201,14 @@ class NSTools():
     @staticmethod
     def end_timer():
         '''
-        Prints time passed since last call of ".start_timer()".
+        Prints wall clock time passed since last call of ".start_timer()".
         '''
-        NSTools.__end_time = time.clock()
+        NSTools.__end_time = time.time()
         passed_time = NSTools.__end_time - NSTools.__start_time
 
         NSTools.filter_unset()
         NSTools.p( 'time passed =', passed_time )
         NSTools.filter_reset()
-
 
 
 

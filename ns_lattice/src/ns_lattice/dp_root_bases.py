@@ -8,6 +8,7 @@ Classification of root subsystems of root systems
 of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
 from sage_interface import sage_VectorSpace
+from sage_interface import sage_vector
 from sage_interface import sage_QQ
 from sage_interface import sage_identity_matrix
 from sage_interface import sage_Graph
@@ -17,8 +18,8 @@ from sage_interface import sage_Subsets
 from sage_interface import sage_Combinations
 from sage_interface import sage_Permutations
 
-
 from class_ns_tools import NSTools
+
 from class_div import Div
 
 from div_in_lattice import get_divs
@@ -123,60 +124,6 @@ def get_ext_graph( d_lst, M ):
         G.add_edge( i, j, 1000 )
 
     return G
-
-
-def is_equal_root_bases( d_lst1, d_lst2 ):
-    '''Test equality of root bases
-    
-    Check whether "d_lst1" and "d_lst2"
-    are bases of isomorphic root subsystems by using
-    the Cremona invariant. This is a graph
-    whose vertices are Div object "d" such that
-        ( d*k, d*d ) in [ (-1,-1), (0,-2)]
-    where k=3e0-e1-...-er. 
-
-
-    Parameters
-    ----------
-    d_lst1 : list<Div>
-        A list of lists of "Div" objects "d" such that 
-        each "d" has the same rank.        
-
-    d_lst2 : list<Div>
-        A list of lists of "Div" objects "d" such that 
-        each "d" has the same rank as any element in d_lst1.        
-
-    Returns
-    -------
-    bool
-        True if "d_lst1" and "d_lst2" are equivalent
-        as root sub systems in the root system with
-        Dynkin type either
-
-              A1, A1+A2, A4, D5, E6, E7 or E8.
-    '''
-
-    # check cardinality
-    if len( d_lst1 ) != len( d_lst2 ):
-        return False
-
-    # empty root bases are equivalent
-    if len( d_lst1 ) == 0:
-        return True
-
-    # check rank
-    if d_lst1[0].rank() != d_lst2[0].rank():
-        return False
-
-    rank = d_lst1[0].rank()
-
-    M = sage_identity_matrix( sage_QQ, rank )  # real structure is the identity
-    m1_lst = get_divs( get_ak( rank ), 1, -1, True )
-
-    G1 = get_ext_graph( m1_lst + d_lst1, M )
-    G2 = get_ext_graph( m1_lst + d_lst2, M )
-
-    return G1.is_isomorphic( G2, edge_labels = True )
 
 
 def get_dynkin_type( d_lst ):
@@ -314,8 +261,9 @@ def get_dynkin_type( d_lst ):
     raise ValueError( 'Could not recognize Dynkin type: ', d_lst )
 
 
-def get_root_bases_orbit( d_lst, positive = False ):
-    '''Returns the orbit of a root base under the Weyl group.
+def get_root_bases_orbit( d_lst, positive = True ):
+    '''
+    Computes the orbit of a root base under the Weyl group.
     
     Parameters
     ----------
@@ -356,19 +304,21 @@ def get_root_bases_orbit( d_lst, positive = False ):
         For example '15' and '1124' but not '-15' or '-1124'. 
         See "Div.get_label()" for the notation.                           
     '''
-    key = 'get_root_bases_orbit' + str( d_lst )
+    if d_lst == []:
+        return [[]]
+
+    # in cache?
+    key = 'get_root_bases_orbit_' + str( d_lst ) + '_' + str( d_lst[0].rank() )
     if key in NSTools.get_tool_dct():
         return NSTools.get_tool_dct()[key]
 
-    if d_lst == []:
-        return []
-
-    # obtain list of all (-2)-classes
+    # obtain list of all positive (-2)-classes
     m2_lst = get_divs( get_ak( d_lst[0].rank() ), 0, -2, True )
-    m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
-    NSTools.p( 'd_lst  =', d_lst )
+    # m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
+    NSTools.p( 'd_lst  =', len( d_lst ), d_lst )
     NSTools.p( 'm2_lst =', len( m2_lst ), m2_lst )
 
+    d_lst.sort()
     d_lst_lst = [d_lst]
     for cd_lst in d_lst_lst:
         for m2 in m2_lst:
@@ -379,16 +329,12 @@ def get_root_bases_orbit( d_lst, positive = False ):
             # Notice that m2*m2==-2.
             #
             od_lst = [ cd + m2.int_mul( cd * m2 ) for cd in cd_lst]
-            print( 'm2 =', m2, ', od_lst =', od_lst, ', cd_lst =', cd_lst, ', d_lst_lst =', d_lst_lst, ' positive =', positive )
-
-            if not is_root_basis( od_lst ):
-                raise Exception( 'Unexpected position: the Weyl group should ' +
-                                 'act transitively on root bases!\n' +
-                                 'cd_lst =', cd_lst, ', m2 =', m2, ' od_lst =', od_lst )
+            # print( 'm2 =', m2, ', od_lst =', od_lst, ', cd_lst =', cd_lst, ', d_lst_lst =', d_lst_lst, ' positive =', positive )
 
             if positive and '-' in [ od.get_label( True )[0] for od in od_lst ]:
                 continue  # continue with for loop since a negative root in basis
 
+            od_lst.sort()
             if od_lst not in d_lst_lst:
                 d_lst_lst += [od_lst]
 
@@ -397,194 +343,192 @@ def get_root_bases_orbit( d_lst, positive = False ):
     NSTools.get_tool_dct()[key] = d_lst_lst
     NSTools.save_tool_dct()
 
-    NSTools.p( 'orbit(' + str( d_lst ) + ') =', d_lst_lst )
+    NSTools.p( '#orbit(' + str( d_lst ) + ') =', len( d_lst_lst ) )
 
     return d_lst_lst
 
 
-def get_root_bases( rank, positive = False, fast = True ):
-    '''Returns all root bases of given rank.
-    
-    Parameters
-    ---------- 
-    rank : int
-        An integer between 3 and 9.
-    
-    positive : bool
-    
-    fast: bool
-        If False then the root bases are computed by
-        exhaustive search.
-    
-    Returns
-    -------
-    list<Div>
-        Returns a list of lists of "Div" objects "d", 
-        such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
-        The empty list is included.
-         
-        The list of "Div" objects represent a list of (-2)-classes
-        that form a basis for a root subsystem of the root system
-        with Dynkin type either:
-            A1, A1+A2, A4, D5, E6, E7 or E8,
-        corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively
-        (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
-        Note that the root systems live in the vector space 
-        associated to the Neron-Severi lattice of a weak Del Pezzo surface.          
-          
-        If "positive==True" then the 
-        roots in the basis are all positive
-        and thus of the form <ij>, <1ijk>, <2ij>, <30i>
-        with i<j<k. For example '15' and '1124' 
-        but not '-15' or '-1124' 
-        (see "Div.get_label()" for notation).  
-          
-        The output list is sorted with respect to the string of the Dynkin type.
-        Each root basis in the list is sorted as a list of Div objects.         
-    '''
-    # already computed before?
-    key = 'get_root_bases_' + str( rank ) + '_' + str( positive ) + '_' + str( fast )
-    if key in NSTools.get_tool_dct():
-        return NSTools.get_tool_dct()[key]
-
-    NSTools.p( 'Constructing root bases for rank', rank, '...' )
-    d_lst_lst = [[]]
-
-    if fast:
-
-        # for each root basis representative we obtain its
-        # orbit and thus we obtain all root bases.
-        #
-        for d_lst in get_cls_root_bases( rank )[rank]:
-            NSTools.p( 'computing orbit of ', get_dynkin_type( d_lst ), ' d_lst =', d_lst )
-            d_lst_lst += get_root_bases_orbit( d_lst, positive )
-
-    else:
-        # perform exhaustive search
-
-        # construct list of (-2)-classes
-        m2_lst = get_divs( get_ak( rank ), 0, -2, True )
-        if not positive:
-            m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
-
-        # loop through all subsets of list of (-2)-classes of length at most rank-1.
-        for r in range( 1, rank ):
-
-            # go through all possible root bases of length r
-            NSTools.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
-            for idx_lst in sage_Subsets( range( len( m2_lst ) ), r ):
-
-                # construct sub-list
-                d_lst1 = [ m2_lst[idx] for idx in idx_lst ]
-
-                # add if root basis
-                if is_root_basis( d_lst1 ):
-                    d_lst1.sort()
-                    d_lst_lst += [d_lst1]
 
 
-    # sort list
-    d_lst_lst.sort( key = lambda d_lst: get_dynkin_type( d_lst ) )
 
-    # cache output
-    NSTools.get_tool_dct()[key] = d_lst_lst
-    NSTools.save_tool_dct()
-
-    return d_lst_lst
-
-
-def get_cls_root_bases( max_rank = 9 ):
-    '''
-    See [Algorithm 5, http://arxiv.org/abs/1302.6678] for more info. 
-    
-    Parameters
-    ----------
-    max_rank : int
-        An integer in [3,...,9].    
-    
-    Returns
-    -------
-    dict
-        A dictionary "bases_cls_dct" such that 
-        "bases_cls_dct[rank]" is a list of lists of "Div" objects "d", 
-        such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
-        The empty list is included and rank<=max_rank.
-         
-        The list of "Div" objects represent a list of (-2)-classes
-        that form a basis for a root subsystem of the root system
-        with Dynkin type either:
-            A1, A1+A2, A4, D5, E6, E7 or E8,
-        corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively 
-        (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
-        Note that the root systems live in a subspace of the vector space 
-        associated to the Neron-Severi lattice of a weak Del Pezzo surface.
-    
-        The list "bases_cls_dct[rank]" contains exactly one 
-        representative for all root subsystems up to equivalence.         
-    '''
-    # classification of root bases in cache?
-    key = 'get_cls_root_bases_' + str( max_rank )
-    if key in NSTools.get_tool_dct():
-        return NSTools.get_tool_dct()[key]
-
-
-    A = [ 12, 23, 34, 45, 56, 67, 78]
-    B = [ 1123, 1456, 1567, 278, 1678, 1145 ]
-    C = [ 234, 308, 278, 1567, 1347, 1127 ]
-    D = [1123, 1345, 1156, 1258, 1367, 1247, 1468, 1178 ]
-
-    d_lst_lst = []
-    for ( lst1, lst2 ) in [ ( A, [] ), ( A, B ), ( A, C ), ( [], D ) ]:
-
-        # restrict to divisors in list, that are of rank at most "max_rank"
-        lst1 = [ e for e in lst1 if max_rank >= Div.get_min_rank( str( e ) ) ]
-        lst2 = [ e for e in lst2 if max_rank >= Div.get_min_rank( str( e ) ) ]
-
-        # loop through the lists
-        for idx2_lst in sage_Subsets( range( len( lst2 ) ) ):
-            NSTools.p( 'inside loop: ', lst1, lst2, idx2_lst )
-            for idx1_lst in sage_Subsets( range( len( lst1 ) ) ):
-
-                # construct d_lst as a union
-                d_lst = []
-                d_lst += [ lst1[idx1] for idx1 in idx1_lst ]
-                d_lst += [ lst2[idx2] for idx2 in idx2_lst ]
-
-                # check whether d_lst is a root basis
-                # and whether it is not isomorphic to
-                # a root base obtained before.
-                d_lst = [  Div.new( str( d ), max_rank ) for d in d_lst ]
-                if not is_root_basis( d_lst ):
-                    continue
-                found_new_d_lst = True
-                for d_lst2 in d_lst_lst:
-                    if is_equal_root_bases( d_lst, d_lst2 ):
-                        found_new_d_lst = False
-                        break
-
-                # add if new d_lst is found
-                if found_new_d_lst:
-                    d_lst_lst += [d_lst]
-
-    # construct dictionary by taking for each rank
-    # the d_lst in d_lst_lst such that d_lst only consists
-    # of Div objects of rank at most the given rank
-    bases_cls_dct = {}
-    for rank in range( 3, max_rank + 1 ):
-        rank_d_lst_lst = []
-        for d_lst in d_lst_lst:
-            new_d_lst = [ d for d in d_lst if rank >= Div.get_min_rank( d.get_label() ) ]
-            if len( new_d_lst ) == len( d_lst ):
-                rank_d_lst_lst += [[Div.new( d.get_label(), rank ) for d in d_lst]]  # set current rank
-        bases_cls_dct[rank] = rank_d_lst_lst
-
-
-    # cache output
-    NSTools.get_tool_dct()[key] = bases_cls_dct
-    NSTools.save_tool_dct()
-
-    return bases_cls_dct
-
+#
+# def get_root_bases( rank, positive = False, fast = True ):
+#     '''Returns all root bases of given rank.
+#
+#     Parameters
+#     ----------
+#     rank : int
+#         An integer between 3 and 9.
+#
+#     positive : bool
+#
+#     fast: bool
+#         If False then the root bases are computed by
+#         exhaustive search.
+#
+#     Returns
+#     -------
+#     list<Div>
+#         Returns a list of lists of "Div" objects "d",
+#         such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
+#         The empty list is included.
+#
+#         The list of "Div" objects represent a list of (-2)-classes
+#         that form a basis for a root subsystem of the root system
+#         with Dynkin type either:
+#             A1, A1+A2, A4, D5, E6, E7 or E8,
+#         corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively
+#         (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
+#         Note that the root systems live in the vector space
+#         associated to the Neron-Severi lattice of a weak Del Pezzo surface.
+#
+#         If "positive==True" then the
+#         roots in the basis are all positive
+#         and thus of the form <ij>, <1ijk>, <2ij>, <30i>
+#         with i<j<k. For example '15' and '1124'
+#         but not '-15' or '-1124'
+#         (see "Div.get_label()" for notation).
+#
+#         The output list is sorted with respect to the string of the Dynkin type.
+#         Each root basis in the list is sorted as a list of Div objects.
+#     '''
+#     # already computed before?
+#     key = 'get_root_bases_' + str( rank ) + '_' + str( positive ) + '_' + str( fast )
+#     if key in NSTools.get_tool_dct():
+#         return NSTools.get_tool_dct()[key]
+#
+#     NSTools.p( 'Constructing root bases for rank', rank, '...' )
+#     d_lst_lst = [[]]
+#
+#     if fast:
+#
+#         # for each root basis representative we obtain its
+#         # orbit and thus we obtain all root bases.
+#         #
+#         for d_lst in get_cls_root_bases( rank )[rank]:
+#             NSTools.p( 'computing orbit of ', get_dynkin_type( d_lst ), ' d_lst =', d_lst, 'rank =', [d.rank() for d in d_lst ] )
+#             d_lst_lst += get_root_bases_orbit( d_lst, positive )
+#
+#     else:
+#         # perform exhaustive search
+#
+#         # construct list of (-2)-classes
+#         m2_lst = get_divs( get_ak( rank ), 0, -2, True )
+#         if not positive:
+#             m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
+#
+#         # loop through all subsets of list of (-2)-classes of length at most rank-1.
+#         for r in range( 1, rank ):
+#
+#             # go through all possible root bases of length r
+#             NSTools.p( r, '/', rank - 1, ', length list =', len( m2_lst ), ', rank =', rank )
+#             for idx_lst in sage_Subsets( range( len( m2_lst ) ), r ):
+#
+#                 # construct sub-list
+#                 d_lst1 = [ m2_lst[idx] for idx in idx_lst ]
+#
+#                 # add if root basis
+#                 if is_root_basis( d_lst1 ):
+#                     d_lst1.sort()
+#                     d_lst_lst += [d_lst1]
+#
+#
+#     # sort list
+#     d_lst_lst.sort( key = lambda d_lst: [len( d_lst ) , get_dynkin_type( d_lst ), len( str( d_lst ) ) ] )
+#
+#     # cache output
+#     NSTools.get_tool_dct()[key] = d_lst_lst
+#     NSTools.save_tool_dct()
+#
+#     return d_lst_lst
+#
+#
+#
+# def quick_check( d_lst, d_lst_lst ):
+#     '''
+#     Helper function for get_cls_root_bases.
+#     It verifies as quick as possible whether
+#     d_lst already occurs in d_lst_lst and
+#     whether it is a valid root system basis.
+#
+#     Parameters
+#     ----------
+#     d_lst : list<Div>
+#         A list of lists of "Div" objects "d" of the same rank or the empty list.
+#
+#     d_lst_lst : list<list<Div>>
+#         A list of lists of "Div" objects "d" such that
+#         each "d" has the same rank.
+#
+#
+#     Returns
+#     -------
+#     bool
+#         True if d_lst should be added to d_lst_lst.
+#     '''
+#     if d_lst == []:
+#         return not [] in d_lst_lst
+#
+#     for i in range( len( d_lst ) ):
+#         for j in range( len( d_lst ) ):
+#             if d_lst[i] * d_lst[j] not in [0, 1, -2]:
+#                 return False  # not a root basis
+#
+#     rank = d_lst[0].rank()
+#     ak = get_ak( rank )
+#
+#     m1_lst = get_divs( ak, 1, -1, True )
+#     nl1 = len( get_indecomp_divs( m1_lst, d_lst ) )
+#
+#     c_lst = get_divs( ak, 2, 0, True )
+#     nc1 = len( get_indecomp_divs( c_lst, d_lst ) )
+#
+#     m2_lst = get_divs( ak, 0, -2, True )
+#     or_lst = []
+#     for m2 in m2_lst:
+#         if [m2 * d for d in d_lst] == len( d_lst ) * [0]:
+#             or_lst += [m2]
+#
+#     V = sage_VectorSpace( sage_QQ, rank )
+#     W = V.subspace( [d.e_lst for d in d_lst] )
+#     ss_lst = []
+#     for m2 in m2_lst:
+#         if sage_vector( m2.e_lst ) in W:
+#             ss_lst += [ m2 ]
+#
+#     for d_lst2 in d_lst_lst:
+#
+#         if len( d_lst ) != len( d_lst2 ):
+#             continue
+#
+#         nl2 = len( get_indecomp_divs( m1_lst, d_lst2 ) )
+#         if nl1 != nl2:
+#             continue
+#
+#         nc2 = len( get_indecomp_divs( c_lst, d_lst2 ) )
+#         if nc1 != nc2:
+#             continue
+#
+#         or_lst2 = []
+#         for m2 in m2_lst:
+#             if [m2 * d for d in d_lst2] == len( d_lst2 ) * [0]:
+#                 or_lst2 += [m2]
+#         if len( or_lst ) != len( or_lst2 ):
+#             continue
+#
+#         W2 = V.subspace( [d.e_lst for d in d_lst2] )
+#         ss_lst2 = []
+#         for m2 in m2_lst:
+#             if sage_vector( m2.e_lst ) in W2:
+#                 ss_lst2 += [ m2 ]
+#         if len( ss_lst ) != len( ss_lst2 ):
+#             continue
+#
+#         # if get_dynkin_type( d_lst ) != get_dynkin_type( d_lst2 ):
+#         #    continue
+#         return False
+#
+#     return True
 
     #     #################
     #     # maximal bases #

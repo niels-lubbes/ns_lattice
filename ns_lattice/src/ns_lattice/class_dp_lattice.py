@@ -6,9 +6,14 @@ This module is for classifying real structures and singularities
 of weak Del Pezzo surfaces of degree between 1 and 7.
 
 '''
+import time
 
 from sage_interface import sage_identity_matrix
 from sage_interface import sage_ZZ
+from sage_interface import sage_QQ
+from sage_interface import sage_Subsets
+from sage_interface import sage_VectorSpace
+from sage_interface import sage_vector
 
 from div_in_lattice import get_divs
 from div_in_lattice import get_indecomp_divs
@@ -16,9 +21,11 @@ from div_in_lattice import get_ak
 
 from dp_root_bases import get_ext_graph
 from dp_root_bases import get_dynkin_type
-from dp_root_bases import get_root_bases
+from dp_root_bases import get_root_bases_orbit
+from dp_root_bases import is_root_basis
 
-from dp_involutions import get_cls_involutions
+from dp_involutions import basis_to_involution
+from dp_involutions import is_integral_involution
 
 from class_ns_tools import NSTools
 
@@ -52,7 +59,6 @@ class DPLattice:
     remaining intersections zero.         
     
 
-    
     Attributes
     ----------
     M : sage_matrix<sage_ZZ>
@@ -104,27 +110,134 @@ class DPLattice:
         A list "Div" objects that represent real classes in "self.fam_lst".
         Thus these classes are send to itself by M.
         Geometrically these classes correspond to a real families of conics        
+   
+    self.or_lst : list<Div>
+        A list of "Div" objects that represents roots that are orthogonal to
+        "self.d_lst".  
+
+    self.sr_lst : list<Div>
+        A list of "Div" objects that represents roots that are contained in
+        the subspace spanned by "self.d_lst".  
+    
+    self.G : sage_Graph
+        The Cremona invariant for the current lattice.
     '''
 
 
-    def __init__( self ):
+    def __init__( self, d_lst, Md_lst, M ):
         '''
         Constructor.
         
         Returns
         -------
         DPLattice
+            A DPLattice class whose attributes are set according to input:
+                * DPLattice.M
+                * DPLattice.Md_lst
+                * DPLattice.d_lst
+            The remaining attributes of DPLattice can be computed 
+            from these attributes.
+                    
+            In order for this object to make sense, it is required that the 
+            involution "M" preserves "d_lst" as a set. Geometrically this 
+            means that the involution sends isolated singularities to isolated 
+            singularities.  
         '''
-        self.M = None
-        self.Md_lst = None
-        self.Mtype = None
-        self.d_lst = None
-        self.type = None
+
+        self.d_lst = d_lst
+        self.Md_lst = Md_lst
+        self.M = M
+
         self.m1_lst = None
         self.fam_lst = None
         self.real_d_lst = None
         self.real_m1_lst = None
         self.real_fam_lst = None
+        self.Mtype = None
+        self.type = None
+        self.or_lst = None
+        self.sr_lst = None
+        self.G = None
+
+
+    def set_attributes( self, level = 9 ):
+        '''
+        Sets attributes of this object, depending
+        on the input level.
+        For constructing a classification we instantiate
+        many DPLattice objects. This method allows us 
+        to minimize the number of attributes that computed
+        (thus we use lazy evaluation).
+        
+        Parameter
+        ---------
+        self: DPLattice
+            At least self.M, self.Md_lst and self.d_lst        
+            should be initialized.
+        
+        level : int
+            A positive number.
+        '''
+
+        # M, Md_lst and d_lst are set.
+
+        if self.m1_lst == None:
+            all_m1_lst = get_divs( get_ak( self.get_rank() ), 1, -1, True )
+            self.m1_lst = get_indecomp_divs( all_m1_lst, self.d_lst )
+
+        if level < 1: return
+
+        if self.fam_lst == None:
+            all_fam_lst = get_divs( get_ak( self.get_rank() ), 2, 0, True )
+            self.fam_lst = get_indecomp_divs( all_fam_lst, self.d_lst )
+
+        if level < 2: return
+
+        if self.real_d_lst == None:
+            self.real_d_lst = [ d for d in self.d_lst if d.mat_mul( self.M ) == d ]
+
+        if level < 3: return
+
+        if self.real_m1_lst == None:
+            self.real_m1_lst = [ m1 for m1 in self.m1_lst if m1.mat_mul( self.M ) == m1 ]
+
+        if level < 4: return
+
+        if self.real_fam_lst == None:
+            self.real_fam_lst = [ f for f in self.fam_lst if f.mat_mul( self.M ) == f ]
+
+        if level < 5: return
+
+        if self.or_lst == None:
+            self.or_lst = []
+            for m2 in get_divs( get_ak( self.get_rank() ), 0, -2, True ):
+                if [m2 * d for d in self.d_lst] == len( self.d_lst ) * [0]:
+                    self.or_lst += [m2]
+
+        if level < 6: return
+
+        if self.sr_lst == None:
+            V = sage_VectorSpace( sage_QQ, self.get_rank() )
+            W = V.subspace( [d.e_lst for d in self.d_lst] )
+            self.sr_lst = []
+            for m2 in get_divs( get_ak( self.get_rank() ), 0, -2, True ):
+                if sage_vector( m2.e_lst ) in W:
+                    self.sr_lst += [ m2 ]
+
+        if level < 7: return
+
+        if self.type == None:
+            self.type = get_dynkin_type( self.d_lst )
+
+        if level < 8: return
+
+        if self.Mtype == None:
+            self.Mtype = get_dynkin_type( self.Md_lst )
+
+        if level < 9: return
+
+        if self.G == None:
+            self.G = get_ext_graph( self.d_lst + self.m1_lst, self.M )
 
 
     def get_rank( self ):
@@ -183,6 +296,7 @@ class DPLattice:
             if it is effective and cannot be written as 
             the sum of two effective classes.
         '''
+        self.set_attributes( 6 )
         return ( len( self.d_lst ),
                  len( self.m1_lst ),
                  len( self.fam_lst ),
@@ -210,6 +324,8 @@ class DPLattice:
             lattice with respect to a new basis.
                 
         '''
+        self.set_attributes( 6 )
+
         dpl = DPLattice()
         dpl.M = ~( B.T ) * self.M * ( B.T )  # ~B is inverse of B
         dpl.Md_lst = [ Md.get_basis_change( B ) for Md in self.Md_lst ]
@@ -226,61 +342,113 @@ class DPLattice:
 
 
     @staticmethod
-    def init( d_lst, Md_lst, M ):
+    def get_cls_root_bases( max_rank = 9 ):
         '''
+        See [Algorithm 5, http://arxiv.org/abs/1302.6678] for more info. 
+        
         Parameters
         ----------
-        d_lst : list<Div> 
-            A list of Div objects of rank 2<=r<=9, such that the matrix 
-            of the intersection product is the default diagonal matrix with 
-            signature (1,r).
-                            
-        Md_lst : list<Div> 
-            A list of Div objects of rank r,
-            such that the matrix of the intersection 
-            product is the default diagonal matrix with 
-            signature (1,r).  
-            
-        M : sage_matrix<sage_ZZ>      
-            An r*r unimodular involutary matrix whose eigenspace for -1 is 
-            generated by "Md_lst" and with the property that M(d_lst)=d_lst.
-        
+        max_rank : int
+            An integer in [3,...,9].    
         
         Returns
         -------
-        DPLattice
-            A DPLattice class whose attributes are set according to input:
-                * DPLattice.M
-                * DPLattice.Md_lst
-                * DPLattice.d_lst
-            The remaining attributes of DPLattice can be computed 
-            from these attributes.
-                    
-            In order for this object to make sense, it is required that the 
-            involution "M" preserves "d_lst" as a set. Geometrically this 
-            means that the involution sends isolated singularities to isolated 
-            singularities.                     
+        dict
+            A dictionary "bases_cls_dct" such that 
+            "bases_cls_dct[rank]" is a list of lists of "Div" objects "d", 
+            such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
+            The empty list is included and rank<=max_rank.
+             
+            The list of "Div" objects represent a list of (-2)-classes
+            that form a basis for a root subsystem of the root system
+            with Dynkin type either:
+                A1, A1+A2, A4, D5, E6, E7 or E8,
+            corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively 
+            (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
+            Note that the root systems live in a subspace of the vector space 
+            associated to the Neron-Severi lattice of a weak Del Pezzo surface.
+        
+            The list "bases_cls_dct[rank]" contains exactly one 
+            representative for all root subsystems up to equivalence.         
         '''
-        dpl = DPLattice()
+        # classification of root bases in cache?
+        for rank in range( max_rank, 9 + 1 ):
+            key = 'get_cls_root_bases_' + str( rank )
+            if key in NSTools.get_tool_dct():
+                return NSTools.get_tool_dct()[key]
+        key = 'get_cls_root_bases_' + str( max_rank )
 
-        dpl.M = M
-        dpl.Md_lst = Md_lst
-        dpl.Mtype = get_dynkin_type( Md_lst )
-        dpl.type = get_dynkin_type( d_lst )
+        A = [ 12, 23, 34, 45, 56, 67, 78]
+        B = [ 1123, 1145, 1456, 1567, 1678, 278 ]
+        C = [ 1127, 1347, 1567, 234, 278, 308 ]
+        D = [ 1123, 1345, 1156, 1258, 1367, 1247, 1468, 1178 ]
 
-        dpl.d_lst = d_lst
+        dpl_lst = []
+        for ( lst1, lst2 ) in [ ( A, [] ), ( A, B ), ( A, C ), ( [], D ) ]:
 
-        m1_lst = get_divs( get_ak( dpl.get_rank() ), 1, -1, True )
-        dpl.m1_lst = get_indecomp_divs( m1_lst, d_lst )
+            # restrict to divisors in list, that are of rank at most "max_rank"
+            lst1 = [ Div.new( str( e ), max_rank ) for e in lst1 if max_rank >= Div.get_min_rank( str( e ) ) ]
+            lst2 = [ Div.new( str( e ), max_rank ) for e in lst2 if max_rank >= Div.get_min_rank( str( e ) ) ]
 
-        fam_lst = get_divs( get_ak( dpl.get_rank() ), 2, 0, True )
-        dpl.fam_lst = get_indecomp_divs( fam_lst, d_lst )
+            # data for ETA computation
+            total = len( sage_Subsets( range( len( lst1 ) ) ) )
+            total *= len( sage_Subsets( range( len( lst2 ) ) ) )
+            counter = 0
+            c_ival = 20
 
-        dpl.real_d_lst = [ d for d in dpl.d_lst if d.mat_mul( M ) == d ]
-        dpl.real_m1_lst = [ m1 for m1 in dpl.m1_lst if m1.mat_mul( M ) == m1 ]
-        dpl.real_fam_lst = [ f for f in dpl.fam_lst if f.mat_mul( M ) == f ]
+            NSTools.p( 'inside loop: ', lst1, lst2 )
 
-        return dpl
+            # loop through the lists
+            for idx2_lst in sage_Subsets( range( len( lst2 ) ) ):
+                for idx1_lst in sage_Subsets( range( len( lst1 ) ) ):
+
+                    # start time for ETA estimation
+                    if counter % c_ival == 0:
+                        start = time.time()
+                    counter += 1
+
+                    # construct d_lst as a union
+                    d_lst = []
+                    d_lst += [ lst1[idx1] for idx1 in idx1_lst ]
+                    d_lst += [ lst2[idx2] for idx2 in idx2_lst ]
+
+                    Md_lst = []
+                    M = sage_identity_matrix( sage_QQ, max_rank )
+                    dpl = DPLattice( d_lst, Md_lst, M )
+
+                    if dpl not in dpl_lst:
+                        if is_root_basis( dpl.d_lst ):
+                            dpl_lst += [dpl]
+
+                    # end time for ETA estimation
+                    if counter % c_ival == 0:
+                        passed_time = time.time() - start
+                        NSTools.p( 'ETA in seconds =', passed_time * ( total - counter ) / c_ival, idx1_lst, idx2_lst )
+
+        # construct dictionary by taking for each rank
+        # the d_lst in d_lst_lst such that d_lst only consists
+        # of Div objects of rank at most the given rank
+        bases_cls_dct = {}
+        for rank in range( 3, max_rank + 1 ):
+            rank_dpl_lst = []
+            for dpl in dpl_lst:
+
+                d_lst = [ Div.new( d.get_label(), rank ) for d in dpl.d_lst if rank >= Div.get_min_rank( d.get_label() ) ]
+                if len( d_lst ) == len( dpl.d_lst ):
+                    Md_lst = []
+                    M = sage_identity_matrix( sage_QQ, rank )
+                    rank_dpl = DPLattice( d_lst, Md_lst, M )
+
+                    rank_dpl_lst += [ rank_dpl ]
+
+            rank_dpl_lst.sort()
+            bases_cls_dct[rank] = rank_dpl_lst
+
+        # cache output
+        NSTools.get_tool_dct()[key] = bases_cls_dct
+        NSTools.save_tool_dct()
+
+        return bases_cls_dct
 
 
     @staticmethod
@@ -314,37 +482,40 @@ class DPLattice:
                 return NSTools.get_tool_dct()[key]
         key = 'get_cls_real_dp_' + str( max_rank )
 
+        cls_root_bases = DPLattice.get_cls_root_bases( max_rank )
 
-        NSTools.p( 'max_rank =', max_rank )
         dp_cls_dct = {}
         for rank in range( 3, max_rank + 1 ):
             dpl_lst = []
-            NSTools.p( 'rank =', rank )
+            NSTools.p( 'rank =', rank, ', max_rank =', max_rank )
 
-            #
-            # We fix an involution up to equivalence and
-            # go through all possible subset of indecomposable
-            # roots, that form a root base.
-            #
-            for ( M, Md_lst ) in get_cls_involutions( max_rank )[rank]:
-                NSTools.p( 'Md_lst =', Md_lst )
-                for d_lst in get_root_bases( rank ):
+            # we fix an involution up to equivalence and
+            # go through all possible root basis d_lst.
+            for dpl_invo in cls_root_bases[rank]:
 
-                    # check whether involution M preserves d_lst
-                    dm_lst = [ d.mat_mul( M ) for d in d_lst ]
-                    if sorted( dm_lst ) != sorted( d_lst ):
-                        continue
+                M = basis_to_involution( dpl_invo.d_lst, rank )
+                if not is_integral_involution( M ):
+                    continue
 
-                    # setup DPLattice object
-                    dpl = DPLattice.init( d_lst, Md_lst, M )
+                for dpl_sing in cls_root_bases[rank]:
+                    for d_lst in get_root_bases_orbit( dpl_sing.d_lst ):
 
-                    # add to classification if not equivalent to objects in list
-                    # see "DPLattice.__eq__(self)".
-                    if dpl not in dpl_lst:
-                        dpl_lst += [dpl]
+                        print( dpl_invo.d_lst, d_lst, dpl_sing.d_lst )
 
-            # end of classification for given rank.
-            # add to classification dictionary
+                        # check whether involution M preserves d_lst
+                        dm_lst = [ d.mat_mul( M ) for d in d_lst ]
+                        dm_lst.sort()
+                        if dm_lst != d_lst:
+                            continue
+
+                        # add to classification if not equivalent to objects
+                        # in list, see "DPLattice.__eq__()".
+                        dpl = DPLattice( d_lst, dpl_invo.d_lst, M )
+                        if dpl not in dpl_lst:
+                            dpl_lst += [dpl]
+
+            # finished classification for given rank
+            dpl_lst.sort()
             dp_cls_dct[rank] = dpl_lst
 
         # store classification
@@ -354,178 +525,63 @@ class DPLattice:
         return dp_cls_dct
 
 
-    @staticmethod
-    def get_tex_table( cls_dct ):
-        '''
-        Parameters
-        ----------
-        cls_dct : dict
-            A dictionary with each key an integer corresponding 
-            to rank and each value corresponds to a list of DPLattice objects
-            of given rank.  
-        
-        Returns
-        -------
-        string
-            A String in Tex format, representing a table of "cls_dct"
-        '''
-
-        tex = '''
-\\renewcommand*{\\arraystretch}{1.2}
-\\begin{longtable}{|@{}c@{}||@{~}c@{~}|@{~}l@{~}|l|l|l|l|}    
-\\hline
- & $\\lambda,d,n$ & $\\sigma_*$ & $\\McalB(X)$ & $\\McalE(X)$ & $\\McalF(X)$ & Description 
-\\\\\\hline\\hline
-\\endhead'''
-
-        col_len = [10, 15, 15]  # bound for character length of column
-        real_tex = '\\underline'  # Tex command for displaying real classes
-
-        row_idx = 1
-        for rank in [4, 6]:
-            if rank not in cls_dct:
-                continue
-
-            for dpl in cls_dct[rank]:
-
-                # strings for first 3 columns
-                #
-                col0 = '$' + str( row_idx ) + '$'
-
-                col1 = '$'
-                col1 += str( len( dpl.real_fam_lst ) ) + ', '
-                col1 += str( dpl.get_degree() ) + ', '
-                col1 += str( dpl.get_degree() - 1 )
-                col1 += '$'
-
-                col2 = ( '$' + str( dpl.Mtype ) + '$' ).replace( 'A', 'A_' ).replace( 'D', 'D_' )
-
-                tex += '\n'
-                tex += col0 + ' & '
-                tex += col1 + ' & '
-                tex += col2
-
-                # sort elements, such that adjacent elements
-                # are conjugates.
-                #
-                lst1_lst = [ dpl.d_lst, dpl.m1_lst, dpl.fam_lst]
-                lst2_lst = []
-                for lst1 in lst1_lst:
-                    lst2 = []
-                    for elt1 in lst1:
-                        for elt2 in [elt1, elt1.mat_mul( dpl.M )]:
-                            if elt2 not in lst2:
-                                lst2 += [elt2]
-                    lst2_lst += [lst2]
-
-
-                # sort elements on string length
-                lst3_lst = []
-                col_idx = 0
-                for lst2 in lst2_lst:
-                    lst3 = []
-                    idx = 0
-                    while idx < len( lst2 ):
-                        s = ''
-                        len_s = 0
-                        while idx < len( lst2 ) and len_s <= col_len[col_idx]:
-
-                            # get non abbreviated label
-                            ts = lst2[idx].get_abbr_label()
-
-                            # display real divisors in bold
-                            real_div = ( lst2[idx].mat_mul( dpl.M ) == lst2[idx] )
-                            if real_div:
-                                ts = real_tex + '{' + ts + '}'
-                            s += '$' + ts + '$, '
-
-                            # increase index for lst2
-                            idx += 1
-
-                            # determine length of next string
-                            len_s = len( s.replace( real_tex + '{', '' ).replace( '}', '' ).replace( '$', '' ).replace( ',', '' ) )
-                            if idx < len( lst2 ):
-                                len_s += len( lst2[idx].get_abbr_label() )
-
-                        lst3 += [s]
-                    if len( lst3 ) > 0 and lst3[-1].endswith( ', ' ):
-                        lst3[-1] = lst3[-1][:-2]
-                    lst3_lst += [lst3]
-                    col_idx += 1
-                max_len3 = max( [len( lst3 ) for lst3 in lst3_lst ] )
-
-
-                # col3, col4, col5, col6
-                tex += '\n     &'
-                for i in range( 0, max_len3 ):
-                    if i > 0:
-                        tex += ' & & & '
-
-                    for lst3 in lst3_lst:
-                        if i == 0 and lst3 == []:
-                            tex += '$\\emptyset$'
-                        if i < len( lst3 ):
-                            tex += lst3[i]
-                        tex += ' & '
-
-                    # description column here
-                    tex += '\n\\\\'
-                tex += '\\hline'
-                row_idx += 1
-            # end for dpl
-
-            tex += '\\hline'
-            tex += '\n'
-
-        # end for rank
-        tex += '\\end{longtable}'
-
-        return tex
-
-
-
     # overloading of "=="
+    # returns True if isomorphic as Neron-Severi lattices
     def __eq__( self, other ):
 
         # compared with None?
         if type( self ) != type( other ):
             return False
 
-        # Dynkin type real structures agree?
-        if self.Mtype != other.Mtype:
-            return False
-
-        # Dynkin type effective (-2)-classes agree?
-        if self.type != other.type:
-            return False
-
         # cardinality of classes agree?
         if len( self.d_lst ) != len( other.d_lst ):
             return False
+        self.set_attributes( 0 )
+        other.set_attributes( 0 )
         if len( self.m1_lst ) != len( other.m1_lst ):
             return False
+        self.set_attributes( 1 )
+        other.set_attributes( 1 )
         if len( self.fam_lst ) != len( other.fam_lst ):
             return False
+        self.set_attributes( 2 )
+        other.set_attributes( 2 )
         if len( self.real_d_lst ) != len( other.real_d_lst ):
             return False
+        self.set_attributes( 3 )
+        other.set_attributes( 3 )
         if len( self.real_m1_lst ) != len( other.real_m1_lst ):
             return False
+        self.set_attributes( 4 )
+        other.set_attributes( 4 )
         if len( self.real_fam_lst ) != len( other.real_fam_lst ):
             return False
-
-        # check incidence graphs
-        all_m1_lst = get_divs( get_ak( self.get_rank() ), 1, -1, True )
-        G1 = get_ext_graph( self.d_lst + all_m1_lst, self.M )
-        G2 = get_ext_graph( other.d_lst + all_m1_lst, other.M )
-        if not G1.is_isomorphic( G2, edge_labels = True ):
-            NSTools.p( 'Non isomorphic graphs (unexpected position): ', self, other )
+        self.set_attributes( 5 )
+        other.set_attributes( 5 )
+        if len( self.or_lst ) != len( other.or_lst ):
+            return False
+        self.set_attributes( 6 )
+        other.set_attributes( 6 )
+        if len( self.sr_lst ) != len( other.sr_lst ):
             return False
 
-        # check incidence graphs including fam_lst classes
-        G1 = get_ext_graph( self.d_lst + all_m1_lst + self.fam_lst, self.M )
-        G2 = get_ext_graph( other.d_lst + all_m1_lst + other.fam_lst, other.M )
-        if not G1.is_isomorphic( G2, edge_labels = True ):
-            NSTools.p( 'Non isomorphic graphs including fam_lst (unexpected position): ', self, other )
+        # Dynkin type effective (-2)-classes agree?
+        self.set_attributes( 7 )
+        other.set_attributes( 7 )
+        if self.type != other.type:
+            return False
+
+        # Dynkin type real structures agree?
+        self.set_attributes( 8 )
+        other.set_attributes( 8 )
+        if self.Mtype != other.Mtype:
+            return False
+
+        # check Cremona invariant
+        self.set_attributes( 9 )
+        other.set_attributes( 9 )
+        if not self.G.is_isomorphic( other.G, edge_labels = True ):
+            NSTools.p( 'Non isomorphic graphs (unexpected position): ', self, other )
             return False
 
         return True
@@ -539,17 +595,23 @@ class DPLattice:
         if self.get_rank() != other.get_rank():
            return self.get_rank() < other.get_rank()
 
-        if self.get_degree() != other.get_degree():
-           return self.get_degree() < other.get_degree()
+        if len( self.Md_lst ) != len( other.Md_lst ):
+           return len( self.Md_lst ) < len( other.Md_lst )
 
-        if len( self.real_fam_lst ) != len( other.real_fam_lst ):
-            return len( self.real_fam_lst ) < len( other.real_fam_lst )
+        if len( self.d_lst ) != len( other.d_lst ):
+           return len( self.d_lst ) < len( other.d_lst )
+
+        self.set_attributes( 8 )
+        other.set_attributes( 8 )
+
+        if self.Mtype != other.Mtype:
+            return self.type < other.type
 
         if self.type != other.type:
             return self.type < other.type
 
-        if self.Mtype != other.Mtype:
-            return self.type < other.type
+        if len( self.real_fam_lst ) != len( other.real_fam_lst ):
+            return len( self.real_fam_lst ) > len( other.real_fam_lst )
 
         if len( self.fam_lst ) != len( other.fam_lst ):
             return len( self.fam_lst ) < len( other.fam_lst )
@@ -559,8 +621,12 @@ class DPLattice:
 
 
 
+
+
     # overloading of "str()": human readable string representation of object
     def __str__( self ):
+
+        self.set_attributes()
 
         s = '\n'
         s += 50 * '=' + '\n'
@@ -570,6 +636,7 @@ class DPLattice:
         s += 'Intersection    = ' + str( list( self.m1_lst[0].int_mat ) ) + '\n'
         s += 'Real structure  = ' + str( self.Mtype ) + '\n'
         s += 'Singularities   = ' + str( self.type ) + '\n'
+        s += 'Cardinalities   = ' + '(' + str( len( self.or_lst ) ) + ', ' + str( len( self.sr_lst ) ) + ')\n'
 
         arrow = '  --->  '
 

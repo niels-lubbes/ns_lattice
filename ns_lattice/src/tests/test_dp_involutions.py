@@ -11,6 +11,7 @@ from ns_lattice.sage_interface import sage_diagonal_matrix
 
 from ns_lattice.dp_involutions import complete_basis
 from ns_lattice.dp_involutions import is_integral_involution
+from ns_lattice.dp_involutions import basis_to_involution
 from ns_lattice.class_div import Div
 
 from ns_lattice.class_ns_tools import NSTools
@@ -97,10 +98,13 @@ class TestDPInvolutions():
         D = sage_diagonal_matrix( [-1, -1, -1, 1] )
         J = sage_diagonal_matrix( [1, -1, -1, -1] )
         M = V * D * ~V
+
         print( ~V * sage_vector( [1, -1, -1, -1] ) )
         print( ~V * sage_vector( [0, 1, 0, -1] ) )
         print( ~V * sage_vector( [0, 0, 1, -1] ) )
         print( V )
+
+        assert M == basis_to_involution( d_lst, rank )
         assert str( list( V ) ) == "[(0, 0, 1, -3), (1, 0, -1, 1), (-1, 1, -1, 1), (0, -1, -1, 1)]"
         assert str( list( ~V ) ) == "[(0, 2/3, -1/3, -1/3), (0, 1/3, 1/3, -2/3), (-1/2, -1/2, -1/2, -1/2), (-1/2, -1/6, -1/6, -1/6)]"
         assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, -4/3, -1/3, -1/3), (-1, -1/3, -4/3, -1/3), (-1, -1/3, -1/3, -4/3)]"
@@ -117,6 +121,8 @@ class TestDPInvolutions():
         D = sage_diagonal_matrix( [-1, 1, 1, 1] )
         J = sage_diagonal_matrix( [1, -1, -1, -1] )
         M = V * D * ~V
+
+        assert M == basis_to_involution( d_lst, rank )
         assert str( list( M ) ) == "[(1, 0, 0, 0), (0, 0, 1, 0), (0, 1, 0, 0), (0, 0, 0, 1)]"
         assert M * M == sage_identity_matrix( 4 )
         assert M.T * J * M == J
@@ -131,6 +137,8 @@ class TestDPInvolutions():
         D = sage_diagonal_matrix( [-1, 1, 1, 1] )
         J = sage_diagonal_matrix( [1, -1, -1, -1] )
         M = V * D * ~V
+
+        assert M == basis_to_involution( d_lst, rank )
         assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, 0, -1, -1), (-1, -1, 0, -1), (-1, -1, -1, 0)]"
         assert M * M == sage_identity_matrix( 4 )
         assert M.T * J * M == J
@@ -145,6 +153,8 @@ class TestDPInvolutions():
         D = sage_diagonal_matrix( [-1, -1, 1, 1] )
         J = sage_diagonal_matrix( [1, -1, -1, -1] )
         M = V * D * ~V
+
+        assert M == basis_to_involution( d_lst, rank )
         assert str( list( M ) ) == "[(2, 1, 1, 1), (-1, -1, 0, -1), (-1, 0, -1, -1), (-1, -1, -1, 0)]"
         assert M * M == sage_identity_matrix( 4 )
         assert M.T * J * M == J

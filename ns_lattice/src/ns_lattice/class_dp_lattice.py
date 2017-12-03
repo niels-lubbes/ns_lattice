@@ -402,10 +402,13 @@ class DPLattice:
             for idx2_lst in sage_Subsets( range( len( lst2 ) ) ):
                 for idx1_lst in sage_Subsets( range( len( lst1 ) ) ):
 
-                    # start time for ETA estimation
+                    # ETA
                     if counter % c_ival == 0:
                         start = time.time()
                     counter += 1
+                    if counter % c_ival == 0:
+                        passed_time = time.time() - start
+                        NSTools.p( 'ETA in minutes =', passed_time * ( total - counter ) / ( c_ival * 60 ), idx1_lst, idx2_lst )
 
                     # construct d_lst as a union
                     d_lst = []
@@ -420,29 +423,30 @@ class DPLattice:
                         if is_root_basis( dpl.d_lst ):
                             dpl_lst += [dpl]
 
-                    # end time for ETA estimation
-                    if counter % c_ival == 0:
-                        passed_time = time.time() - start
-                        NSTools.p( 'ETA in seconds =', passed_time * ( total - counter ) / c_ival, idx1_lst, idx2_lst )
 
         # construct dictionary by taking for each rank
         # the d_lst in d_lst_lst such that d_lst only consists
         # of Div objects of rank at most the given rank
         bases_cls_dct = {}
         for rank in range( 3, max_rank + 1 ):
-            rank_dpl_lst = []
-            for dpl in dpl_lst:
 
-                d_lst = [ Div.new( d.get_label(), rank ) for d in dpl.d_lst if rank >= Div.get_min_rank( d.get_label() ) ]
-                if len( d_lst ) == len( dpl.d_lst ):
-                    Md_lst = []
-                    M = sage_identity_matrix( sage_QQ, rank )
-                    rank_dpl = DPLattice( d_lst, Md_lst, M )
+            if rank == 4 and max_rank != 4:
+                # the root subsystems of A1+A2 are not root subsystems of E8
+                bases_cls_dct[rank] = DPLattice.get_cls_root_bases( 4 )[4]
+            else:
+                rank_dpl_lst = []
+                for dpl in dpl_lst:
 
-                    rank_dpl_lst += [ rank_dpl ]
+                    d_lst = [ Div.new( d.get_label(), rank ) for d in dpl.d_lst if rank >= Div.get_min_rank( d.get_label() ) ]
+                    if len( d_lst ) == len( dpl.d_lst ):
+                        Md_lst = []
+                        M = sage_identity_matrix( sage_QQ, rank )
+                        rank_dpl = DPLattice( d_lst, Md_lst, M )
+                        rank_dpl.set_attributes()
+                        rank_dpl_lst += [ rank_dpl ]
 
-            rank_dpl_lst.sort()
-            bases_cls_dct[rank] = rank_dpl_lst
+                rank_dpl_lst.sort()
+                bases_cls_dct[rank] = rank_dpl_lst
 
         # cache output
         NSTools.get_tool_dct()[key] = bases_cls_dct
@@ -486,8 +490,16 @@ class DPLattice:
 
         dp_cls_dct = {}
         for rank in range( 3, max_rank + 1 ):
+
             dpl_lst = []
-            NSTools.p( 'rank =', rank, ', max_rank =', max_rank )
+
+            # ETA
+            total = len( cls_root_bases[rank] ) ** 2
+            total_orbit_len = 0
+            total_counter = 0
+            counter = 0
+            c_ival = 20
+            NSTools.p( '#(Mtype,type) =', total, ', rank =', rank, ', max_rank =', max_rank )
 
             # we fix an involution up to equivalence and
             # go through all possible root basis d_lst.
@@ -498,9 +510,25 @@ class DPLattice:
                     continue
 
                 for dpl_sing in cls_root_bases[rank]:
-                    for d_lst in get_root_bases_orbit( dpl_sing.d_lst ):
 
-                        print( dpl_invo.d_lst, d_lst, dpl_sing.d_lst )
+                    orbit_lst = get_root_bases_orbit( dpl_sing.d_lst )
+
+                    # ETA
+                    total_counter += 1
+                    total_orbit_len += len( orbit_lst )
+                    avg_orbit_len = total_orbit_len / total_counter
+                    fine_total = ( avg_orbit_len * total ) - counter
+                    NSTools.p( '#orbit =', len( orbit_lst ), '(average =', avg_orbit_len, '), total_counter =', total_counter, '/', total )
+
+                    for d_lst in orbit_lst:
+
+                        # ETA
+                        if counter % c_ival == 0:
+                            start = time.time()
+                        counter += 1
+                        if counter % c_ival == 0:
+                            passed_time = time.time() - start
+                            NSTools.p( 'ETA in minutes =', passed_time * ( fine_total - counter ) / ( c_ival * 60 ) )
 
                         # check whether involution M preserves d_lst
                         dm_lst = [ d.mat_mul( M ) for d in d_lst ]
@@ -512,7 +540,9 @@ class DPLattice:
                         # in list, see "DPLattice.__eq__()".
                         dpl = DPLattice( d_lst, dpl_invo.d_lst, M )
                         if dpl not in dpl_lst:
+                            dpl.set_attributes()
                             dpl_lst += [dpl]
+
 
             # finished classification for given rank
             dpl_lst.sort()

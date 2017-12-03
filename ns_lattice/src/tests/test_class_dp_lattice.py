@@ -105,6 +105,30 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
+    def test__get_cls_real_dp__large_rank( self ):
+        # comment for long computation
+        return
+
+        # NSTools.set_enable_tool_dct( False )
+        NSTools.filter( None )
+
+        rank = 6
+        dct = DPLattice.get_cls_real_dp( rank )
+
+        for dpl in dct[rank]:
+            dpl.set_attributes( 8 )
+
+        type_lst = []
+        for dpl in dct[rank]:
+            type_lst += [( dpl.Mtype, dpl.type )]
+            print( type_lst[-1] )
+        print( type_lst )
+        print( len( dct[rank] ) )
+
+        assert len( dct[rank] ) == 12  # 5=12, 6=
+        NSTools.set_enable_tool_dct( True )
+
+
 if __name__ == '__main__':
 
     NSTools.filter( 'class_dp_lattice.py' )
@@ -112,5 +136,6 @@ if __name__ == '__main__':
     # TestClassDPLattice().test__get_cls_root_bases__rank_3()
     # TestClassDPLattice().test__get_cls_root_bases__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__rank_3()
-    TestClassDPLattice().test__get_cls_real_dp__rank_4()
+    # TestClassDPLattice().test__get_cls_real_dp__rank_4()
+    TestClassDPLattice().test__get_cls_real_dp__large_rank()
     pass

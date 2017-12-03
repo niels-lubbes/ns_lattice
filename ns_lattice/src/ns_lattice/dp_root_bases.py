@@ -7,6 +7,8 @@ See [http://arxiv.org/abs/1302.6678] for more info.
 Classification of root subsystems of root systems
 of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
+import time
+
 from sage_interface import sage_VectorSpace
 from sage_interface import sage_vector
 from sage_interface import sage_QQ
@@ -307,21 +309,37 @@ def get_root_bases_orbit( d_lst, positive = True ):
     if d_lst == []:
         return [[]]
 
+    rank = d_lst[0].rank()
+
     # in cache?
-    key = 'get_root_bases_orbit_' + str( d_lst ) + '_' + str( d_lst[0].rank() )
+    key = 'get_root_bases_orbit_' + str( d_lst ) + '_' + str( rank )
     if key in NSTools.get_tool_dct():
         return NSTools.get_tool_dct()[key]
 
     # obtain list of all positive (-2)-classes
-    m2_lst = get_divs( get_ak( d_lst[0].rank() ), 0, -2, True )
+    m2_lst = get_divs( get_ak( rank ), 0, -2, True )
     # m2_lst += [ m2.int_mul( -1 ) for m2 in m2_lst]
-    NSTools.p( 'd_lst  =', len( d_lst ), d_lst )
-    NSTools.p( 'm2_lst =', len( m2_lst ), m2_lst )
+    NSTools.p( 'd_lst  =', len( d_lst ), d_lst, ', m2_lst =', len( m2_lst ), m2_lst )
+
+    # data for ETA computation
+    counter = 0
+    total = len( m2_lst )
+    ival = 5000
 
     d_lst.sort()
     d_lst_lst = [d_lst]
     for cd_lst in d_lst_lst:
+
+        total = len( m2_lst ) * len( d_lst_lst )
         for m2 in m2_lst:
+
+            # ETA
+            if counter % ival == 0:
+                start = time.time()
+            counter += 1
+            if counter % ival == 0:
+                passed_time = time.time() - start
+                NSTools.p( 'ETA in minutes =', passed_time * ( total - counter ) / ( ival * 60 ), ', len(d_lst_lst) =', len( d_lst_lst ), ', total =', total )
 
             #
             # The action of roots on a root base is by reflection:
@@ -331,21 +349,24 @@ def get_root_bases_orbit( d_lst, positive = True ):
             od_lst = [ cd + m2.int_mul( cd * m2 ) for cd in cd_lst]
             # print( 'm2 =', m2, ', od_lst =', od_lst, ', cd_lst =', cd_lst, ', d_lst_lst =', d_lst_lst, ' positive =', positive )
 
-            if positive and '-' in [ od.get_label( True )[0] for od in od_lst ]:
-                continue  # continue with for loop since a negative root in basis
-
             od_lst.sort()
             if od_lst not in d_lst_lst:
                 d_lst_lst += [od_lst]
 
+    # select positive roots if positive==True
+    pd_lst_lst = []
+    for d_lst in d_lst_lst:
+        if positive and '-' in [ d.get_label( True )[0] for d in d_lst ]:
+            continue  # continue with for loop since a negative root in basis
+        pd_lst_lst += [d_lst]
 
     # cache output
-    NSTools.get_tool_dct()[key] = d_lst_lst
+    NSTools.get_tool_dct()[key] = pd_lst_lst
     NSTools.save_tool_dct()
 
-    NSTools.p( '#orbit(' + str( d_lst ) + ') =', len( d_lst_lst ) )
+    NSTools.p( '#orbit(' + str( d_lst ) + ') =', len( pd_lst_lst ) )
 
-    return d_lst_lst
+    return pd_lst_lst
 
 
 

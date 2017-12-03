@@ -12,6 +12,8 @@ See
 
 '''
 
+import time
+
 from sage_interface import sage_Combinations
 from sage_interface import sage_Compositions
 from sage_interface import sage_Partitions
@@ -131,11 +133,10 @@ def get_divs( d, dc, cc, perm = False ):
                 out_lst += [c]
 
     #
-    # Cauchy-Schwarz inequality: <x,y>^2 <= <x,x>*<y,y>
-    #
     # Note: cc = c0^2 - c1^2 -...- cr^2
     #
     c0 = 0
+    cur_eq_diff = -1
     while True:
 
         c0 = c0 + 1
@@ -146,11 +147,23 @@ def get_divs( d, dc, cc, perm = False ):
         # not possible according to io-specs.
         #
         if dc_tail < 0 or dd_tail < 0 or cc_tail < 0:
+            NSTools.p( 'continue... (c0, dc_tail, dd_tail, cc_tail) =', ( c0, dc_tail, dd_tail, cc_tail ) )
+            if dd_tail < 0:
+                raise Exception( 'dd_tail =', dd_tail )
             continue
 
         # Cauchy-Schwarz inequality holds?
+        # Cauchy-Schwarz inequality: <x,y>^2 <= <x,x>*<y,y>
         #
-        if dc_tail * dc_tail > dd_tail * cc_tail:
+        prv_eq_diff = cur_eq_diff
+        cur_eq_diff = abs( dc_tail * dc_tail - dd_tail * cc_tail )
+        if prv_eq_diff == -1:
+            prv_eq_diff = cur_eq_diff
+
+        NSTools.p( 'prv_eq_diff =', prv_eq_diff, ', cur_eq_diff =', cur_eq_diff, ', dc_tail^2 =', dc_tail * dc_tail, ', dd_tail*cc_tail =', dd_tail * cc_tail, ', (c0, dc_tail, dd_tail, cc_tail) =', ( c0, dc_tail, dd_tail, cc_tail ) )
+
+        if prv_eq_diff < cur_eq_diff and dc_tail * dc_tail > dd_tail * cc_tail:
+            NSTools.p( 'stop by Cauchy-Schwarz inequality...' )
             break  # out of while loop
 
         # obtain all possible [d1*c1+1,...,dr*cr+1]
@@ -163,9 +176,22 @@ def get_divs( d, dc, cc, perm = False ):
         else:
             p_lst_lst = sage_Partitions( dc_tail + r, length = r )
 
+        # data for ETA computation
+        total = len( p_lst_lst )
+        counter = 0
+        ival = 5000
+
         # obtain [c1,...,cr] from [d1*c1+1,...,dr*cr+1]
         #
         for p_lst in p_lst_lst:
+
+            # ETA
+            if counter % ival == 0:
+                start = time.time()
+            counter += 1
+            if counter % ival == 0:
+                passed_time = time.time() - start
+                NSTools.p( 'ETA in minutes =', passed_time * ( total - counter ) / ( ival * 60 ), ' (', counter, '/', total, '), c0 =', c0, ', prv_eq_diff =', prv_eq_diff, ', cur_eq_diff =', cur_eq_diff )
 
             # dc_tail=d1*c1 +...+ dr*cr = p1 +...+ pr  with pi>=0
             p_lst = [ p - 1 for p in p_lst]

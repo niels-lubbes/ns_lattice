@@ -6,7 +6,6 @@ Classification of unimodular involutions of Neron-Severi lattice
 of weak del Pezzo surfaces.
 '''
 
-
 from sage_interface import sage_ZZ
 from sage_interface import sage_QQ
 from sage_interface import sage_matrix
@@ -14,7 +13,10 @@ from sage_interface import sage_identity_matrix
 from sage_interface import sage_diagonal_matrix
 
 from class_ns_tools import NSTools
+
 from class_div import Div
+
+from div_in_lattice import get_ak
 
 
 def complete_basis( d_lst ):
@@ -98,6 +100,11 @@ def is_integral_involution( M ):
         for c in range( ncols ):
             if M[r][c] not in sage_ZZ:
                 return False
+
+    # check whether canonical class is preserved
+    ak = get_ak( nrows )
+    if ak.mat_mul( M ) != ak:
+        return False
 
     return True
 

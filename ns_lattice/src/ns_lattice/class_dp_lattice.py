@@ -342,41 +342,36 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_root_bases( max_rank = 9 ):
+    def get_cls_root_bases( rank = 9 ):
         '''
         See [Algorithm 5, http://arxiv.org/abs/1302.6678] for more info. 
         
         Parameters
         ----------
-        max_rank : int
+        rank : int
             An integer in [3,...,9].    
         
         Returns
         -------
-        dict
-            A dictionary "bases_cls_dct" such that 
-            "bases_cls_dct[rank]" is a list of lists of "Div" objects "d", 
-            such that d*d=-2 and d*(-3h+e1+...+er)=0 where r=rank-1.
-            The empty list is included and rank<=max_rank.
+        list<DPLattice>
+            A list of "DPLattice" objects dpl such that dpl.d_lst 
+            is the bases of a root subsystem and dpl.Mtype == A0. 
+            The list contains exactly one representative for all 
+            root subsystems up to equivalence.  
              
-            The list of "Div" objects represent a list of (-2)-classes
-            that form a basis for a root subsystem of the root system
-            with Dynkin type either:
+            The list represents a classification of root 
+            subsystems of the root system with Dynkin type either:
                 A1, A1+A2, A4, D5, E6, E7 or E8,
             corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively 
             (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
-            Note that the root systems live in a subspace of the vector space 
-            associated to the Neron-Severi lattice of a weak Del Pezzo surface.
-        
-            The list "bases_cls_dct[rank]" contains exactly one 
-            representative for all root subsystems up to equivalence.         
+            Note that the root systems live in a subspace of 
+            the vector space associated to the Neron-Severi lattice 
+            of a weak Del Pezzo surface.
         '''
         # classification of root bases in cache?
-        for rank in range( max_rank, 9 + 1 ):
-            key = 'get_cls_root_bases_' + str( rank )
-            if key in NSTools.get_tool_dct():
-                return NSTools.get_tool_dct()[key]
-        key = 'get_cls_root_bases_' + str( max_rank )
+        key = 'get_cls_root_bases_' + str( rank )
+        if key in NSTools.get_tool_dct():
+            return NSTools.get_tool_dct()[key]
 
         A = [ 12, 23, 34, 45, 56, 67, 78]
         B = [ 1123, 1145, 1456, 1567, 1678, 278 ]
@@ -387,172 +382,137 @@ class DPLattice:
         for ( lst1, lst2 ) in [ ( A, [] ), ( A, B ), ( A, C ), ( [], D ) ]:
 
             # restrict to divisors in list, that are of rank at most "max_rank"
-            lst1 = [ Div.new( str( e ), max_rank ) for e in lst1 if max_rank >= Div.get_min_rank( str( e ) ) ]
-            lst2 = [ Div.new( str( e ), max_rank ) for e in lst2 if max_rank >= Div.get_min_rank( str( e ) ) ]
+            lst1 = [ Div.new( str( e ), rank ) for e in lst1 if rank >= Div.get_min_rank( str( e ) ) ]
+            lst2 = [ Div.new( str( e ), rank ) for e in lst2 if rank >= Div.get_min_rank( str( e ) ) ]
 
             # data for ETA computation
             total = len( sage_Subsets( range( len( lst1 ) ) ) )
             total *= len( sage_Subsets( range( len( lst2 ) ) ) )
             counter = 0
-            c_ival = 20
+            ival = 20
 
-            NSTools.p( 'inside loop: ', lst1, lst2 )
+            NSTools.p( 'inside loop: ', lst1, lst2, ', rank = ', rank )
 
             # loop through the lists
             for idx2_lst in sage_Subsets( range( len( lst2 ) ) ):
                 for idx1_lst in sage_Subsets( range( len( lst1 ) ) ):
 
                     # ETA
-                    if counter % c_ival == 0:
+                    if counter % ival == 0:
                         start = time.time()
                     counter += 1
-                    if counter % c_ival == 0:
+                    if counter % ival == 0:
                         passed_time = time.time() - start
-                        NSTools.p( 'ETA in minutes =', passed_time * ( total - counter ) / ( c_ival * 60 ), idx1_lst, idx2_lst )
+                        NSTools.p( 'ETA in minutes =', passed_time * ( total - counter ) / ( ival * 60 ), idx1_lst, idx2_lst, ', rank =', rank )
 
                     # construct d_lst as a union
                     d_lst = []
                     d_lst += [ lst1[idx1] for idx1 in idx1_lst ]
                     d_lst += [ lst2[idx2] for idx2 in idx2_lst ]
 
+                    if not is_root_basis( d_lst ):
+                        continue
+
                     Md_lst = []
-                    M = sage_identity_matrix( sage_QQ, max_rank )
+                    M = sage_identity_matrix( sage_QQ, rank )
                     dpl = DPLattice( d_lst, Md_lst, M )
 
                     if dpl not in dpl_lst:
-                        if is_root_basis( dpl.d_lst ):
-                            dpl_lst += [dpl]
-
-
-        # construct dictionary by taking for each rank
-        # the d_lst in d_lst_lst such that d_lst only consists
-        # of Div objects of rank at most the given rank
-        bases_cls_dct = {}
-        for rank in range( 3, max_rank + 1 ):
-
-            if rank == 4 and max_rank != 4:
-                # the root subsystems of A1+A2 are not root subsystems of E8
-                bases_cls_dct[rank] = DPLattice.get_cls_root_bases( 4 )[4]
-            else:
-                rank_dpl_lst = []
-                for dpl in dpl_lst:
-
-                    d_lst = [ Div.new( d.get_label(), rank ) for d in dpl.d_lst if rank >= Div.get_min_rank( d.get_label() ) ]
-                    if len( d_lst ) == len( dpl.d_lst ):
-                        Md_lst = []
-                        M = sage_identity_matrix( sage_QQ, rank )
-                        rank_dpl = DPLattice( d_lst, Md_lst, M )
-                        rank_dpl.set_attributes()
-                        rank_dpl_lst += [ rank_dpl ]
-
-                rank_dpl_lst.sort()
-                bases_cls_dct[rank] = rank_dpl_lst
+                        dpl.set_attributes()
+                        dpl_lst += [dpl]
 
         # cache output
-        NSTools.get_tool_dct()[key] = bases_cls_dct
+        dpl_lst.sort()
+        NSTools.get_tool_dct()[key] = dpl_lst
         NSTools.save_tool_dct()
 
-        return bases_cls_dct
+        return dpl_lst
 
 
     @staticmethod
-    def get_cls_real_dp( max_rank = 7 ):
+    def get_cls_real_dp( rank = 9 ):
         '''
         Parameters
         ----------
         max_rank : int
-            An integer in [3,...,7].           
+            An integer in [3,...,9].           
     
         Returns
         -------
-        dict
-            A dictionary "cls_dct" such that "cls_dct[rank]" 
-            is a list of DPLattice objects corresponding the enhanced 
-            Neron-Severi lattice of weak Del Pezzo surfaces of degree 
-            (10-rank). 
+        list<DPLattice>
+            A list of DPLattice objects corresponding to Neron-Severi lattices 
+            of weak Del Pezzo surfaces of degree (10-rank). The list contains
+            exactly one representative for each equivalence class.
               
             All the Div objects referenced in the DPLattice objects of 
             the output have the default intersection matrix:
                 diagonal matrix with diagonal: (1,-1,...,-1). 
-                            
-            We classify for rank in [3,...,max_rank].
-            For rank 8 and 9 this classification method will not 
-            terminate within reasonable time.
         '''
         # classification of involutions in cache?
-        for rank in range( max_rank, 9 + 1 ):
-            key = 'get_cls_real_dp_' + str( rank )
-            if key in NSTools.get_tool_dct():
-                return NSTools.get_tool_dct()[key]
-        key = 'get_cls_real_dp_' + str( max_rank )
+        key = 'get_cls_real_dp_' + str( rank )
+        if key in NSTools.get_tool_dct():
+            return NSTools.get_tool_dct()[key]
 
-        cls_root_bases = DPLattice.get_cls_root_bases( max_rank )
 
-        dp_cls_dct = {}
-        for rank in range( 3, max_rank + 1 ):
+        base_lst = DPLattice.get_cls_root_bases( rank )
 
-            dpl_lst = []
+        # ETA
+        total = len( base_lst ) ** 2
+        total_orbit_len = 0
+        total_counter = 0
+        counter = 0
+        ival = 20
 
-            # ETA
-            total = len( cls_root_bases[rank] ) ** 2
-            total_orbit_len = 0
-            total_counter = 0
-            counter = 0
-            c_ival = 20
-            NSTools.p( '#(Mtype,type) =', total, ', rank =', rank, ', max_rank =', max_rank )
+        # we fix an involution up to equivalence and go through
+        # all possible root bases for singularities.
+        dpl_lst = []
+        for dpl_invo in base_lst:
 
-            # we fix an involution up to equivalence and
-            # go through all possible root basis d_lst.
-            for dpl_invo in cls_root_bases[rank]:
+            M = basis_to_involution( dpl_invo.d_lst, rank )
+            if not is_integral_involution( M ):
+                continue
 
-                M = basis_to_involution( dpl_invo.d_lst, rank )
-                if not is_integral_involution( M ):
-                    continue
+            for dpl_sing in base_lst:
 
-                for dpl_sing in cls_root_bases[rank]:
+                orbit_lst = get_root_bases_orbit( dpl_sing.d_lst )
 
-                    orbit_lst = get_root_bases_orbit( dpl_sing.d_lst )
+                # ETA
+                total_counter += 1
+                total_orbit_len += len( orbit_lst )
+                avg_orbit_len = total_orbit_len / total_counter
+                fine_total = ( avg_orbit_len * total )
+                NSTools.p( '#orbit =', len( orbit_lst ), '(average =', avg_orbit_len, '), total_counter =', total_counter, '/', total, ', rank =', rank )
+
+                for d_lst in orbit_lst:
 
                     # ETA
-                    total_counter += 1
-                    total_orbit_len += len( orbit_lst )
-                    avg_orbit_len = total_orbit_len / total_counter
-                    fine_total = ( avg_orbit_len * total ) - counter
-                    NSTools.p( '#orbit =', len( orbit_lst ), '(average =', avg_orbit_len, '), total_counter =', total_counter, '/', total )
+                    if counter % ival == 0:
+                        start = time.time()
+                    counter += 1
+                    if counter % ival == 0:
+                        passed_time = time.time() - start
+                        NSTools.p( 'ETA in minutes =', passed_time * ( fine_total - counter ) / ( ival * 60 ), ' counter =', counter, '/', fine_total )
 
-                    for d_lst in orbit_lst:
+                    # check whether involution M preserves d_lst
+                    dm_lst = [ d.mat_mul( M ) for d in d_lst ]
+                    dm_lst.sort()
+                    if dm_lst != d_lst:
+                        continue
 
-                        # ETA
-                        if counter % c_ival == 0:
-                            start = time.time()
-                        counter += 1
-                        if counter % c_ival == 0:
-                            passed_time = time.time() - start
-                            NSTools.p( 'ETA in minutes =', passed_time * ( fine_total - counter ) / ( c_ival * 60 ) )
+                    # add to classification if not equivalent to objects
+                    # in list, see "DPLattice.__eq__()".
+                    dpl = DPLattice( d_lst, dpl_invo.d_lst, M )
+                    if dpl not in dpl_lst:
+                        dpl.set_attributes()
+                        dpl_lst += [dpl]
 
-                        # check whether involution M preserves d_lst
-                        dm_lst = [ d.mat_mul( M ) for d in d_lst ]
-                        dm_lst.sort()
-                        if dm_lst != d_lst:
-                            continue
-
-                        # add to classification if not equivalent to objects
-                        # in list, see "DPLattice.__eq__()".
-                        dpl = DPLattice( d_lst, dpl_invo.d_lst, M )
-                        if dpl not in dpl_lst:
-                            dpl.set_attributes()
-                            dpl_lst += [dpl]
-
-
-            # finished classification for given rank
-            dpl_lst.sort()
-            dp_cls_dct[rank] = dpl_lst
 
         # store classification
-        NSTools.get_tool_dct()[key] = dp_cls_dct
+        dpl_lst.sort()
+        NSTools.get_tool_dct()[key] = dpl_lst
         NSTools.save_tool_dct()
 
-        return dp_cls_dct
+        return dpl_lst
 
 
     # overloading of "=="
@@ -648,9 +608,6 @@ class DPLattice:
 
         if len( self.m1_lst ) != len( other.m1_lst ):
             return len( self.m1_lst ) < len( other.m1_lst )
-
-
-
 
 
     # overloading of "str()": human readable string representation of object

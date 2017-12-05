@@ -41,12 +41,10 @@ def usecase__get_cls_root_bases( max_rank ):
     '''
     NSTools.p( 'Classification of root bases.' )
 
-
-    cls_root_bases = DPLattice.get_cls_root_bases( max_rank )
     for rank in range( 3, max_rank + 1 ):
-        for dpl in cls_root_bases[rank]:
+        for dpl in DPLattice.get_cls_root_bases( rank ):
             print( str( rank ) + '\t' + dpl.type + '\t\t\t' + str( dpl.d_lst ) )
-        print( 'total = ' + str( len( cls_root_bases[rank] ) ) )
+        print( 'total = ' + str( len( DPLattice.get_cls_root_bases( rank ) ) ) )
 
 
 def usecase__get_cls_real_dp( max_rank, celestial = False ):
@@ -69,11 +67,10 @@ def usecase__get_cls_real_dp( max_rank, celestial = False ):
     '''
     NSTools.p( 'Classification of DPLattice objects. celestial =', celestial )
 
-    dp_cls_dct = DPLattice.get_cls_real_dp( max_rank )
     celestial_dct = {}
     table = []
     for rank in range( 3, max_rank + 1 ):
-        for dpl in dp_cls_dct[rank]:
+        for dpl in DPLattice.get_cls_real_dp( rank ):
 
             # no real lines and two families of conics
             if celestial and ( len( dpl.real_fam_lst ) < 2 or len( dpl.real_m1_lst ) != 0 ):
@@ -206,6 +203,7 @@ if __name__ == '__main__':
     #
     NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
     NSTools.filter( None )
+    NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
     NSTools.start_timer()
 
@@ -213,7 +211,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    max_rank = 5
+    rank = 5
 
     #########################################
     #                                       #
@@ -221,11 +219,10 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    # NSTools.get_tool_dct().clear()
     usecase__get_tool_dct()
-    usecase__get_cls_root_bases( max_rank )
-    usecase__get_cls_real_dp( max_rank )
-    usecase__get_classes_dp1( max_rank )
+    usecase__get_cls_root_bases( rank )
+    usecase__get_cls_real_dp( rank )
+    usecase__get_classes_dp1( rank )
     # usecase__circles()  # does not terminate within reasonable time
 
     #########################################

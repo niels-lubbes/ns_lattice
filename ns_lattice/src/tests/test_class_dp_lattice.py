@@ -30,39 +30,39 @@ class TestClassDPLattice():
 
     def test__get_cls_root_bases__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
-        dct = DPLattice.get_cls_root_bases( 3 )
-        print( len( dct[3] ) )
-        for dpl in dct[3]:
+        bas_lst = DPLattice.get_cls_root_bases( 3 )
+        print( len( bas_lst ) )
+        for dpl in bas_lst:
             print( dpl )
-        assert len( dct[3] ) == 2
+        assert len( bas_lst ) == 2
         NSTools.set_enable_tool_dct( True )
 
 
     def test__get_cls_root_bases__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
         rank = 4
-        dct = DPLattice.get_cls_root_bases( rank )
-        print( len( dct[rank] ) )
-        for dpl in dct[rank]:
+        bas_lst = DPLattice.get_cls_root_bases( rank )
+        print( len( bas_lst ) )
+        for dpl in bas_lst:
             print( dpl )
-        assert len( dct[rank] ) == 6
+        assert len( bas_lst ) == 6
         NSTools.set_enable_tool_dct( True )
 
 
     def test__get_cls_root_bases__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
         rank = 4
-        dct = DPLattice.get_cls_root_bases( rank )
-        print( len( dct[rank] ) )
-        for dpl in dct[rank]:
+        bas_lst = DPLattice.get_cls_root_bases( rank )
+        print( len( bas_lst ) )
+        for dpl in bas_lst:
             dpl.set_attributes( 8 )
 
         type_lst = []
-        for dpl in dct[rank]:
+        for dpl in bas_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
             print( type_lst[-1] )
 
-        assert len( dct[rank] ) == 6
+        assert len( bas_lst ) == 6
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2')]"
         NSTools.set_enable_tool_dct( True )
 
@@ -71,13 +71,13 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( False )
 
         rank = 3
-        dct = DPLattice.get_cls_real_dp( rank )
+        dpl_lst = DPLattice.get_cls_real_dp( rank )
 
-        for dpl in dct[rank]:
+        for dpl in dpl_lst:
             dpl.set_attributes( 8 )
 
         type_lst = []
-        for dpl in dct[rank]:
+        for dpl in dpl_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
             print( type_lst[-1] )
         print( type_lst )
@@ -90,13 +90,13 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( False )
 
         rank = 4
-        dct = DPLattice.get_cls_real_dp( rank )
+        dpl_lst = DPLattice.get_cls_real_dp( rank )
 
-        for dpl in dct[rank]:
+        for dpl in dpl_lst:
             dpl.set_attributes( 8 )
 
         type_lst = []
-        for dpl in dct[rank]:
+        for dpl in dpl_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
             print( type_lst[-1] )
         print( type_lst )
@@ -112,20 +112,20 @@ class TestClassDPLattice():
         # NSTools.set_enable_tool_dct( False )
         NSTools.filter( None )
 
-        rank = 6
-        dct = DPLattice.get_cls_real_dp( rank )
+        rank = 5
+        dpl_lst = DPLattice.get_cls_real_dp( rank )
 
-        for dpl in dct[rank]:
+        for dpl in dpl_lst:
             dpl.set_attributes( 8 )
 
         type_lst = []
-        for dpl in dct[rank]:
+        for dpl in dpl_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
             print( type_lst[-1] )
         print( type_lst )
-        print( len( dct[rank] ) )
+        print( len( dpl_lst ) )
 
-        assert len( dct[rank] ) == 12  # 5=12, 6=
+        assert len( dpl_lst ) == 12  # 5=12, 6=
         NSTools.set_enable_tool_dct( True )
 
 

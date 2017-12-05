@@ -43,7 +43,7 @@ def is_root_basis( d_lst ):
     bool
         True if input is the empty list or if divisors 
         in "d_lst" are linear independent as vectors
-        and their pairwise product is either -2, 0 or 1.        
+        and their pairwise product is either -2, 0 or 1.               
     '''
 
     if d_lst == []:

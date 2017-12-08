@@ -246,7 +246,7 @@ class Div:
             with respect to a new basis.                
         '''
         new_int_mat = B * self.int_mat * B.T
-        new_e_lst = self.mat_mul( ~( B.T ) )
+        new_e_lst = self.mat_mul( ~( B.T ) ).e_lst
 
         return Div( new_e_lst, new_int_mat )
 

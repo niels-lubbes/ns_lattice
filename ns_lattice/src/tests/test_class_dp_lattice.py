@@ -66,6 +66,22 @@ class TestClassDPLattice():
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2')]"
         NSTools.set_enable_tool_dct( True )
 
+    def test__get_cls_involutions__rank_4( self ):
+        NSTools.set_enable_tool_dct( False )
+        rank = 4
+        inv_lst = DPLattice.get_cls_involutions( rank )
+        print( len( inv_lst ) )
+        for inv in inv_lst:
+            inv.set_attributes( 8 )
+
+        type_lst = []
+        for inv in inv_lst:
+            type_lst += [( inv.Mtype, inv.type )]
+            print( type_lst[-1] )
+
+        assert len( inv_lst ) == 4
+        assert str( type_lst ) == "[('A0', 'A0'), ('A1', 'A0'), ('A1', 'A0'), ('2A1', 'A0')]"
+        NSTools.set_enable_tool_dct( True )
 
     def test__get_cls_real_dp__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
@@ -135,7 +151,8 @@ if __name__ == '__main__':
 
     # TestClassDPLattice().test__get_cls_root_bases__rank_3()
     # TestClassDPLattice().test__get_cls_root_bases__rank_4()
+    TestClassDPLattice().test__get_cls_invo__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__rank_3()
     # TestClassDPLattice().test__get_cls_real_dp__rank_4()
-    TestClassDPLattice().test__get_cls_real_dp__large_rank()
+    # TestClassDPLattice().test__get_cls_real_dp__large_rank()
     pass

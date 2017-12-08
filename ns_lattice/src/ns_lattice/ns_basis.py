@@ -4,15 +4,22 @@ Created on Feb 9, 2017
 @author: Niels Lubbes
 '''
 
+from sage_interface import sage_identity_matrix
+from sage_interface import sage_matrix
+from sage_interface import sage_ZZ
+
 from div_in_lattice import get_indecomp_divs
+from div_in_lattice import get_ak
+from div_in_lattice import get_divs
 
 from class_ns_tools import NSTools
 
 from class_dp_lattice import DPLattice
 
 
-def get_basis_lst( a_lst, M, d_lst, m1_lst ):
-    '''Returns a list of basis with specified generators.
+def get_bases_lst( a_lst, M, d_lst, m1_lst, perm = False ):
+    '''
+    Returns a list of basis with specified generators.
     
     Parameters
     ----------
@@ -35,12 +42,13 @@ def get_basis_lst( a_lst, M, d_lst, m1_lst ):
     m1_lst : list<Div>
         A list of Div objects d of the same rank as any
         element in "a_lst", so that "d*k==d*d==-1".
-        These represent a root basis for the  
-        (-1)-classes in the Neron-Severi lattice of a 
-        weak del Pezzo surface. These are not necessarily
-        indecomposable.   
-     
-
+        These represent (-1)-classes in the Neron-Severi 
+        lattice of a weak del Pezzo surface.     
+    
+    perm : bool
+        If False, then we consider two bases the same if the 
+        generators of the first basis can be obtained from 
+        the second basis via a permutation matrix.
     
     Returns
     -------
@@ -53,9 +61,10 @@ def get_basis_lst( a_lst, M, d_lst, m1_lst ):
             * a1,...,as are defined by the input "a_lst"
             * bi is an element in m1_lst such that bi*bj=am*bi=0 
               for all 1<=i<j<=t and 1<=m<=s              
-        If "a_lst==[]" then "[[]]" is returned.          
+        If "a_lst==[]" then "[[]]" is returned.   
+               
     '''
-    key = 'get_bases_lst__' + str( ( a_lst, M, d_lst, m1_lst ) ) + '__' + str( M.rank() )
+    key = 'get_bases_lst__' + str( ( a_lst, M, d_lst, m1_lst, perm ) ) + '__' + str( M.rank() )
     if key in NSTools.get_tool_dct():
         return NSTools.get_tool_dct()[key]
 
@@ -82,22 +91,84 @@ def get_basis_lst( a_lst, M, d_lst, m1_lst ):
         new_m1_lst = [ m1 for m1 in m1_lst if m1 * e == m1 * Me == 0 ]
         add_lst = [e]
         if e != Me: add_lst += [Me]
-        bas2_lst = get_basis_lst( a_lst + add_lst, M, new_d_lst, new_m1_lst )
+        bas2_lst = get_bases_lst( a_lst + add_lst, M, new_d_lst, new_m1_lst, perm )
 
-        # add if basis is not found in list
-        for bas2 in bas2_lst:
-            found = False
-            for bas in bas_lst:
-                if set( bas ) == set( bas2 ):
-                    found = True
-            if not found:
-                bas_lst += [bas2]
+        if perm:
+            bas_lst += bas2_lst
+        else:
+            for bas2 in bas2_lst:
+                found = False
+                for bas in bas_lst:
+                    # check whether the two bases are the same up to
+                    # permutation of generators
+                    if set( bas ) == set( bas2 ):
+                        found = True
+                        break  # break out of nearest for loop
+                if not found:
+                    NSTools.p( 'found new basis: ', bas2, ', bas2_lst =', bas2_lst )
+                    bas_lst += [bas2]
 
     # cache output
     NSTools.get_tool_dct()[key] = bas_lst
     NSTools.save_tool_dct()
 
     return bas_lst
+
+
+def get_webs( dpl ):
+    '''
+    Returns lists of families of conics for each possible complex basis change.
+    For example the first family in each list correspond to a fixed family wrt.
+    different bases. 
+    
+    Parameters
+    ----------
+    dpl : DPLattice
+        Represents the Neron-Severi lattice of a weak del Pezzo surface. 
+        
+    Returns
+    -------
+    list<list<Div>>
+        A list of lists of Div objects. 
+        Each Div object f has the property that 
+        f*(3e0-e1-...-er)=2, f*f==0 and f*d>=0 for all d in dpl.d_lst.
+        Such a Div object corresponds geometrically to a family of conics.
+        For each index i, the i-th entry of each list of Div object corresponds
+        to the same family of conics.          
+    '''
+    key = 'get_webs__' + str( dpl ).replace( '\n', '---' )
+    if key in NSTools.get_tool_dct():
+        return NSTools.get_tool_dct()[key]
+
+    ak = get_ak( dpl.get_rank() )
+    all_m1_lst = get_divs( ak, 1, -1, True )
+    akc, cc = ( 3, 1 )
+    M = sage_identity_matrix( dpl.get_rank() )
+
+    fam_lst_lst = []
+    for e0 in get_divs( ak, akc, cc, True ):
+        NSTools.p( 'e0 =', e0 )
+        for B_lst in get_bases_lst( [e0], M, dpl.d_lst, all_m1_lst, True ):
+            B = sage_matrix( sage_ZZ, [ d.e_lst for d in B_lst ] )
+            dplB = dpl.get_basis_change( B )
+            fam_lst_lst += [ dplB.real_fam_lst ]
+
+    # reduce fam_lst
+    pat_lst_lst = []
+    rfam_lst_lst = []
+    for fam_lst in fam_lst_lst:
+        pat_lst = [ 0  if fam[0] != 1 else 1 for fam in fam_lst ]
+        if pat_lst not in pat_lst_lst:
+            pat_lst_lst += [ pat_lst ]
+            rfam_lst_lst += [ fam_lst ]
+
+
+    # cache output
+    NSTools.get_tool_dct()[key] = rfam_lst_lst
+    NSTools.save_tool_dct()
+
+    return rfam_lst_lst
+
 
 
 # def get_base_changes( rank, d_lst = [], div_dct = None ):

@@ -326,11 +326,12 @@ class DPLattice:
         '''
         self.set_attributes( 6 )
 
-        dpl = DPLattice()
-        dpl.M = ~( B.T ) * self.M * ( B.T )  # ~B is inverse of B
-        dpl.Md_lst = [ Md.get_basis_change( B ) for Md in self.Md_lst ]
+        d_lst_B = [ d.get_basis_change( B ) for d in self.d_lst ]
+        Md_lst_B = [ Md.get_basis_change( B ) for Md in self.Md_lst ]
+        M_B = ~( B.T ) * self.M * ( B.T )  # ~B is inverse of B, new involution after coordinate change
+
+        dpl = DPLattice( d_lst_B, Md_lst_B, M_B )
         dpl.Mtype = self.Mtype
-        dpl.d_lst = [ d.get_basis_change( B ) for d in self.d_lst ]
         dpl.type = self.type
         dpl.m1_lst = [ m1.get_basis_change( B ) for m1 in self.m1_lst ]
         dpl.fam_lst = [ fam.get_basis_change( B ) for fam in self.fam_lst ]
@@ -430,6 +431,61 @@ class DPLattice:
 
 
     @staticmethod
+    def get_cls_involutions( rank = 9 ):
+        '''
+        Outputs a list representing a classification of root 
+        subsystems that define unimodular involutions on the 
+        Neron-Severi lattice of a weak del Pezzo surface.
+        We consider root subsystems of the root system with Dynkin 
+        type either:
+            A1, A1+A2, A4, D5, E6, E7 or E8,
+        corresponding to ranks 3, 4, 5, 6, 7, 8 and 9 respectively 
+        (eg. A1+A2 if rank equals 4, and E8 if rank equals 9).
+        Note that root systems live in a subspace of 
+        the vector space associated to the Neron-Severi lattice 
+        of a weak Del Pezzo surface.        
+        
+                
+        Parameters
+        ----------
+        max_rank : int
+            An integer in [3,...,9].           
+    
+        Returns
+        -------
+        list<DPLattice>
+            A list of "DPLattice" objects dpl such that dpl.Md_lst 
+            is the bases of a root subsystem and dpl.type == A0. 
+            The list contains exactly one representative for 
+            root subsystems up to equivalence, so that the root
+            subsystem defines a unimodular involution.  
+        '''
+        # check cache
+        key = 'get_cls_invo_' + str( rank )
+        if key in NSTools.get_tool_dct():
+            return NSTools.get_tool_dct()[key]
+
+
+        bas_lst = DPLattice.get_cls_root_bases( rank )
+        inv_lst = []
+        for bas in bas_lst:
+            M = basis_to_involution( bas.d_lst, rank )
+            if not is_integral_involution( M ):
+                continue
+            inv = DPLattice( [], bas.d_lst, M )
+            inv.set_attributes()
+            inv_lst += [ inv ]
+
+
+        # store in cache
+        inv_lst.sort()
+        NSTools.get_tool_dct()[key] = inv_lst
+        NSTools.save_tool_dct()
+
+        return inv_lst
+
+
+    @staticmethod
     def get_cls_real_dp( rank = 9 ):
         '''
         Parameters
@@ -448,66 +504,72 @@ class DPLattice:
             the output have the default intersection matrix:
                 diagonal matrix with diagonal: (1,-1,...,-1). 
         '''
-        # classification of involutions in cache?
+        # check cache
         key = 'get_cls_real_dp_' + str( rank )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
 
+        inv_lst = DPLattice.get_cls_involutions( rank )
+        bas_lst = DPLattice.get_cls_root_bases( rank )
 
-        base_lst = DPLattice.get_cls_root_bases( rank )
 
         # ETA
-        total = len( base_lst ) ** 2
-        total_orbit_len = 0
-        total_counter = 0
-        counter = 0
+        ostart = time.time()
+        ototal = len( bas_lst ) * len( inv_lst )
+        ocounter = 0
+        icounter = 0
         ival = 20
+        total_orbit_len = 0
+
 
         # we fix an involution up to equivalence and go through
         # all possible root bases for singularities.
         dpl_lst = []
-        for dpl_invo in base_lst:
+        for inv in inv_lst:
+            for bas in bas_lst:
 
-            M = basis_to_involution( dpl_invo.d_lst, rank )
-            if not is_integral_involution( M ):
-                continue
+                orbit_lst = get_root_bases_orbit( bas.d_lst )
 
-            for dpl_sing in base_lst:
-
-                orbit_lst = get_root_bases_orbit( dpl_sing.d_lst )
-
-                # ETA
-                total_counter += 1
+                # ETA outer loop
+                ocounter += 1
+                otime = ( time.time() - ostart ) / 60
                 total_orbit_len += len( orbit_lst )
-                avg_orbit_len = total_orbit_len / total_counter
-                fine_total = ( avg_orbit_len * total )
-                NSTools.p( '#orbit =', len( orbit_lst ), '(average =', avg_orbit_len, '), total_counter =', total_counter, '/', total, ', rank =', rank )
+                avg_orbit_len = total_orbit_len / ocounter
+                itotal = ( avg_orbit_len * ototal )
+                NSTools.p( '#orbit =', len( orbit_lst ),
+                           '(average =', avg_orbit_len, '),',
+                           'ocounter =', ocounter, '/', ototal, ',',
+                           'rank =', rank,
+                           'total minutes passed =', otime,
+                           'ETA in minutes =', ( otime / ocounter ) * ( ototal - ocounter ) )
+
 
                 for d_lst in orbit_lst:
 
-                    # ETA
-                    if counter % ival == 0:
-                        start = time.time()
-                    counter += 1
-                    if counter % ival == 0:
-                        passed_time = time.time() - start
-                        NSTools.p( 'ETA in minutes =', passed_time * ( fine_total - counter ) / ( ival * 60 ), ' counter =', counter, '/', fine_total )
+                    # ETA inner loop
+                    if icounter % ival == 0:
+                        istart = time.time()
+                    icounter += 1
+                    if icounter % ival == 0:
+                        itime = ( time.time() - istart ) / 60
+                        NSTools.p( 'ETA in minutes =', ( itime / ival ) * ( itotal - icounter ), ',',
+                                   'icounter =', icounter, '/', itotal )
 
-                    # check whether involution M preserves d_lst
-                    dm_lst = [ d.mat_mul( M ) for d in d_lst ]
+                    # check whether involution inv.M preserves d_lst
+                    dm_lst = [ d.mat_mul( inv.M ) for d in d_lst ]
                     dm_lst.sort()
                     if dm_lst != d_lst:
                         continue
 
                     # add to classification if not equivalent to objects
                     # in list, see "DPLattice.__eq__()".
-                    dpl = DPLattice( d_lst, dpl_invo.d_lst, M )
+                    dpl = DPLattice( d_lst, inv.Md_lst, inv.M )
                     if dpl not in dpl_lst:
                         dpl.set_attributes()
                         dpl_lst += [dpl]
 
 
-        # store classification
+        # store in cache
         dpl_lst.sort()
         NSTools.get_tool_dct()[key] = dpl_lst
         NSTools.save_tool_dct()

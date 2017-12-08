@@ -6,16 +6,25 @@ Created on Aug 11, 2016
 '''
 import sys
 
+from sage_interface import sage_identity_matrix
+from sage_interface import sage_Subsets
+from sage_interface import sage_Permutations
+
 from class_ns_tools import NSTools
+
+from class_div import Div
 
 from div_in_lattice import get_divs
 from div_in_lattice import get_ak
 
 from class_dp_lattice import DPLattice
 
+from ns_basis import get_webs
+
 from linear_series.class_poly_ring import PolyRing
 from linear_series.class_base_points import BasePointTree
 from linear_series.class_linear_series import LinearSeries
+
 
 
 
@@ -122,26 +131,108 @@ def usecase__get_classes_dp1( rank ):
     # canonical class
     d = get_ak( rank )
 
-    dc = 2
-    cc = 0
-    NSTools.p( '(dc, cc) =', ( dc, cc ) )
-    c_lst = get_divs( d, dc, cc, False )
-    for c in c_lst:
-        NSTools.p( '\t\t', c.get_label() )
+    for ( dc, cc ) in [( 2, 0 ), ( 1, -1 ), ( 0, -2 ), ( 2, 2 ), ( 2, 4 ), ( 3, 1 )]:
+        NSTools.p( '(dc, cc) =', ( dc, cc ) )
+        c_lst = get_divs( d, dc, cc, False )
+        for c in c_lst:
+            NSTools.p( '\t\t', c.get_label() )
 
-    dc = 2
-    cc = 2
-    NSTools.p( '(dc, cc) =', ( dc, cc ) )
-    c_lst = get_divs( d, dc, cc, False )
-    for c in c_lst:
-        NSTools.p( '\t\t', c.get_label() )
 
-    dc = 2
-    cc = 4
-    NSTools.p( '(dc, cc) =', ( dc, cc ) )
-    c_lst = get_divs( d, dc, cc, False )
-    for c in c_lst:
-        NSTools.p( '\t\t', c.get_label() )
+def usecase__get_webs( rank ):
+    '''
+    Compute hexagonal webs
+    
+    Parameters
+    ----------
+    rank : int  
+    '''
+    if False:
+
+        dpl_lst = DPLattice.get_cls_real_dp( 6 )
+        for dpl in dpl_lst:
+            if dpl.Mtype == '2A1' and dpl.type == 'A0' and len( dpl.real_fam_lst ) == 6:
+                print( dpl )
+                print( dpl.d_lst )
+                print( dpl.Md_lst )
+                print( list( dpl.M ) )
+        sys.exit()
+
+    # ring torus
+    # dpl.Mtype == '2A1' and dpl.type == '4A1' and len( dpl.real_fam_lst ) == 4:
+    # ----
+    # d_lst = [ Div.new( d, 6 ) for d in ['e2-e4', 'e3-e5', 'e0-e1-e2-e4', 'e0-e1-e3-e5'] ]
+    # Md_lst = [ Div.new( d, 6 ) for d in ['e4-e5', 'e0-e1-e2-e3'] ]
+    # M = sage_matrix( sage_ZZ, [( 2, 1, 1, 1, 0, 0 ), ( -1, 0, -1, -1, 0, 0 ), ( -1, -1, 0, -1, 0, 0 ), ( -1, -1, -1, 0, 0, 0 ), ( 0, 0, 0, 0, 0, 1 ), ( 0, 0, 0, 0, 1, 0 )] )
+    # dpl = DPLattice( d_lst, Md_lst, M )
+
+    d_lst = []
+    Md_lst = []
+    M = sage_identity_matrix( 6 )
+    dpl = DPLattice( d_lst, Md_lst, M )
+    print( dpl )
+
+    table = get_webs( dpl )
+
+    # https://docs.python.org/3/library/string.html
+    row_format = "{:<17}" * len( table[0] )
+
+    for row in table:
+        print( row_format.format( *row ) )
+
+    ak = get_ak( 6 )
+    web_lst = []
+    for trip in sage_Subsets( range( len( table[0] ) ), 3 ):
+        for row in table:
+            fa = row[ trip[0] ].e_lst[0]
+            fb = row[ trip[1] ].e_lst[0]
+            fc = row[ trip[2] ].e_lst[0]
+            if fa == fb == fc == 1:
+                newweb = [ table[0][trip[i]] for i in range( 3 )]
+
+                found = False
+                for perm in sage_Permutations( range( 5 ) ):
+                    permweb = [ Div( [d[0]] + [ d[i + 1] for i in perm ], d.rank() ) for d in newweb ]
+                    for web in web_lst:
+                        if set( web ) == set( permweb ):
+                            found = True
+                            break
+                    if found:
+                        break
+
+                if not found:
+                    web_lst += [newweb]
+    print( ' --- ' )
+    for web in web_lst:
+        print( web )
+
+    noweb_lst = []
+    for trip in sage_Subsets( range( len( table[0] ) ), 3 ):
+        noweb = [ table[0][trip[i]] for i in range( 3 )]
+        found = False
+        for perm in sage_Permutations( range( 5 ) ):
+            permweb = [ Div( [d[0]] + [ d[i + 1] for i in perm ], d.rank() ) for d in noweb ]
+            for web in web_lst:
+                if set( web ) == set( permweb ):
+                    found = True
+                    break
+            if found:
+                break
+            for web in noweb_lst:
+                if set( web ) == set( permweb ):
+                    found = True
+                    break
+            if found:
+                break
+
+
+        if not found:
+            noweb_lst += [noweb]
+
+
+
+    print( ' --- ' )
+    for web in noweb_lst:
+        print( web )
 
 
 
@@ -203,7 +294,7 @@ if __name__ == '__main__':
     #
     NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
     NSTools.filter( None )
-    NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
+    # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
     NSTools.start_timer()
 
@@ -211,7 +302,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    rank = 5
+    rank = 9
 
     #########################################
     #                                       #
@@ -219,10 +310,11 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    usecase__get_tool_dct()
-    usecase__get_cls_root_bases( rank )
-    usecase__get_cls_real_dp( rank )
-    usecase__get_classes_dp1( rank )
+    # usecase__get_tool_dct()
+    # usecase__get_cls_root_bases( rank )
+    # usecase__get_cls_real_dp( rank )
+    # usecase__get_classes_dp1( rank )
+    usecase__get_webs( rank )
     # usecase__circles()  # does not terminate within reasonable time
 
     #########################################

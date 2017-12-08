@@ -40,7 +40,7 @@ sage_GRAPH:
 '''
 
 from sage.all import *
-
+from sage.structure.sage_object import register_unpickle_override
 
 #################################################
 # sage.structure                                #
@@ -56,6 +56,10 @@ def sage_save( *args, **kwargs ):
 # from sage.structure.sage_object import load
 def sage_load( *args, **kwargs ):
     return load( *args, **kwargs )
+
+# from sage.structure.sage_object import register_unpickle_override
+def sage_register_unpickle_override( *args, **kwargs ):
+    register_unpickle_override( *args, **kwargs )
 
 
 #################################################

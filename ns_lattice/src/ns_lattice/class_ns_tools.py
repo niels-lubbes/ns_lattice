@@ -3,11 +3,13 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 7, 2017
 @author: Niels Lubbes
 '''
-from sage.all import *
+from sage_interface import sage_load
+from sage_interface import sage_save
 
 import inspect
 import time
 import sys
+import os
 
 
 class NSTools():
@@ -115,7 +117,7 @@ class NSTools():
     @staticmethod
     def set_enable_tool_dct( enable_tool_dct ):
         NSTools.filter_unset()
-        NSTools.p( 'Caching enabled? ', enable_tool_dct )
+        NSTools.p( 'Caching enabled: ', enable_tool_dct )
         NSTools.filter_reset()
         NSTools.__enable_tool_dct = enable_tool_dct
 
@@ -145,18 +147,19 @@ class NSTools():
         file_name = path + fname
         if NSTools.__tool_dct == None:
 
-            NSTools.filter_unset()
             try:
 
                 NSTools.p( 'Loading from:', file_name )
-                NSTools.__tool_dct = load( file_name )
+                NSTools.__tool_dct = sage_load( file_name )
 
             except Exception as e:
 
+                NSTools.filter_unset()
                 NSTools.p( 'Cannot load ".__tool_dct": ', e )
-                NSTools.__tool_dct = {}
-
-            NSTools.filter_reset()
+                NSTools.p( 'Exiting...' )
+                NSTools.filter_reset()
+                sys.exit()
+                # NSTools.__tool_dct = {}
 
         return NSTools.__tool_dct
 
@@ -178,11 +181,8 @@ class NSTools():
         path = os.path.dirname( os.path.abspath( __file__ ) ) + '/'
         file_name = path + fname
 
-        NSTools.filter_unset()
         NSTools.p( 'Saving to:', file_name )
-        NSTools.filter_reset()
-
-        save( NSTools.__tool_dct, file_name )
+        sage_save( NSTools.__tool_dct, file_name )
 
 
     @staticmethod

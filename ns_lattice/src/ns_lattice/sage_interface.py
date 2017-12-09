@@ -70,6 +70,10 @@ def sage_register_unpickle_override( *args, **kwargs ):
 def sage__eval( *args, **kwargs ):
     return sage_eval( *args, **kwargs )
 
+# from sage.misc.functional import n
+def sage_n( *args, **kwargs ):
+    return n( *args, **kwargs )
+
 
 #################################################
 # sage.symbolic                                 #

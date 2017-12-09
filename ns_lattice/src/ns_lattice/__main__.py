@@ -20,6 +20,10 @@ from div_in_lattice import get_ak
 from class_dp_lattice import DPLattice
 
 from ns_basis import get_webs
+from ns_basis import contains_perm
+from ns_basis import nonreducible_webs
+from ns_basis import nonreducible_intersect_webs
+
 
 from linear_series.class_poly_ring import PolyRing
 from linear_series.class_base_points import BasePointTree
@@ -138,103 +142,50 @@ def usecase__get_classes_dp1( rank ):
             NSTools.p( '\t\t', c.get_label() )
 
 
-def usecase__get_webs( rank ):
+def usecase__get_webs( max_rank ):
     '''
     Compute hexagonal webs
     
     Parameters
     ----------
-    rank : int  
+    max_rank : int  
     '''
     if False:
+        d_lst = []
+        Md_lst = []
+        M = sage_identity_matrix( 6 )
+        dpl = DPLattice( d_lst, Md_lst, M )
+        print( dpl )
 
-        dpl_lst = DPLattice.get_cls_real_dp( 6 )
-        for dpl in dpl_lst:
-            if dpl.Mtype == '2A1' and dpl.type == 'A0' and len( dpl.real_fam_lst ) == 6:
-                print( dpl )
-                print( dpl.d_lst )
-                print( dpl.Md_lst )
-                print( list( dpl.M ) )
-        sys.exit()
-
-    # ring torus
-    # dpl.Mtype == '2A1' and dpl.type == '4A1' and len( dpl.real_fam_lst ) == 4:
-    # ----
-    # d_lst = [ Div.new( d, 6 ) for d in ['e2-e4', 'e3-e5', 'e0-e1-e2-e4', 'e0-e1-e3-e5'] ]
-    # Md_lst = [ Div.new( d, 6 ) for d in ['e4-e5', 'e0-e1-e2-e3'] ]
-    # M = sage_matrix( sage_ZZ, [( 2, 1, 1, 1, 0, 0 ), ( -1, 0, -1, -1, 0, 0 ), ( -1, -1, 0, -1, 0, 0 ), ( -1, -1, -1, 0, 0, 0 ), ( 0, 0, 0, 0, 0, 1 ), ( 0, 0, 0, 0, 1, 0 )] )
-    # dpl = DPLattice( d_lst, Md_lst, M )
-
-    d_lst = []
-    Md_lst = []
-    M = sage_identity_matrix( 6 )
-    dpl = DPLattice( d_lst, Md_lst, M )
-    print( dpl )
-
-    table = get_webs( dpl )
-
-    # https://docs.python.org/3/library/string.html
-    row_format = "{:<17}" * len( table[0] )
-
-    for row in table:
-        print( row_format.format( *row ) )
-
-    ak = get_ak( 6 )
-    web_lst = []
-    for trip in sage_Subsets( range( len( table[0] ) ), 3 ):
+        table = get_webs( dpl )
+        # https://docs.python.org/3/library/string.html
+        row_format = "{:<17}" * len( table[0] )
         for row in table:
-            fa = row[ trip[0] ].e_lst[0]
-            fb = row[ trip[1] ].e_lst[0]
-            fc = row[ trip[2] ].e_lst[0]
-            if fa == fb == fc == 1:
-                newweb = [ table[0][trip[i]] for i in range( 3 )]
+            print( row_format.format( *row ) )
 
-                found = False
-                for perm in sage_Permutations( range( 5 ) ):
-                    permweb = [ Div( [d[0]] + [ d[i + 1] for i in perm ], d.rank() ) for d in newweb ]
-                    for web in web_lst:
-                        if set( web ) == set( permweb ):
-                            found = True
-                            break
-                    if found:
-                        break
-
-                if not found:
-                    web_lst += [newweb]
-    print( ' --- ' )
-    for web in web_lst:
-        print( web )
-
-    noweb_lst = []
-    for trip in sage_Subsets( range( len( table[0] ) ), 3 ):
-        noweb = [ table[0][trip[i]] for i in range( 3 )]
-        found = False
-        for perm in sage_Permutations( range( 5 ) ):
-            permweb = [ Div( [d[0]] + [ d[i + 1] for i in perm ], d.rank() ) for d in noweb ]
-            for web in web_lst:
-                if set( web ) == set( permweb ):
-                    found = True
-                    break
-            if found:
-                break
-            for web in noweb_lst:
-                if set( web ) == set( permweb ):
-                    found = True
-                    break
-            if found:
-                break
+        f_lst_lst = nonreducible_webs( dpl, 2, 3 )
+        for f_lst in f_lst_lst:
+            print( f_lst )
 
 
-        if not found:
-            noweb_lst += [noweb]
+    numline = 1
+    numfam = 3
+    int_lst = [1]
 
+    af_lst_lst = []
+    for rank in range( 7, max_rank + 1 ):
+        NSTools.p( 'rank =', rank )
+        for dpl in DPLattice.get_cls_root_bases( rank ):
+            f_lst_lst = nonreducible_intersect_webs( dpl, numline, numfam, int_lst )
+            for f_lst in f_lst_lst:
+                if not contains_perm( af_lst_lst, f_lst ):
+                    af_lst_lst += [ f_lst ]
+            NSTools.p( dpl )
+            NSTools.p( 'f_lst_lst  =', len( f_lst_lst ), f_lst_lst )
 
-
-    print( ' --- ' )
-    for web in noweb_lst:
-        print( web )
-
-
+    for af_lst in af_lst_lst:
+        NSTools.p( af_lst[0].get_rank(), af_lst )
+    NSTools.p( 'af_lst_lst  =', len( af_lst_lst ), af_lst_lst )
 
 def usecase__circles():
     '''
@@ -302,7 +253,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    rank = 9
+    rank = 7
 
     #########################################
     #                                       #

@@ -113,6 +113,8 @@ def get_ext_graph( d_lst, M ):
         Labeled self-loops are also included.
         Two orthogonal vertices are connected 
     '''
+    NSTools.p( 'd_lst =', len( d_lst ), d_lst, ', M =', list( M ) )
+
     G = sage_Graph()
     G.add_vertices( range( len( d_lst ) ) )
 

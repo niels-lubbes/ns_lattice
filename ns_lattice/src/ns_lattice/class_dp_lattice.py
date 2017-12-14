@@ -39,22 +39,22 @@ class DPLattice:
     and a set of effective (-2)-classes "d_lst". The effective (-2)-classes
     form the basis of a root system.
     
-        ( ZZ<h,e1,...,er>, M, d_lst )
+        ( ZZ<e0,e1,...,er>, M, d_lst )
     
     From these objects it is possible to compute the remaining attributes of 
     this class. 
     
-    If <h,e1,...,er> is a basis for the Neron-Severi lattice of the 
+    If <e0,e1,...,er> is a basis for the Neron-Severi lattice of the 
     projective plane P^2 blown up in r points then the the canonical 
     class k equals 
-        k=-3h+e1+...+er.
-    The intersection product is in this case -h^2=e1^2=...=er^2=-1 with
+        k=-3e0+e1+...+er.
+    The intersection product is in this case -e0^2=e1^2=...=er^2=-1 with
     remaining intersections zero.
     
-    Otherwise if <h,e1,...,er> is a basis for the Neron-Severi lattice of the 
+    Otherwise if <e0,e1,...,er> is a basis for the Neron-Severi lattice of the 
     P^1xP^1 blown up in r points then the the canonical 
     class k equals 
-        k=-2*(h+e1).
+        k=-2*(e0+e1).
     The intersection product is in this case -h*e1=e2^2=...=er^2=-1 with
     remaining intersections zero.         
     
@@ -63,7 +63,7 @@ class DPLattice:
     ----------
     M : sage_matrix<sage_ZZ>
         A matrix which correspond to an involution of the lattice
-        <h,e1,...,er> with r=rank-1 and 2 <= r <= 8.
+        <e0,e1,...,er> with r=rank-1 and 2 <= r <= 8.
     
     Md_lst : list<Div>
         A list of "Div" objects that correspond to the eigenvectors
@@ -240,6 +240,8 @@ class DPLattice:
             self.G = get_ext_graph( self.d_lst + self.m1_lst, self.M )
 
 
+
+
     def get_rank( self ):
         '''
         Parameters
@@ -303,6 +305,29 @@ class DPLattice:
                  len( self.real_d_lst ),
                  len( self.real_m1_lst ),
                  len( self.real_fam_lst ) )
+
+
+    def contains_fam_pair( self ):
+        '''
+        Parameters
+        ----------
+        self : DPLattice
+        
+        Returns
+        -------
+        bool
+            True if self.real_fam_lst contains two Div classes 
+            with intersection one. Geometrically this means that a 
+            weak del Pezzo surface with a Neron-Severi lattice that
+            is isomorphic to this one, must be birational to P1xP1
+            (ie. fiber product of the projective line with itself).             
+        '''
+        self.set_attributes( 6 )
+        for f1 in self.real_fam_lst:
+            for f2 in self.real_fam_lst:
+                if f1 * f2 == 1:
+                    return True
+        return False
 
 
     def get_basis_change( self, B ):
@@ -465,17 +490,19 @@ class DPLattice:
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
 
-
         bas_lst = DPLattice.get_cls_root_bases( rank )
+        counter = 0
+        total = len( bas_lst )
         inv_lst = []
         for bas in bas_lst:
+            NSTools.p( 'counter =', counter , '/', total, ', root base = ', bas.d_lst )
+            counter += 1
             M = basis_to_involution( bas.d_lst, rank )
             if not is_integral_involution( M ):
                 continue
             inv = DPLattice( [], bas.d_lst, M )
             inv.set_attributes()
             inv_lst += [ inv ]
-
 
         # store in cache
         inv_lst.sort()

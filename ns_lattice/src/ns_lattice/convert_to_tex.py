@@ -10,6 +10,8 @@ from class_div import Div
 
 from class_dp_lattice import DPLattice
 
+from class_ns_tools import NSTools
+
 
 def break_col( col, max_len, row_num ):
     '''
@@ -27,16 +29,33 @@ def break_col( col, max_len, row_num ):
     -------
     list<string>        
     '''
-    s_lst = str( col ).split( ',' )
+
+    col = str( col )
 
     col_lst = []
-    ts = ''
-    for s in s_lst:
-        ts += s + ', '
-        if len( ts ) >= max_len:
-            col_lst += [ts]
-            ts = ''
+    if ',' not in col or len( col ) < max_len:
+        col_lst = [ str( col ) ]
+    else:
+        s_lst = str( col ).split( ',' )
+        ts = ''
+        for s in s_lst:
 
+            if len( ts + s + ', ' ) >= max_len:
+                col_lst += [ts]
+                ts = ''
+
+            ts += s + ', '
+            if ts[-3:] in ['), ', '], ']:
+                ts = ts[:-2]  # remove the comma at the end
+
+        # add remainder
+        col_lst += [ts]
+
+    # we cannot break up a column in too many rows
+    if row_num - len( col_lst ) < 0:
+        raise Exception( 'Parameter row_num is too small: ', row_num, '<', len( col_lst ) )
+
+    # return row_num columns
     for i in range( row_num - len( col_lst ) ):
         col_lst += ['']
 
@@ -62,6 +81,7 @@ def refine_table( table, max_len = 50, row_num = 5 ):
             new_row = []
             for ci in range( len( table[ri] ) ):
                 new_row += [ break_col( table[ri][ci], max_len, row_num )[i] ]
+                # NSTools.p( table[ri][ci], new_row, break_col( table[ri][ci], max_len, row_num ) )
             if set( new_row ) != {''}:
                 new_table += [new_row]
 
@@ -83,14 +103,14 @@ def get_table_header( h_lst ):
     h_str = ''
     h_str += '\n' + '\\begin{center}'
     h_str += '\n' + '{\\tiny'
-    h_str += '\n' + '\\begin{longtable}{|c|c|c|c|c|c|c|c|c|c|c|}'
+    h_str += '\n' + '\\begin{longtable}{|' + ( len( h_lst ) * 'c|' ) + '}'
     h_str += '\n' + '\\hline'
     h_str += '\n'
     for h in h_lst:
         h_str += str( h ) + '&'
     h_str = h_str[:-1]
     h_str += '\n' + '\\\\\\hline\\hline\\endhead'
-
+    return h_str
 
 
 def get_table_footer():
@@ -127,16 +147,35 @@ def table_to_tex( table, replace_dct = {}, col_idx = -1 ):
     out = '\n'
     if table == []:
         return ''
-    prev_row = table[0]
+
+    prv_val = '' if col_idx == -1 else table[0][col_idx]
     for row in table:
-        if row[col_idx] != prev_row[col_idx]:
+
+        # Check whether to add a horizontal separator line in table.
+        # We take in account that a row may be split up in several rows.
+        cur_val = '' if col_idx == -1 else row[col_idx]
+        if cur_val == '':
+            cur_val = prv_val
+        if cur_val != prv_val:
             out += '\\hline' + '\n'
+        prv_val = cur_val
+
+        # tex code for row
         for col in row:
+
+            # replace characters in column string
             for key in replace_dct:
                 col = str( col ).replace( key, replace_dct[key] )
-            out += str( col ) + ' &'
+
+            # tex code for a column
+            out += '$' + str( col ) + ' $' + ' &'
+
+        # omit the last &-separator
         out = out[:-1]
+
+        # tex code for ending a table row
         out += '\\' + '\\' + '\\hline' + '\n'
+
     return out
 
 
@@ -149,12 +188,15 @@ def dp_lattice_tex():
     dpl_dct[5] = DPLattice.get_cls_real_dp( 5 )
     dpl_dct[6] = DPLattice.get_cls_real_dp( 6 )
     dpl_dct[7] = DPLattice.get_cls_real_dp( 7 )
-    dpl_dct[8] = DPLattice.get_cls_root_bases( 8 )
-    dpl_dct[9] = DPLattice.get_cls_root_bases( 9 )
+    dpl_dct[8] = DPLattice.get_cls_root_bases( 8 ) + DPLattice.get_cls_involutions( 8 )
+    dpl_dct[9] = DPLattice.get_cls_root_bases( 9 ) + DPLattice.get_cls_involutions( 9 )
 
 
-    max_len = 50
-    row_num = 5
+    #
+    # parameters for refine_table()
+    #
+    max_len = 60
+    row_num = 9
     dct = {'A':'A_', 'D':'D_', 'E':'E_', 'e':'e_'}
 
     #
@@ -173,11 +215,13 @@ def dp_lattice_tex():
             row += [dpl.Mtype]
             row += [dpl.type]
             if dpl.contains_fam_pair():
-                row += ['\\text{yes}']
+                row += ['y']
             else:
-                row += ['\\text{no}']
+                row += ['n']
             row += dpl.get_numbers()
+
             tab1 += [row]
+            idx += 1
 
     #
     # table 2
@@ -196,11 +240,12 @@ def dp_lattice_tex():
             row += [ div_tup ]
 
             tab2 += [row]
+            idx += 1
 
     #
     # table 3
     #
-    tab2 = []
+    tab3 = []
     h3_lst = ['', 'deg', 'real', 'sing', 'root base' ]
     idx = 0
     for rank in range( 3, max_rank + 1 ):
@@ -214,7 +259,12 @@ def dp_lattice_tex():
             row += [[ d for d in dpl.d_lst ]]
 
             tab3 += [row]
+            idx += 1
 
+
+    #
+    # construct the string
+    #
 
     s = ''
 

@@ -174,7 +174,8 @@ def usecase__get_cls_real_dp( max_rank, celestial = False, tex = False ):
             print( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
 
     else:
-        tex()
+
+        print( dp_lattice_tex() )
 
 
 

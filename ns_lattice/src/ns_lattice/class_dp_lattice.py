@@ -123,6 +123,11 @@ class DPLattice:
         The Cremona invariant for the current lattice.
     '''
 
+    # Static variable. If False, then equivalent real structures with
+    # different Dynkin types are considered equivalent. Equivalent real
+    # structures can have several Dynkin types. We set this variable to
+    # False in order to register this. See also get_reduced_cls()
+    weak_equality = False
 
     def __init__( self, d_lst, Md_lst, M ):
         '''
@@ -513,7 +518,7 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_real_dp( rank = 9 ):
+    def get_cls_real_dp( rank = 7 ):
         '''
         Parameters
         ----------
@@ -604,6 +609,57 @@ class DPLattice:
         return dpl_lst
 
 
+    @staticmethod
+    def get_reduced_cls( max_rank = 9, invo_cls = False ):
+        '''
+        Parameters
+        ----------
+        max_rank : int
+        invo_cls : bool
+        
+        Returns
+        -------
+        TODO
+        '''
+        # check cache
+        key = 'get_reduced_cls' + str( max_rank )
+        if key in NSTools.get_tool_dct():
+            return NSTools.get_tool_dct()[key]
+
+        DPLattice.weak_equality = True
+        dpl_dct = {}
+
+        for rank in range( 3, max_rank + 1 ):
+
+            dpl_lst = []
+
+            if rank > 7:
+                dpl_lst = DPLattice.get_cls_root_bases( rank ) + DPLattice.get_cls_involutions( rank )
+            else:
+                dpl_lst = DPLattice.get_cls_real_dp( rank )
+
+            dpl_dct[rank] = []
+            for dpl in dpl_lst:
+
+                if dpl in dpl_dct[rank]:
+
+                    for i in range( len( dpl_dct[rank] ) ):
+                        if dpl_dct[rank][i] == dpl and dpl_dct[rank][i] < dpl:
+                            dpl_dct[rank][i] = dpl
+
+                else:
+
+                    dpl_dct[rank] += [dpl]
+
+        DPLattice.weak_equality = False
+
+        # store in cache
+        NSTools.get_tool_dct()[key] = TODO
+        NSTools.save_tool_dct()
+
+        return TODO
+
+
     # overloading of "=="
     # returns True if isomorphic as Neron-Severi lattices
     def __eq__( self, other ):
@@ -653,8 +709,12 @@ class DPLattice:
         # Dynkin type real structures agree?
         self.set_attributes( 8 )
         other.set_attributes( 8 )
-        if self.Mtype != other.Mtype:
-            return False
+        if not DPLattice.weak_equality:
+            # In a finer classification, this check should be
+            # omitted, since equivalent real structures may have
+            # different Dynkin types.
+            if self.Mtype != other.Mtype:
+                return False
 
         # check Cremona invariant
         self.set_attributes( 9 )

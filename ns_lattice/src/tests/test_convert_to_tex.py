@@ -28,7 +28,7 @@ class TestConvertToTex:
 
 
     def test__refine_table( self ):
-        in_tab = [['a,1,2,3', 'b,u,v,w', 'c', 'd,q']]
+        in_tab = [['a,1,2,3', 'b,u,v,w', 'c', 'd,q'], ['(aaaaa,ccccccc,3)', '[bbbbb,cccccccc]', 'c', 'd,q']]
 
         max_len = 5
         row_num = 10
@@ -36,9 +36,11 @@ class TestConvertToTex:
 
         for row in tab:
             print( row )
+        print( tab )
 
-        assert len( tab ) == 2
-        assert len( tab[0] ) == len( tab[1] ) == 4
+        assert len( tab ) == 8
+        assert [len( row ) for row in tab] == 8 * [4]
+        assert str( tab ) == "[['a, ', 'b, ', 'c', 'd,q'], ['1, ', 'u, ', '', ''], ['2, ', 'v, ', '', ''], ['3, ', 'w, ', '', ''], ['', '', 'c', 'd,q'], ['(aaaaa, ', '[bbbbb, ', '', ''], ['ccccccc, ', 'cccccccc]', '', ''], ['3)', '', '', '']]"
 
 
 if __name__ == '__main__':

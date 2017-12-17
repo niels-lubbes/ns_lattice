@@ -30,7 +30,7 @@ from linear_series.class_poly_ring import PolyRing
 from linear_series.class_base_points import BasePointTree
 from linear_series.class_linear_series import LinearSeries
 
-from convert_to_tex import dp_lattice_tex
+from convert_to_tex import table_to_tex
 
 
 def usecase__circles():
@@ -112,71 +112,126 @@ def usecase__get_cls_root_bases( max_rank ):
         print( 'total = ' + str( len( DPLattice.get_cls_root_bases( rank ) ) ) )
 
 
-def usecase__get_cls_real_dp( max_rank, celestial = False, tex = False ):
+def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     '''
     Classification NS-lattices of weak del Pezzo surfaces.  
-    If celestial==True, then only surfaces with 
-    at least two real families of circles and no real lines
-    are listed.
     
-    See "DPLattice.get_cls_real_dp()".  
+    See "DPLattice.usecase__get_reduced_cls_dp_lattice()".  
     
     Parameters
     ----------
     max_rank : int
         Maximal rank for the root system associated to singularities and
         involutions of weak del Pezzo surfaces.
-    
-    celestial : bool
-        If True, then classify only weak del Pezzo surfaces 
-        with at least two elements in "NSLattice.real_fam_lst" and
-        no elements in "NSLattice.real_m1_lst".
-                
+                    
     tex : bool
         If True, then output the classification as a table in Tex code.
     '''
-    NSTools.p( 'Classification of DPLattice objects. celestial =', celestial )
+    NSTools.p( 'Reduced classification of DPLattice objects.' )
 
-    # construct a table
-    celestial_dct = {}
-    table = []
+    #
+    # table 1
+    #
+    tab1 = []
+    h1_lst = ['', 'deg', 'real', 'sing', '$\MbbP^1\\times\MbbP^1$',
+              '\#(-2)', '\#(-1)', '\#(0)',
+              '\#(-2)$_\MbbR$', '\#(-1)$_\MbbR$', '\#(0)$_\MbbR$']
+    idx = 0
     for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_cls_real_dp( rank ):
+        for dpl in DPLattice.get_reduced_cls( rank, False ):
+            row = []
+            row += [idx]
+            row += [dpl.get_degree()]
+            row += [dpl.Mtype]
+            row += [dpl.type]
+            if dpl.contains_fam_pair():
+                row += ['y']
+            else:
+                row += ['n']
+            row += dpl.get_numbers()
 
-            # no real lines and two families of conics
-            if celestial and ( len( dpl.real_fam_lst ) < 2 or len( dpl.real_m1_lst ) != 0 ):
-                continue
+            tab1 += [row]
+            idx += 1
 
-            if rank not in celestial_dct:
-                celestial_dct[rank] = []
-            celestial_dct[rank] += [dpl]
+    #
+    # table 2
+    #
+    tab2 = []
+    h2_lst = ['', 'deg', 'real', 'involution' ]
+    idx = 0
+    for rank in range( 3, max_rank + 1 ):
+        for dpl in DPLattice.get_reduced_cls( rank, True ):
+            div_tup = tuple( [Div( row ).mat_mul( dpl.M ) for row in sage_identity_matrix( rank ) ] )
 
-            table += [ [dpl.get_degree(), dpl.Mtype, dpl.type, dpl.contains_fam_pair()] + [str( num ) for num in dpl.get_numbers()]]
+            row = []
+            row += [ idx ]
+            row += [ dpl.get_degree() ]
+            row += [ dpl.Mtype ]
+            row += [ div_tup ]
 
+            tab2 += [row]
+            idx += 1
 
-    if table == []:
-        NSTools.p( 'There exist no celestials for rank=' + str( rank ) + '...returning...' )
-        return
+    #
+    # table 3
+    #
+    tab3 = []
+    h3_lst = ['', 'deg', 'real', 'sing', 'root base' ]
+    idx = 0
+    for rank in range( 3, max_rank + 1 ):
+        for dpl in DPLattice.get_reduced_cls( rank, False ):
 
-    # output a table
-    table = [['------'] * len( table[0] )] + table
-    table = [['Degree', 'real', 'sing', 'P1xP1', '#(-2)', '#(-1)', '#(0)', '#RR(-2)', '#RR(-1)', '#RR(0)']] + table
-    table = [['------'] * len( table[0] )] + table
-    table += [['------'] * len( table[0] )]
-    row_format = "{:<8}" * len( table[0] )
+            row = []
+            row += [idx]
+            row += [dpl.get_degree()]
+            row += [dpl.Mtype]
+            row += [dpl.type]
+            row += [[ d for d in dpl.d_lst ]]
 
+            tab3 += [row]
+            idx += 1
 
+    #
+    # ordering for the tables
+    #
+    tab_h_lst = [( tab2, h2_lst ), ( tab3, h3_lst ), ( tab1, h1_lst )]
+
+    #
+    # output the tables
+    #
     if not tex:
 
-        for row in table:
-            print( row_format.format( *row ) )
-        for rank in celestial_dct:
-            print( 'deg =', 10 - rank, ' #lattice-classes =', len( celestial_dct[rank] ) )
+        for tab, h_lst in tab_h_lst:
+
+            num_cols = len( tab[0] )
+            tab = [['------'] * num_cols] + tab
+            tab = [h_lst] + tab
+            tab = [['------'] * num_cols] + tab
+            tab += [['------'] * num_cols]
+            row_format = "{:<8}" * num_cols  # each column is 8 chars.
+
+            for row in tab:
+                print( row_format.format( *row ) )
+            for rank in range( 3, max_rank + 1 ):
+                print( 'deg =', 10 - rank, ' #lattice-classes =', len( DPLattice.get_reduced_cls( rank ) ) )
+
+            print( 80 * '=' )
 
     else:
 
-        print( dp_lattice_tex() )
+        #
+        # parameters for table_to_tex()
+        #
+        max_len = 60
+        row_num = 9
+        replace_dct = {'A':'A_', 'D':'D_', 'E':'E_', 'e':'e_', '[':'\\{', ']':'\\}'}
+        col_idx = 1
 
+        s = ''
+        for tab, h_lst in tab_h_lst:
+            s += table_to_tex( h_lst, tab, replace_dct, col_idx, max_len, row_num )
+
+        print( s )
 
 
 def usecase__get_classes_dp1( rank ):
@@ -311,13 +366,13 @@ if __name__ == '__main__':
     NSTools.filter( None )
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
-    NSTools.start_timer()
+    # NSTools.start_timer()
 
     #
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    rank = 7
+    rank = 9
 
     #########################################
     #                                       #
@@ -327,7 +382,7 @@ if __name__ == '__main__':
 
     # usecase__get_tool_dct()
     # usecase__get_cls_root_bases( rank )
-    usecase__get_cls_real_dp( rank, False, True )
+    usecase__get_reduced_cls_dp_lattice( rank, False )
     # usecase__get_classes_dp1( rank )
     # usecase__get_webs( rank )
     # usecase__graphs( rank )

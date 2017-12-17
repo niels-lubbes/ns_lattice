@@ -610,54 +610,58 @@ class DPLattice:
 
 
     @staticmethod
-    def get_reduced_cls( max_rank = 9, invo_cls = False ):
+    def get_reduced_cls( rank = 9, invo_cls = False ):
         '''
         Parameters
         ----------
-        max_rank : int
+        rank : int
         invo_cls : bool
         
         Returns
         -------
-        TODO
+        Classification of DPLattices using weak equivalence. 
+        If invo_cls is True, then only return DPLattices dpl 
+        such that dpl.type is A0. If rank>7, then either 
+        dpl.type or dpl.Mtype equals A0.  
         '''
         # check cache
-        key = 'get_reduced_cls' + str( max_rank )
+        key = 'get_reduced_cls' + str( ( rank, invo_cls ) )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
 
-        DPLattice.weak_equality = True
-        dpl_dct = {}
-
-        for rank in range( 3, max_rank + 1 ):
-
-            dpl_lst = []
-
+        # obtain nonreduced classification
+        dpl_lst = []
+        if invo_cls:
+            dpl_lst = DPLattice.get_cls_involutions( rank )
+        else:
             if rank > 7:
-                dpl_lst = DPLattice.get_cls_root_bases( rank ) + DPLattice.get_cls_involutions( rank )
+                # In this case we do not have the complete
+                # classification yet: either type or Mtype equals A0
+                dpl_lst += DPLattice.get_cls_root_bases( rank )
+                dpl_lst += DPLattice.get_cls_involutions( rank )
             else:
                 dpl_lst = DPLattice.get_cls_real_dp( rank )
 
-            dpl_dct[rank] = []
-            for dpl in dpl_lst:
+        # reduce classification
+        DPLattice.weak_equality = True  # see DPLattice.__eq__()
+        out_lst = []
+        for dpl in dpl_lst:
 
-                if dpl in dpl_dct[rank]:
-
-                    for i in range( len( dpl_dct[rank] ) ):
-                        if dpl_dct[rank][i] == dpl and dpl_dct[rank][i] < dpl:
-                            dpl_dct[rank][i] = dpl
-
-                else:
-
-                    dpl_dct[rank] += [dpl]
-
+            if not dpl in out_lst:
+                out_lst += [dpl]
+            else:
+                # dpl is already in list using weak equality
+                for i in range( len( out_lst ) ):
+                    if out_lst[i] == dpl and out_lst[i].Mtype < dpl.Mtype:
+                        out_lst[i] = dpl
+                        break
         DPLattice.weak_equality = False
 
         # store in cache
-        NSTools.get_tool_dct()[key] = TODO
+        NSTools.get_tool_dct()[key] = out_lst
         NSTools.save_tool_dct()
 
-        return TODO
+        return out_lst
 
 
     # overloading of "=="
@@ -720,7 +724,8 @@ class DPLattice:
         self.set_attributes( 9 )
         other.set_attributes( 9 )
         if not self.G.is_isomorphic( other.G, edge_labels = True ):
-            NSTools.p( 'Non isomorphic graphs (unexpected position): ', self, other )
+            if not DPLattice.weak_equality:
+                NSTools.p( 'Non isomorphic graphs (unexpected position): ', self, other )
             return False
 
         return True

@@ -127,27 +127,44 @@ def get_table_footer():
     return f_str
 
 
-def table_to_tex( table, replace_dct = {}, col_idx = -1 ):
+def table_to_tex( h_lst, table, replace_dct = {}, col_idx = -1, max_len = 60, row_num = 10 ):
     '''
     Parameters
     ----------
+    h_lst : list<string>
+        A list of string defining the column 
+        headers of a table.
+    
     table : list<list<object>>
+        A list of lists represent rows in a table.
     
     replace_dct : dict<string:string>
         A dictionary whose keys and values are strings.
     
-    col_idc : int
-        index of a column
+    col_idx : int
+        Index of a column.
     
     Returns
     -------
     string
-        A string representing the input table in Tex.
+        A string representing "table" in Tex format.
+        The column headers are defined by "h_lst".
+        The characters in each column entry are adapted using
+        dictionary "replace_dct" so that key is replaced with value.  
+        If the "col_idx"-th column changes at the subsequent row,
+        then a horizontal line separator is added. 
+        If a column entry is longer than "max_len" characters, 
+        then then it is broken up in several rows, by the splitting 
+        the string with respect to the comma.         
     '''
-    out = '\n'
-    if table == []:
-        return ''
+    out = ''
+    out += '\n\n\\subsection{}'
+    out += get_table_header( h_lst )
 
+    # split columns that are too long in several rows
+    table = refine_table( table, max_len, row_num )
+
+    # construct tex string for each row in table
     prv_val = '' if col_idx == -1 else table[0][col_idx]
     for row in table:
 
@@ -176,112 +193,6 @@ def table_to_tex( table, replace_dct = {}, col_idx = -1 ):
         # tex code for ending a table row
         out += '\\' + '\\' + '\\hline' + '\n'
 
+    # add footer for table in the end
+    out += get_table_footer()
     return out
-
-
-def dp_lattice_tex():
-    max_rank = 9
-
-    dpl_dct = {}
-    dpl_dct[3] = DPLattice.get_cls_real_dp( 3 )
-    dpl_dct[4] = DPLattice.get_cls_real_dp( 4 )
-    dpl_dct[5] = DPLattice.get_cls_real_dp( 5 )
-    dpl_dct[6] = DPLattice.get_cls_real_dp( 6 )
-    dpl_dct[7] = DPLattice.get_cls_real_dp( 7 )
-    dpl_dct[8] = DPLattice.get_cls_root_bases( 8 ) + DPLattice.get_cls_involutions( 8 )
-    dpl_dct[9] = DPLattice.get_cls_root_bases( 9 ) + DPLattice.get_cls_involutions( 9 )
-
-
-    #
-    # parameters for refine_table()
-    #
-    max_len = 60
-    row_num = 9
-    dct = {'A':'A_', 'D':'D_', 'E':'E_', 'e':'e_'}
-
-    #
-    # table 1
-    #
-    tab1 = []
-    h1_lst = ['', 'deg', 'real', 'sing', '$\MbbP^1\\times\MbbP^1$',
-              '\#(-2)', '\#(-1)', '\#(0)',
-              '\#(-2)$_\MbbR$', '\#(-1)$_\MbbR$', '\#(0)$_\MbbR$']
-    idx = 0
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in dpl_dct[rank]:
-            row = []
-            row += [idx]
-            row += [dpl.get_degree()]
-            row += [dpl.Mtype]
-            row += [dpl.type]
-            if dpl.contains_fam_pair():
-                row += ['y']
-            else:
-                row += ['n']
-            row += dpl.get_numbers()
-
-            tab1 += [row]
-            idx += 1
-
-    #
-    # table 2
-    #
-    tab2 = []
-    h2_lst = ['', 'deg', 'real', 'involution' ]
-    idx = 0
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_cls_involutions( rank ):
-            div_tup = tuple( [Div( row ).mat_mul( dpl.M ) for row in sage_identity_matrix( rank ) ] )
-
-            row = []
-            row += [ idx ]
-            row += [ dpl.get_degree() ]
-            row += [ dpl.Mtype ]
-            row += [ div_tup ]
-
-            tab2 += [row]
-            idx += 1
-
-    #
-    # table 3
-    #
-    tab3 = []
-    h3_lst = ['', 'deg', 'real', 'sing', 'root base' ]
-    idx = 0
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in dpl_dct[rank]:
-
-            row = []
-            row += [idx]
-            row += [dpl.get_degree()]
-            row += [dpl.Mtype]
-            row += [dpl.type]
-            row += [[ d for d in dpl.d_lst ]]
-
-            tab3 += [row]
-            idx += 1
-
-
-    #
-    # construct the string
-    #
-
-    s = ''
-
-    s += '\n\n\\subsection{}'
-    s += get_table_header( h1_lst )
-    s += table_to_tex( refine_table( tab1, max_len, row_num ), dct, 1 )
-    s += get_table_footer()
-
-    s += '\n\n\\subsection{}'
-    s += get_table_header( h2_lst )
-    s += table_to_tex( refine_table( tab2, max_len, row_num ), dct, 1 )
-    s += get_table_footer()
-
-    s += '\n\n\\subsection{}'
-    s += get_table_header( h3_lst )
-    s += table_to_tex( refine_table( tab3, max_len, row_num ), dct, 1 )
-    s += get_table_footer()
-
-    return s
-

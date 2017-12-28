@@ -125,8 +125,8 @@ def get_bases_lst( a_lst, M, d_lst, m1_lst, perm = False ):
 def get_webs( dpl ):
     '''
     Returns lists of families of conics for each possible complex basis change.
-    For example the first family in each list correspond to a fixed family wrt.
-    different bases. 
+    The n-th family in each list correspond to a fixed family wrt.
+    different bases for each n. 
     
     Parameters
     ----------

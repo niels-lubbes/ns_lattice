@@ -25,7 +25,8 @@ from class_div import Div
 
 
 def get_divs( d, dc, cc, perm = False ):
-    '''Computes divisors in unimodular lattice with prescribed intersection product. 
+    '''
+    Computes divisors in unimodular lattice with prescribed intersection product. 
     
     Parameters
     ---------- 

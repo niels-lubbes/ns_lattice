@@ -7,6 +7,8 @@ Created on Aug 11, 2016
 import sys
 import os
 
+from sage_interface import sage_matrix
+from sage_interface import sage_ZZ
 from sage_interface import sage_identity_matrix
 from sage_interface import sage_Subsets
 from sage_interface import sage_Permutations
@@ -21,6 +23,7 @@ from div_in_lattice import get_ak
 
 from class_dp_lattice import DPLattice
 
+from ns_basis import get_bases_lst
 from ns_basis import get_webs
 from ns_basis import contains_perm
 from ns_basis import nonreducible_webs
@@ -248,11 +251,22 @@ def usecase__get_classes_dp1( rank ):
     # canonical class
     d = get_ak( rank )
 
+    # basis change
+    a_lst = [ 'e0-e1', 'e0-e2']
+    a_lst = [ Div.new( a, rank ) for a in a_lst ]
+    m1_lst = get_divs( d, 1, -1, True )
+    print( d )
+    M = sage_identity_matrix( rank )
+    d_lst = []
+    d_tup_lst = get_bases_lst( a_lst, M, d_lst, m1_lst, False )
+    B = sage_matrix( sage_ZZ, [ dt.e_lst for dt in d_tup_lst[0] ] )
+
+    # list the classes
     for ( dc, cc ) in [( 2, 0 ), ( 1, -1 ), ( 0, -2 ), ( 2, 2 ), ( 2, 4 ), ( 3, 1 )]:
         NSTools.p( '(dc, cc) =', ( dc, cc ) )
         c_lst = get_divs( d, dc, cc, False )
         for c in c_lst:
-            NSTools.p( '\t\t', c.get_label() )
+            NSTools.p( '\t\t', c, '\t\t', c.get_basis_change( B ) )
 
 
 def usecase__get_webs( max_rank ):
@@ -309,42 +323,27 @@ def usecase__graphs( rank ):
     dpl = DPLattice.get_cls_root_bases( rank )[0]
     f_lst = dpl.real_fam_lst
 
-    if True:
-        f_lst = []
-        f_lst += ["2e0-e1-e2-e3-e4"]
-        f_lst += ["2e0-e1-e2-e3-e5"]
-        f_lst += ["2e0-e1-e2-e3-e6"]
-        f_lst += ["2e0-e1-e2-e4-e5"]
-        f_lst += ["2e0-e1-e2-e4-e6"]
-        f_lst += ["2e0-e1-e2-e5-e6"]
-        f_lst += ["2e0-e1-e3-e4-e5"]
-        f_lst += ["2e0-e1-e3-e4-e6"]
-        f_lst += ["2e0-e1-e3-e5-e6"]
-        f_lst += ["2e0-e1-e4-e5-e6"]
-        f_lst += ["2e0-e2-e3-e4-e5"]
-        f_lst += ["2e0-e2-e3-e4-e6"]
-        f_lst += ["2e0-e2-e3-e5-e6"]
-        f_lst += ["2e0-e2-e4-e5-e6"]
-        f_lst += ["2e0-e3-e4-e5-e6"]
-
-        f_lst = [ Div.new( f, 7 ) for f in f_lst ]
-
-
-
     G = sage_Graph()
     G.add_vertices( range( len( f_lst ) ) )
 
     num_lst = []
+    ne_lst = []  # each entry denotes the number of outgoing edges of some vertex
     for i in range( len( f_lst ) ):
+        ne = 0
         for j in range( len( f_lst ) ):
-            if f_lst[i] * f_lst[j] > 1 and i != j:
+            if f_lst[i] * f_lst[j] > 1:
+                ne += 1
                 num = f_lst[i] * f_lst[j]
                 G.add_edge( i, j, num )
                 if num not in num_lst:
                     num_lst += [num]
 
-    NSTools.p( 'labels =', num_lst )
-    # sys.exit()
+        if ne not in ne_lst:
+            ne_lst += [ne]
+
+    NSTools.p( 'labels      =', sorted( num_lst ) )  # [2,3,4,5,6,7,8]
+    NSTools.p( 'regularity  =', sorted( ne_lst ) )  # E8: [2095]
+    NSTools.p( 'vertices    =', len( f_lst ) )  # E8: [2160]
 
 
     P = G.graphplot( vertex_size = 1,
@@ -382,8 +381,8 @@ if __name__ == '__main__':
 
     # usecase__get_tool_dct()
     # usecase__get_cls_root_bases( rank )
-    usecase__get_reduced_cls_dp_lattice( rank, False )
-    # usecase__get_classes_dp1( rank )
+    # #usecase__get_reduced_cls_dp_lattice( rank, False )
+    usecase__get_classes_dp1( rank )
     # usecase__get_webs( rank )
     # usecase__graphs( rank )
     # usecase__circles()  # does not terminate within reasonable time

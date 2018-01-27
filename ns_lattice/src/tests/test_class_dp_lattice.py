@@ -17,6 +17,8 @@ from ns_lattice.class_dp_lattice import DPLattice
 class TestClassDPLattice():
 
     def test__eq( self ):
+        NSTools.set_enable_tool_dct( False )
+
         Md_lst = []
         M = sage_identity_matrix( sage_QQ, 4 )
 
@@ -26,6 +28,8 @@ class TestClassDPLattice():
 
         assert dpl23 != dpl1123
         assert dpl23 == dpl12
+
+        NSTools.set_enable_tool_dct( True )
 
 
     def test__get_cls_root_bases__rank_3( self ):
@@ -149,9 +153,10 @@ if __name__ == '__main__':
 
     NSTools.filter( 'class_dp_lattice.py' )
 
+    TestClassDPLattice().test__eq()
     # TestClassDPLattice().test__get_cls_root_bases__rank_3()
     # TestClassDPLattice().test__get_cls_root_bases__rank_4()
-    TestClassDPLattice().test__get_cls_invo__rank_4()
+    # TestClassDPLattice().test__get_cls_invo__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__rank_3()
     # TestClassDPLattice().test__get_cls_real_dp__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__large_rank()

@@ -33,7 +33,7 @@ class NSTools():
     __start_time = None
     __end_time = None
 
-    # private static variables used by ".verbose()"
+    # private static variables used by ".p()"
     #
     __filter_fname = None
     __prev_filter_fname = None
@@ -209,6 +209,4 @@ class NSTools():
         NSTools.filter_unset()
         NSTools.p( 'time passed =', passed_time )
         NSTools.filter_reset()
-
-
 

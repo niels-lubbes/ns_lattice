@@ -17,14 +17,14 @@ class TestConvertToTex:
 
 
     def test__break_col( self ):
-        col = 'a,1,2,3'
-        max_len = 4
+        col = '1234567,12,345,12,34567'
+        max_len = 10
         row_num = 5
         lst = break_col( col, max_len, row_num )
         print( lst )
 
         assert len( lst ) == row_num
-        assert lst == ['a, 1, ', '2, 3, ', '', '', '']
+        assert lst == ['1234567, ', '12, 345, ', '12, ', '34567, ', '']
 
 
     def test__refine_table( self ):
@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    # TestConvertToTex().test__break_col()
-    TestConvertToTex().test__refine_table()
+    TestConvertToTex().test__break_col()
+    # TestConvertToTex().test__refine_table()
 
     pass

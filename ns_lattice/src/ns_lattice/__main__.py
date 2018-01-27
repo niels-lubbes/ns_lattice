@@ -26,8 +26,7 @@ from class_dp_lattice import DPLattice
 from ns_basis import get_bases_lst
 from ns_basis import get_webs
 from ns_basis import contains_perm
-from ns_basis import nonreducible_webs
-from ns_basis import nonreducible_intersect_webs
+from ns_basis import triples
 
 from linear_series.class_poly_ring import PolyRing
 from linear_series.class_base_points import BasePointTree
@@ -269,50 +268,28 @@ def usecase__get_classes_dp1( rank ):
             NSTools.p( '\t\t', c, '\t\t', c.get_basis_change( B ) )
 
 
-def usecase__get_webs( max_rank ):
+def usecase__hex_webs( max_rank ):
     '''
-    Compute hexagonal webs
+    Obtain counter examples to hexagonal webs. 
     
     Parameters
     ----------
     max_rank : int  
     '''
-    if False:
-        d_lst = []
-        Md_lst = []
-        M = sage_identity_matrix( 6 )
-        dpl = DPLattice( d_lst, Md_lst, M )
-        print( dpl )
 
-        table = get_webs( dpl )
-        # https://docs.python.org/3/library/string.html
-        row_format = "{:<17}" * len( table[0] )
-        for row in table:
-            print( row_format.format( *row ) )
-
-        f_lst_lst = nonreducible_webs( dpl, 2, 3 )
-        for f_lst in f_lst_lst:
-            print( f_lst )
-
-
-    numline = 1
-    numfam = 3
-    int_lst = [1]
-
-    af_lst_lst = []
-    for rank in range( 7, max_rank + 1 ):
+    for rank in range( 5, max_rank + 1 ):
         NSTools.p( 'rank =', rank )
-        for dpl in DPLattice.get_cls_root_bases( rank ):
-            f_lst_lst = nonreducible_intersect_webs( dpl, numline, numfam, int_lst )
-            for f_lst in f_lst_lst:
-                if not contains_perm( af_lst_lst, f_lst ):
-                    af_lst_lst += [ f_lst ]
-            NSTools.p( dpl )
-            NSTools.p( 'f_lst_lst  =', len( f_lst_lst ), f_lst_lst )
+        # for dpl in DPLattice.get_cls_root_bases( rank ):
+        for dpl in DPLattice.get_reduced_cls( rank ):
 
-    for af_lst in af_lst_lst:
-        NSTools.p( af_lst[0].get_rank(), af_lst )
-    NSTools.p( 'af_lst_lst  =', len( af_lst_lst ), af_lst_lst )
+            t_lst = triples( dpl )
+            if t_lst != []:
+                NSTools.p( dpl )
+                NSTools.p( 'dpl.d_lst  =', dpl.d_lst )
+                NSTools.p( 'dpl.M      =', list( dpl.M ) )
+                NSTools.p( 'dpl.Md_lst =', dpl.Md_lst )
+                NSTools.p( '::: t_lst  =', t_lst )
+                NSTools.p( 10 * '=*' )
 
 
 def usecase__graphs( rank ):
@@ -381,9 +358,9 @@ if __name__ == '__main__':
 
     # usecase__get_tool_dct()
     # usecase__get_cls_root_bases( rank )
-    # #usecase__get_reduced_cls_dp_lattice( rank, False )
-    usecase__get_classes_dp1( rank )
-    # usecase__get_webs( rank )
+    # usecase__get_reduced_cls_dp_lattice( rank, False )
+    # usecase__get_classes_dp1( rank )
+    usecase__hex_webs( rank )
     # usecase__graphs( rank )
     # usecase__circles()  # does not terminate within reasonable time
 

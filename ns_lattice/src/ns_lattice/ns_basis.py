@@ -3,15 +3,11 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 9, 2017
 @author: Niels Lubbes
 '''
-
-import time
-
 from sage_interface import sage_identity_matrix
 from sage_interface import sage_matrix
 from sage_interface import sage_ZZ
 from sage_interface import sage_Permutations
 from sage_interface import sage_Subsets
-from sage_interface import sage_n
 
 from class_div import Div
 
@@ -19,9 +15,11 @@ from div_in_lattice import get_indecomp_divs
 from div_in_lattice import get_ak
 from div_in_lattice import get_divs
 
-from class_ns_tools import NSTools
-
 from class_dp_lattice import DPLattice
+
+from class_eta import ETA
+
+from class_ns_tools import NSTools
 
 
 def get_bases_lst( a_lst, M, d_lst, m1_lst, perm = False ):
@@ -182,7 +180,7 @@ def contains_perm( f_lst_lst, c_lst ):
     Parameters
     ----------
     f_lst_lst : list<list<Div>>
-        A list of list containing Div objects.
+        A list of lists containing Div objects.
     
     c_lst : list<Div>
         A list of Div objects
@@ -208,154 +206,79 @@ def contains_perm( f_lst_lst, c_lst ):
     return False
 
 
-def nonreducible_intersect_webs( dpl, numline, numfam, int_lst ):
+def triples( dpl ):
     '''
     Parameters
     ----------
     dpl : DPLattice
     
-    numline : int
-    
-    numfam : int
-    
-    int_lst : list<int>
-        List of intersection numbers. Should not contain 0.
-    
     Returns
     -------
-    list<list<Div>>
-        All lists of real families in "dpl" of length "numfam", so that 
-        there does not exists "numline" pairwise orthogonal real lines 
-        that are orthogonal to the families as well. Moreover we require
-        the number of intersections between two families is in "int_lst".
-        If "int_lst==[]", then no restrictions are imposed.
+    list<(Div,Div,Div)>
+        List of triples in "dpl.fam_lst":
+           [ (a,b,c),... ]
+        so that there does not exists e in "dpl.m1_lst"
+        with the property that a*e==b*e==c*e==0.
     '''
-    key = 'nonreducible_intersect_webs__' + str( ( dpl.real_fam_lst, dpl.real_m1_lst, numline, numfam, int_lst ) )
+    key = 'triples__' + str( dpl ).replace( '\n', '---' )
     if key in NSTools.get_tool_dct():
         return NSTools.get_tool_dct()[key]
 
-    f_lst_lst = []
+    f_lst = dpl.fam_lst
+    e_lst = dpl.m1_lst
 
-    if numfam == 1:
-        if len( dpl.real_m1_lst ) < numline:
-            f_lst_lst = [ [f] for f in dpl.real_fam_lst ]
-    else:
-        # data for ETA computation
-        ostart = time.time()
-        counter = 0
-        total = len( dpl.real_fam_lst )
-        ival = 10
+    # obtain list of triples (a,b,c) in f_lst
+    # that are not orthogonal to any element in e_lst
+    t_lst = []
+    idx_lst_lst = sage_Subsets( range( len( f_lst ) ), 3 )
+    eta = ETA( len( idx_lst_lst ), 100 )
+    for idx_lst in idx_lst_lst:
+        eta.update( 't_lst' )
+        t = [ f_lst[idx] for idx in idx_lst ]
 
-        for f in dpl.real_fam_lst:
+        if max( [t[0] * t[1], t[1] * t[2], t[0] * t[2]] ) > 2:
+            continue
 
-            # ETA
-            if counter % ival == 0:
-                istart = time.time()
-            counter += 1
-            if counter % ival == 0:
-                itime = ( time.time() - istart ) / ( 60 * ival )
-                otime = ( time.time() - ostart ) / 60
-                spc = '' + max( ( 3 - numfam ), 0 ) * '\t'
-                NSTools.p( spc,
-                           'ETA =', sage_n( itime * ( total - counter ), digits = 5 ),
-                           'm, counter =', counter, '/', total,
-                           ', time =', sage_n( otime, digits = 5 ),
-                           'm, rank =', dpl.get_rank() )
+        cont = False
+        for e in e_lst:
+            if [f * e for f in t] == [0, 0, 0]:
+                cont = True
+                break
+        if cont: continue
 
-            fdpl = DPLattice( dpl.d_lst, dpl.Md_lst, dpl.M )
-            if int_lst != []:
-                fdpl.real_fam_lst = [ f2 for f2 in dpl.real_fam_lst if f2 * f in int_lst ]
-            else:
-                fdpl.real_fam_lst = [ f2 for f2 in dpl.real_fam_lst if f2 * f != 0 ]
-            fdpl.real_m1_lst = [ m for m in dpl.real_m1_lst if m * f == 0 ]
-            rf_lst_lst = nonreducible_intersect_webs( fdpl, numline, numfam - 1, int_lst )
-            for f_lst in rf_lst_lst:
-                f_lst_lst += [[f] + f_lst]
+        if not contains_perm( t_lst, t ):
+            t_lst += [t]
 
-    if numfam > 2:
-        # cache output
-        NSTools.get_tool_dct()[key] = f_lst_lst
-        NSTools.save_tool_dct()
-
-    return f_lst_lst
-
-
-
-def nonreducible_webs( dpl, numline, numfam = 3 ):
-    '''
-    Parameters
-    ----------
-    dpl : DPLattice
-    numline : int
-    numfam : int
-    
-    Returns
-    -------
-    list<list<Div>>
-        All lists of real families in "dpl" of length "numfam", so that 
-        there does not exists "numline" pairwise orthogonal real lines 
-        that are orthogonal to the families as well. 
-    '''
-    key = 'nonreducible_webs__' + str( dpl ).replace( '\n', '---' ) + '__' + str( ( numline, numfam ) )
-    if key in NSTools.get_tool_dct():
-        return NSTools.get_tool_dct()[key]
-
-    idx_f_lst = sage_Subsets( range( len( dpl.real_fam_lst ) ), numfam )
-
-    # data for ETA computation
-    ostart = time.time()
-    counter = 0
-    total = len( idx_f_lst )
-    ival = 10
-
-    NSTools.p( dpl )
-
-    f_lst_lst = []
-    for idx_f in idx_f_lst:
-
-        # ETA
-        if counter % ival == 0:
-            istart = time.time()
-        counter += 1
-        if counter % ival == 0:
-            itime = ( time.time() - istart ) / ( 60 * ival )
-            otime = ( time.time() - ostart ) / 60
-            NSTools.p( 'ETA =', sage_n( itime * ( total - counter ), digits = 5 ),
-                       'm, counter =', counter, '/', total,
-                       ', time =', sage_n( otime, digits = 5 ),
-                       'm, rank =', dpl.get_rank() )
-
-
-        reduce = False
-
-        f_lst = [ dpl.real_fam_lst[idx] for idx in idx_f ]
-
-        om_lst = []
-        for om in dpl.real_m1_lst:
-            if set( [om * f for f in f_lst ] ) == {0}:
-                om_lst += [om]
-
-        for idx_m in sage_Subsets( range( len( om_lst ) ), numline ):
-            m_lst = [ om_lst[idx] for idx in idx_m ]
-
-            if numline > 1 and set( [m1 * m2 for m1 in m_lst for m2 in m_lst ] ) != {0, -1}:
-                continue
-
-            reduce = True
-            break
-
-        if not reduce and not contains_perm( f_lst_lst, f_lst ):
-            NSTools.p( 'nonreducible f_lst =', f_lst )
-            f_lst_lst += [ f_lst ]
+    NSTools.p( 't_lst =', t_lst )
 
     # cache output
-    NSTools.get_tool_dct()[key] = f_lst_lst
+    NSTools.get_tool_dct()[key] = t_lst
     NSTools.save_tool_dct()
 
-    return f_lst_lst
+    return t_lst
 
 
 
 
-
+#     # construct list of pairs (a,b) s.t. a*b==2
+#     #
+#     p_lst = []
+#     for idx_lst in sage_Subsets( range( len( f_lst ) ), 2 ):
+#         p = [ f_lst[idx] for idx in idx_lst ]
+#         if p[0] * p[1] == 2: p_lst += [p]
+#     NSTools.p( 'p_lst =', p_lst )
+#
+#     # triples (a,b,c) s.t. a*b==2 and c*f==1 for all families f
+#     # and the triples are not orthogonal to any element in e_lst
+#     #
+#     w_lst = []
+#     eta = ETA( len( f_lst ), 10 )
+#     for f in f_lst:
+#         eta.update( 'w_lst' )
+#         if set( [ f * g for g in f_lst] ) == set( [0, 1] ):
+#             for w in [ p + [f] for p in p_lst ]:
+#                 if [0, 0, 0] not in [ [a * e for a in w] for e in e_lst ]:
+#                     if not contains_perm( w_lst, w ):
+#                         w_lst += [w]
+#     NSTools.p( 'w_lst =', w_lst )
 

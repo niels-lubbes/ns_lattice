@@ -24,8 +24,7 @@ from ns_lattice.div_in_lattice import get_ak
 from ns_lattice.ns_basis import get_bases_lst
 from ns_lattice.ns_basis import get_webs
 from ns_lattice.ns_basis import contains_perm
-from ns_lattice.ns_basis import nonreducible_webs
-from ns_lattice.ns_basis import nonreducible_intersect_webs
+from ns_lattice.ns_basis import triples
 
 
 class TestNSBasis( object ):
@@ -133,56 +132,26 @@ class TestNSBasis( object ):
         assert contains_perm( f_lst_lst, c_lst )
 
 
-    def test__nonreducible_webs( self ):
+    def test__triples( self ):
         NSTools.set_enable_tool_dct( False )
 
         rank = 6
 
-        d_lst = []
-        Md_lst = []
-        M = sage_identity_matrix( rank )
+        # (2A1, 4A1)
+        d_lst = [ 'e2-e4', 'e3-e5', 'e0-e1-e2-e4', 'e0-e1-e3-e5']
+        Md_lst = ['e4-e5', 'e0-e1-e2-e3']
+        M = [( 2, 1, 1, 1, 0, 0 ), ( -1, 0, -1, -1, 0, 0 ), ( -1, -1, 0, -1, 0, 0 ), ( -1, -1, -1, 0, 0, 0 ), ( 0, 0, 0, 0, 0, 1 ), ( 0, 0, 0, 0, 1, 0 )]
+
+        d_lst = [ Div.new( d, rank ) for d in d_lst ]
+        Md_lst = [ Div.new( Md, rank ) for Md in Md_lst ]
+        M = sage_matrix( M )
+
         dpl = DPLattice( d_lst, Md_lst, M )
 
-        f_lst_lst = nonreducible_webs( dpl, rank - 4, 3 )
-        print( f_lst_lst )
-        for f_lst in f_lst_lst:
-            print( f_lst )
+        t_lst = triples( dpl )
+        print( t_lst )
 
-        assert len( f_lst_lst ) == 0
-        NSTools.set_enable_tool_dct( True )
-
-
-    def test__nonreducible_intersect_webs( self ):
-        NSTools.set_enable_tool_dct( False )
-
-        rank = 6
-        numline = 1
-        numfam = 3
-        int_lst = [1, 2]
-
-        d_lst = []
-        Md_lst = []
-        M = sage_identity_matrix( rank )
-        dpl = DPLattice( d_lst, Md_lst, M )
-        dpl.set_attributes( 5 )
-
-        f_lst_lst = nonreducible_intersect_webs( dpl, numline, numfam, int_lst )
-        print( len( f_lst_lst ), f_lst_lst )
-        assert len( f_lst_lst ) == 80
-
-        if False:
-            pf_lst_lst = []
-            for f_lst in f_lst_lst:
-                if not contains_perm( pf_lst_lst, f_lst ):
-                    pf_lst_lst += [ f_lst ]
-
-            print( '---' )
-            for pf_lst in pf_lst_lst:
-                print( pf_lst )
-
-            print( len( f_lst_lst ), f_lst_lst )
-            print( len( pf_lst_lst ), pf_lst_lst )
-            assert len( pf_lst_lst ) == 2
+        assert str( t_lst ) == '[[e0-e1, e0-e2, 2e0-e2-e3-e4-e5]]'
 
         NSTools.set_enable_tool_dct( True )
 
@@ -196,5 +165,7 @@ if __name__ == '__main__':
     # TestNSBasis().test__get_basis_lst__rank_4__True()
     # TestNSBasis().test__get_webs__rank_4()
     # TestNSBasis().test__contains_perm__rank6()
-    # TestNSBasis().test__nonreducible_webs()
-    TestNSBasis().test__nonreducible_intersect_webs()
+    TestNSBasis().test__triples()
+
+    pass
+

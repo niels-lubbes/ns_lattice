@@ -620,9 +620,10 @@ class DPLattice:
         Returns
         -------
         Classification of DPLattices using weak equivalence. 
-        If invo_cls is True, then only return DPLattices dpl 
-        such that dpl.type is A0. If rank>7, then either 
-        dpl.type or dpl.Mtype equals A0.  
+        If rank>7, then either dpl.type or dpl.Mtype equals A0.
+        
+        If "invo_cls==True", then only return DPLattices dpl 
+        such that dpl.type is A0.   
         '''
         # check cache
         key = 'get_reduced_cls' + str( ( rank, invo_cls ) )

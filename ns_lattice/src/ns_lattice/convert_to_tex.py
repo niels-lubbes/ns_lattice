@@ -158,7 +158,6 @@ def table_to_tex( h_lst, table, replace_dct = {}, col_idx = -1, max_len = 60, ro
         the string with respect to the comma.         
     '''
     out = ''
-    out += '\n\n\\subsection{}'
     out += get_table_header( h_lst )
 
     # split columns that are too long in several rows

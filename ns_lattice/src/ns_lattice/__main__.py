@@ -116,9 +116,18 @@ def usecase__get_cls_root_bases( max_rank ):
 
 def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     '''
-    Classification NS-lattices of weak del Pezzo surfaces.  
-    
+    We output a table where each row corresponds to exactly 
+    one isomorphism class of a Neron-Severi lattices of weak 
+    del Pezzo surfaces.
+          
     See "DPLattice.usecase__get_reduced_cls_dp_lattice()".  
+    
+    The table headers of the output table mean the following:
+        #(-1)  : length of DPLattice.m1_lst
+        #R(-1) : length of DPLattice.real_m1_lst 
+        #(0)   : length of DPLattice.fam_lst
+        #R(0)  : length of DPLattice.real_fam_lst
+        P1xP1  : y iff there exists f and g in DPLattice.real_fam_lst such that f*g=1   
     
     Parameters
     ----------
@@ -128,6 +137,10 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
                     
     tex : bool
         If True, then output the classification as a table in Tex code.
+        The following Tex macros are used for the table header:        
+            \newcommand{\MmfD}{{\mathfrak{D}}}
+            \newcommand{\MbbP}{{\mathbb{P}}}    
+            \newcommand{\Mrow}[3]{\ensuremath{#1\colon #2\longrightarrow #3}}             
     '''
     NSTools.p( 'Reduced classification of DPLattice objects.' )
 
@@ -135,22 +148,23 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     # table 1
     #
     tab1 = []
-    h1_lst = ['', 'deg', 'real', 'sing', '$\MbbP^1\\times\MbbP^1$',
-              '\#(-2)', '\#(-1)', '\#(0)',
-              '\#(-2)$_\MbbR$', '\#(-1)$_\MbbR$', '\#(0)$_\MbbR$']
+    h1_lst = ['', 'deg', 'real', 'sing', 'P1xP1', '#(-1)', '#(0)', '#R(-1)', '#R(0)']
+    t1_lst = [ '', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\MmfD(B(Y))$',
+                '$\MbbP^1\times\MbbP^1$', '$\#E_\star(Y)$',
+                '\#F_\star(Y)$', '$\#E_\MbbR(Y)$', '$\#G(Y)$' ]
     idx = 0
     for rank in range( 3, max_rank + 1 ):
         for dpl in DPLattice.get_reduced_cls( rank, False ):
             row = []
             row += [idx]
             row += [dpl.get_degree()]
-            row += [dpl.Mtype]
+            row += [dpl.get_marked_Mtype()]
             row += [dpl.type]
             if dpl.contains_fam_pair():
                 row += ['y']
             else:
                 row += ['n']
-            row += dpl.get_numbers()
+            row += dpl.get_numbers()[1:3] + dpl.get_numbers()[4:]
 
             tab1 += [row]
             idx += 1
@@ -160,6 +174,7 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     #
     tab2 = []
     h2_lst = ['', 'deg', 'real', 'involution' ]
+    t2_lst = ['', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\sigma_*$']
     idx = 0
     for rank in range( 3, max_rank + 1 ):
         for dpl in DPLattice.get_reduced_cls( rank, True ):
@@ -168,7 +183,7 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
             row = []
             row += [ idx ]
             row += [ dpl.get_degree() ]
-            row += [ dpl.Mtype ]
+            row += [ dpl.get_marked_Mtype() ]
             row += [ div_tup ]
 
             tab2 += [row]
@@ -179,6 +194,7 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     #
     tab3 = []
     h3_lst = ['', 'deg', 'real', 'sing', 'root base' ]
+    t3_lst = ['', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\MmfD(B(Y))$', '$B(Y)$']
     idx = 0
     for rank in range( 3, max_rank + 1 ):
         for dpl in DPLattice.get_reduced_cls( rank, False ):
@@ -186,7 +202,7 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
             row = []
             row += [idx]
             row += [dpl.get_degree()]
-            row += [dpl.Mtype]
+            row += [dpl.get_marked_Mtype()]
             row += [dpl.type]
             row += [[ d for d in dpl.d_lst ]]
 
@@ -196,21 +212,21 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     #
     # ordering for the tables
     #
-    tab_h_lst = [( tab2, h2_lst ), ( tab3, h3_lst ), ( tab1, h1_lst )]
+    tab_h_lst = [( tab2, h2_lst, t2_lst ), ( tab3, h3_lst, t3_lst ), ( tab1, h1_lst, t1_lst )]
 
     #
     # output the tables
     #
     if not tex:
 
-        for tab, h_lst in tab_h_lst:
+        for tab, h_lst, t_lst in tab_h_lst:
 
             num_cols = len( tab[0] )
             tab = [['------'] * num_cols] + tab
             tab = [h_lst] + tab
             tab = [['------'] * num_cols] + tab
             tab += [['------'] * num_cols]
-            row_format = "{:<8}" * num_cols  # each column is 8 chars.
+            row_format = "{:<10}" * num_cols  # each column is 8 chars.
 
             for row in tab:
                 print( row_format.format( *row ) )
@@ -224,14 +240,24 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
         #
         # parameters for table_to_tex()
         #
-        max_len = 60
+        max_len = 61
         row_num = 9
         replace_dct = {'A':'A_', 'D':'D_', 'E':'E_', 'e':'e_', '[':'\\{', ']':'\\}'}
         col_idx = 1
 
         s = ''
-        for tab, h_lst in tab_h_lst:
-            s += table_to_tex( h_lst, tab, replace_dct, col_idx, max_len, row_num )
+        s += '\n\n\subsection{Classification of involution $\Mrow{\sigma_*}{N(Y)}{N(Y)}$}'
+        s += '\n\label{sec:t1}'
+        s += table_to_tex( t2_lst, tab2, replace_dct, col_idx, max_len, row_num )
+
+        s += '\n\n\subsection{Classification of root base $B(Y)$ of singular locus}'
+        s += '\n\label{sec:t2}'
+        s += table_to_tex( t3_lst, tab3, replace_dct, col_idx, max_len, row_num )
+
+
+        s += '\n\n\subsection{Cardinalities of distinguished subsets of $N(Y)$}'
+        s += '\n\label{sec:t3}'
+        s += table_to_tex( t1_lst, tab1, replace_dct, col_idx, max_len, row_num )
 
         print( s )
 
@@ -270,7 +296,8 @@ def usecase__get_classes_dp1( rank ):
 
 def usecase__hex_webs( max_rank ):
     '''
-    Obtain counter examples to hexagonal webs. 
+    Characterize triples of families of conics on weak del Pezzo surfaces
+    that are not orthogonal to any (-1)-curve. 
     
     Parameters
     ----------
@@ -358,9 +385,9 @@ if __name__ == '__main__':
 
     # usecase__get_tool_dct()
     # usecase__get_cls_root_bases( rank )
-    # usecase__get_reduced_cls_dp_lattice( rank, False )
+    usecase__get_reduced_cls_dp_lattice( rank, True )
     # usecase__get_classes_dp1( rank )
-    usecase__hex_webs( rank )
+    # usecase__hex_webs( rank )
     # usecase__graphs( rank )
     # usecase__circles()  # does not terminate within reasonable time
 

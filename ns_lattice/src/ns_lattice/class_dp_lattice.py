@@ -335,6 +335,26 @@ class DPLattice:
         return False
 
 
+    def get_marked_Mtype( self ):
+        '''
+        We mark Mtype with a '-symbol to distinguish between real 
+        structures of the same Dynkin type that are not conjugate.
+        '''
+        if self.get_degree() not in [6, 4, 2]:
+            return self.Mtype
+
+        self.set_attributes( 8 )
+        if ( self.get_degree(), self.Mtype ) not in [ ( 6, 'A1' ), ( 4, '2A1' ), ( 2, '3A1' ) ]:
+            return self.Mtype
+
+        mark = ''
+        if list( self.M.T[0] ) == [1] + ( self.get_rank() - 1 ) * [0]:
+            # in this case e0 is send to e0 by the involution self.M
+            mark = "'"
+
+        return self.Mtype + mark
+
+
     def get_basis_change( self, B ):
         '''
         Parameters

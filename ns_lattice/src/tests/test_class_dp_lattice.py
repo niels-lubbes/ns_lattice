@@ -6,6 +6,7 @@ Created on Nov 7, 2017
 
 from ns_lattice.sage_interface import sage_QQ
 from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_matrix
 
 from ns_lattice.class_div import Div
 
@@ -29,6 +30,25 @@ class TestClassDPLattice():
         assert dpl23 != dpl1123
         assert dpl23 == dpl12
 
+        NSTools.set_enable_tool_dct( True )
+
+
+    def test__get_marked_Mtype( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        # (2A1, 4A1) Neron-Severi lattice of ring torus
+        rank = 6
+        d_lst = [ 'e2-e4', 'e3-e5', 'e0-e1-e2-e4', 'e0-e1-e3-e5']
+        Md_lst = ['e4-e5', 'e0-e1-e2-e3']
+        M = [( 2, 1, 1, 1, 0, 0 ), ( -1, 0, -1, -1, 0, 0 ), ( -1, -1, 0, -1, 0, 0 ), ( -1, -1, -1, 0, 0, 0 ), ( 0, 0, 0, 0, 0, 1 ), ( 0, 0, 0, 0, 1, 0 )]
+        d_lst = [ Div.new( d, rank ) for d in d_lst ]
+        Md_lst = [ Div.new( Md, rank ) for Md in Md_lst ]
+        M = sage_matrix( M )
+        dpl = DPLattice( d_lst, Md_lst, M )
+
+        print( dpl.get_marked_Mtype() )
+
+        assert dpl.get_marked_Mtype() == "2A1"
         NSTools.set_enable_tool_dct( True )
 
 
@@ -70,6 +90,7 @@ class TestClassDPLattice():
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2')]"
         NSTools.set_enable_tool_dct( True )
 
+
     def test__get_cls_involutions__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
         rank = 4
@@ -86,6 +107,7 @@ class TestClassDPLattice():
         assert len( inv_lst ) == 4
         assert str( type_lst ) == "[('A0', 'A0'), ('A1', 'A0'), ('A1', 'A0'), ('2A1', 'A0')]"
         NSTools.set_enable_tool_dct( True )
+
 
     def test__get_cls_real_dp__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
@@ -151,9 +173,10 @@ class TestClassDPLattice():
 
 if __name__ == '__main__':
 
-    NSTools.filter( 'class_dp_lattice.py' )
+    # NSTools.filter( 'class_dp_lattice.py' )
 
-    TestClassDPLattice().test__eq()
+    # TestClassDPLattice().test__eq()
+    TestClassDPLattice().test__get_marked_Mtype()
     # TestClassDPLattice().test__get_cls_root_bases__rank_3()
     # TestClassDPLattice().test__get_cls_root_bases__rank_4()
     # TestClassDPLattice().test__get_cls_invo__rank_4()

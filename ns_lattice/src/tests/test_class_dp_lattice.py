@@ -48,7 +48,7 @@ class TestClassDPLattice():
 
         print( dpl.get_marked_Mtype() )
 
-        assert dpl.get_marked_Mtype() == "2A1"
+        assert dpl.get_marked_Mtype() == "2A1'"
         NSTools.set_enable_tool_dct( True )
 
 

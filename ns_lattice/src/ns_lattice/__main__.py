@@ -13,6 +13,8 @@ from sage_interface import sage_identity_matrix
 from sage_interface import sage_Subsets
 from sage_interface import sage_Permutations
 from sage_interface import sage_Graph
+from sage_interface import sage_gcd
+from sage_interface import sage_factor
 
 from class_ns_tools import NSTools
 
@@ -33,57 +35,6 @@ from linear_series.class_base_points import BasePointTree
 from linear_series.class_linear_series import LinearSeries
 
 from convert_to_tex import table_to_tex
-
-
-def usecase__circles():
-    '''
-    An example for how to compute circles on rational surface 
-    
-    Requires the linear_series package.
-    '''
-
-    # Blowup of projective plane in 3 colinear points
-    # and 2 infinitly near points. The image of the
-    # map associated to the linear series is a quartic
-    # del Pezzo surface with 5 families of conics.
-    # Moreover the surface contains 8 straight lines.
-    #
-    ring = PolyRing( 'x,y,z', True )
-    p1 = ( -1, 0 )
-    p2 = ( 0, 0 )
-    p3 = ( 1, 0 )
-    p4 = ( 0, 1 )
-    p5 = ( 2, 0 )
-    bp_tree = BasePointTree()
-    bp_tree.add( 'z', p1, 1 )
-    bp_tree.add( 'z', p2, 1 )
-    bp_tree.add( 'z', p3, 1 )
-    bp = bp_tree.add( 'z', p4, 1 )
-    bp.add( 't', p5, 1 )
-    ls = LinearSeries.get( 3, bp_tree )
-    NSTools.p( ls.get_bp_tree() )
-    NSTools.p( ls.get_implicit_image() )
-
-
-    # compose map associated to linear series "ls"
-    # with the inverse stereographic projection "Pinv".
-    #
-    R = PolynomialRing( QQ, 'y0,y1,y2,y3,y4,x,y,z' )
-    y0, y1, y2, y3, y4, x, y, z = R.gens()
-    delta = y1 ** 2 + y2 ** 2 + y3 ** 2 + y4 ** 2
-    Pinv = [ y0 ** 2 + delta, 2 * y0 * y1, 2 * y0 * y2, 2 * y0 * y3, 2 * y0 * y4, -y0 ** 2 + delta]
-    H = sage_eval( str( ls.pol_lst ), R.gens_dict() )
-    PinvH = [ elt.subs( {y0:H[0], y1:H[1], y2:H[2], y3:H[3], y4:H[4]} ) for elt in Pinv ]
-    NSTools.p( 'Pinv        =', Pinv )
-    NSTools.p( 'H           =', H )
-    NSTools.p( 'Pinv o H    =', PinvH )
-
-    # In order to compute the NS-lattice of the image
-    # of "PinvH" we do a base point analysis
-    #
-    #
-    ls2 = LinearSeries( [str( elt ) for elt in PinvH], ring )
-    NSTools.p( 'ls2         =', ls2.get_bp_tree() )
 
 
 def usecase__get_tool_dct():
@@ -150,8 +101,8 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
     tab1 = []
     h1_lst = ['', 'deg', 'real', 'sing', 'P1xP1', '#(-1)', '#(0)', '#R(-1)', '#R(0)']
     t1_lst = [ '', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\MmfD(B(Y))$',
-                '$\MbbP^1\times\MbbP^1$', '$\#E_\star(Y)$',
-                '\#F_\star(Y)$', '$\#E_\MbbR(Y)$', '$\#G(Y)$' ]
+                '$\MbbP^1\\times\MbbP^1$', '$\#E_\star(Y)$',
+                '$\#F_\star(Y)$', '$\#E_\MbbR(Y)$', '$\#G(Y)$' ]
     idx = 0
     for rank in range( 3, max_rank + 1 ):
         for dpl in DPLattice.get_reduced_cls( rank, False ):
@@ -247,16 +198,16 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
 
         s = ''
         s += '\n\n\subsection{Classification of involution $\Mrow{\sigma_*}{N(Y)}{N(Y)}$}'
-        s += '\n\label{sec:t1}'
+        s += '\n\label{sec:t1}\n\n'
         s += table_to_tex( t2_lst, tab2, replace_dct, col_idx, max_len, row_num )
 
         s += '\n\n\subsection{Classification of root base $B(Y)$ of singular locus}'
-        s += '\n\label{sec:t2}'
+        s += '\n\label{sec:t2}\n\n'
         s += table_to_tex( t3_lst, tab3, replace_dct, col_idx, max_len, row_num )
 
 
         s += '\n\n\subsection{Cardinalities of distinguished subsets of $N(Y)$}'
-        s += '\n\label{sec:t3}'
+        s += '\n\label{sec:t3}\n\n'
         s += table_to_tex( t1_lst, tab1, replace_dct, col_idx, max_len, row_num )
 
         print( s )
@@ -356,9 +307,136 @@ def usecase__graphs( rank ):
                      color_by_label = False,
                      layout = 'circular' ).plot()
 
-    P.save( os.environ['HOME'] + '/Documents/graph.png' )
+    P.save( os.environ['OUTPUT_PATH'] + 'graph.png' )
 
     NSTools.p( '#components =', G.connected_components_number() )
+
+
+def usecase__construct_surfaces():
+    '''
+    We construct a surface parametrization and its Neron-Severi lattice. 
+     
+    Requires the linear_series package.
+    '''
+
+    # Blowup of projective plane in 3 colinear points
+    # and 2 infinitly near points. The image of the
+    # map associated to the linear series is a quartic
+    # del Pezzo surface with 5 families of conics.
+    # Moreover the surface contains 8 straight lines.
+    #
+    ring = PolyRing( 'x,y,z', True )
+    p1 = ( -1, 0 )
+    p2 = ( 0, 0 )
+    p3 = ( 1, 0 )
+    p4 = ( 0, 1 )
+    p5 = ( 2, 0 )
+    bp_tree = BasePointTree()
+    bp_tree.add( 'z', p1, 1 )
+    bp_tree.add( 'z', p2, 1 )
+    bp_tree.add( 'z', p3, 1 )
+    bp = bp_tree.add( 'z', p4, 1 )
+    bp.add( 't', p5, 1 )
+    ls = LinearSeries.get( [3], bp_tree )
+    NSTools.p( ls.get_bp_tree() )
+    NSTools.p( 'implicit equation =\n\t', ls.get_implicit_image() )
+
+
+    # construct NS-lattice where p1=e1,...,p5=e5
+    rank = 6
+    d_lst = [ 'e0-e1-e2-e3', 'e4-e5' ]  # basepoint p5 is infinitely near to p4
+    Md_lst = []
+    M = sage_identity_matrix( 6 )
+    d_lst = [ Div.new( d, rank ) for d in d_lst ]
+    Md_lst = [ Div.new( Md, rank ) for Md in Md_lst ]
+    M = sage_matrix( M )
+    dpl = DPLattice( d_lst, Md_lst, M )
+    NSTools.p( 'Neron-Severi lattice =', dpl )
+
+    # search representative for the equivalence class in classification
+    assert dpl in DPLattice.get_reduced_cls( rank )
+
+
+def usecase__roman_circles():
+    '''
+    We compute circles on a Roman surface.
+    '''
+    # parametrization of the Roman surface
+    #
+    p_lst = '[ z^2+x^2+y^2, -z*x, -x*y, z*y ]'
+
+    # we consider the stereographic projection from
+    #     S^3 = { x in P^4 | -x0^2+x1^2+x2^2+x3^2+x4^2 = 0 }
+    # where the center of projection is (1:0:0:0:1):
+    #     (x0:x1:x2:x3:x4) |---> (x0-x4:x1:x2:x3)
+
+    # inverse stereographic projection into 3-sphere
+    #
+    s_lst = '[ y0^2+y1^2+y2^2+y3^2, 2*y0*y1, 2*y0*y2, 2*y0*y3, -y0^2+y1^2+y2^2+y3^2 ]'
+
+    # compose p_lst with s_lst
+    #
+    ring = PolyRing( 'x,y,z,y0,y1,y2,y3' )
+    x, y, z, y0, y1, y2, y3 = ring.gens()
+    p_lst = ring.coerce( p_lst )
+    s_lst = ring.coerce( s_lst )
+    dct = { y0:p_lst[0], y1:p_lst[1], y2:p_lst[2], y3:p_lst[3] }
+    sp_lst = [ s.subs( dct ) for s in s_lst ]
+    NSTools.p( 'sp_lst =' )
+    for sp in sp_lst: NSTools.p( '\t\t', sage_factor( sp ) )
+    NSTools.p( 'gcd(sp_lst) =', sage_gcd( sp_lst ) )
+
+    # determine base points
+    #
+    ring = PolyRing( 'x,y,z', True )
+    sp_lst = ring.coerce( sp_lst )
+    ls = LinearSeries( sp_lst, ring )
+    NSTools.p( ls.get_bp_tree() )
+
+    # We expect that the basepoints come from the intersection
+    # of the Roman surface with the absolute conic:
+    #    A = { (y0:y1:y2:y3) in P^3 | y0=y1^2+y2^2+y3^2 = 0 }
+    #
+    # Circles are the image via p_lst of lines that pass through
+    # complex conjugate points.
+    #
+    ring = PolyRing( 'x,y,z', False )  # reinitialize ring with updated numberfield
+    a0, a1, a2, a3 = ring.root_gens()
+
+    # a0=(1-I*sqrt(3)) with conjugate a0-1 and minimal polynomial t^2-t+1
+
+    # We recover the preimages of circles in the Roman surface
+    # under the map p_lst.
+    #
+    b = [( a0 - 1, -a0 ), ( -a0, a0 - 1 )]
+    bp_tree = BasePointTree()
+    bp = bp_tree.add( 'z', b[0], 1 )
+    bp = bp_tree.add( 'z', b[1] , 1 )
+    NSTools.p( 'basepoints =', b )
+    NSTools.p( LinearSeries.get( [1], bp_tree ) )
+
+    b = [( -a0 + 1, a0 ), ( a0, -a0 + 1 )]
+    bp_tree = BasePointTree()
+    bp = bp_tree.add( 'z', b[0], 1 )
+    bp = bp_tree.add( 'z', b[1] , 1 )
+    NSTools.p( 'basepoints =', b )
+    NSTools.p( LinearSeries.get( [1], bp_tree ) )
+
+    b = [ ( a0 - 1, a0 ), ( -a0, -a0 + 1 )]
+    bp_tree = BasePointTree()
+    bp = bp_tree.add( 'z', b[0], 1 )
+    bp = bp_tree.add( 'z', b[1] , 1 )
+    NSTools.p( 'basepoints =', b )
+    NSTools.p( LinearSeries.get( [1], bp_tree ) )
+
+    b = [( -a0 + 1, -a0 ), ( a0, a0 - 1 )]
+    bp_tree = BasePointTree()
+    bp = bp_tree.add( 'z', b[0], 1 )
+    bp = bp_tree.add( 'z', b[1] , 1 )
+    NSTools.p( 'basepoints =', b )
+    NSTools.p( LinearSeries.get( [1], bp_tree ) )
+
+    return
 
 
 if __name__ == '__main__':
@@ -368,6 +446,9 @@ if __name__ == '__main__':
     # NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
     NSTools.filter( None )
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
+
+    if 'OUTPUT_PATH' not in os.environ:
+        os.environ['OUTPUT_PATH'] = './'
 
     # NSTools.start_timer()
 
@@ -385,11 +466,12 @@ if __name__ == '__main__':
 
     # usecase__get_tool_dct()
     # usecase__get_cls_root_bases( rank )
-    usecase__get_reduced_cls_dp_lattice( rank, True )
+    # usecase__get_reduced_cls_dp_lattice( rank, True )
     # usecase__get_classes_dp1( rank )
     # usecase__hex_webs( rank )
     # usecase__graphs( rank )
-    # usecase__circles()  # does not terminate within reasonable time
+    # usecase__construct_surfaces()
+    usecase__roman_circles()
 
     #########################################
     #                                       #

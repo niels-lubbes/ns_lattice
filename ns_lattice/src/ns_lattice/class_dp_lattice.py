@@ -348,8 +348,8 @@ class DPLattice:
             return self.Mtype
 
         mark = ''
-        if list( self.M.T[0] ) == [1] + ( self.get_rank() - 1 ) * [0]:
-            # in this case e0 is send to e0 by the involution self.M
+        if list( self.M.T[0] ) != [1] + ( self.get_rank() - 1 ) * [0]:
+            # in this case e0 is not send to e0 by the involution self.M
             mark = "'"
 
         return self.Mtype + mark

@@ -4,6 +4,7 @@
 ## Introduction
 
 NS-Lattice is a Python library for doing calculations in Neron-Severi lattices of real weak del Pezzo surfaces.
+
 This library depends on [SageMath](https://SageMath.org) libraries.
 
 ## Installation
@@ -11,7 +12,7 @@ This library depends on [SageMath](https://SageMath.org) libraries.
 * Install Sage from [SageMath](https://SageMath.org).
 We assume that `sage` is accessible from your commandline interface.
 
-* Install the `NS-lattice` package: 
+* Install the `ns_lattice` package: 
 ```    
 sage -pip install ns_lattice
 ```    
@@ -63,6 +64,8 @@ print( get_divs( h, 1, -1, False ) )
 print( get_divs( h, 1, -1, True ) )
 print( len(get_divs( h, 1, -1, True ))==27 )
 ```
+Output:
+
     [e1, e0-e1-e2, 2e0-e1-e2-e3-e4-e5]
     [e1, e2, e3, e4, e5, e6, e0-e1-e2, e0-e1-e3, e0-e2-e3, e0-e1-e4, e0-e2-e4, e0-e3-e4, e0-e1-e5, e0-e2-e5, e0-e3-e5, e0-e4-e5, e0-e1-e6, e0-e2-e6, e0-e3-e6, e0-e4-e6, e0-e5-e6, 2e0-e1-e2-e3-e4-e5, 2e0-e1-e2-e3-e4-e6, 2e0-e1-e2-e3-e5-e6, 2e0-e1-e2-e4-e5-e6, 2e0-e1-e3-e4-e5-e6, 2e0-e2-e3-e4-e5-e6]    
     True

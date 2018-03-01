@@ -257,10 +257,9 @@ def usecase__hex_webs( max_rank ):
 
     for rank in range( 5, max_rank + 1 ):
         NSTools.p( 'rank =', rank )
-        # for dpl in DPLattice.get_cls_root_bases( rank ):
-        for dpl in DPLattice.get_reduced_cls( rank ):
+        for dpl in DPLattice.get_cls_root_bases( rank ):
 
-            t_lst = triples( dpl )
+            t_lst = triples( dpl, 1 )
             if t_lst != []:
                 NSTools.p( dpl )
                 NSTools.p( 'dpl.d_lst  =', dpl.d_lst )
@@ -320,7 +319,7 @@ def usecase__construct_surfaces():
     '''
 
     # Blowup of projective plane in 3 colinear points
-    # and 2 infinitly near points. The image of the
+    # and 2 infinitely near points. The image of the
     # map associated to the linear series is a quartic
     # del Pezzo surface with 5 families of conics.
     # Moreover the surface contains 8 straight lines.
@@ -340,7 +339,6 @@ def usecase__construct_surfaces():
     ls = LinearSeries.get( [3], bp_tree )
     NSTools.p( ls.get_bp_tree() )
     NSTools.p( 'implicit equation =\n\t', ls.get_implicit_image() )
-
 
     # construct NS-lattice where p1=e1,...,p5=e5
     rank = 6
@@ -405,9 +403,30 @@ def usecase__roman_circles():
 
     # a0=(1-I*sqrt(3)) with conjugate a0-1 and minimal polynomial t^2-t+1
 
-    # We recover the preimages of circles in the Roman surface
-    # under the map p_lst.
+    # we compute candidate classes of circles
     #
+    h = Div.new( '4e0-e1-e2-e3-e4-e5-e6-e7-e8' )
+    div_lst = get_divs( h, 2, -2, False ) + get_divs( h, 2, -1, False )
+    NSTools.p( 'Classes of circles up to permutation:' )
+    for c in div_lst:
+        NSTools.p( '\t\t', c )
+
+    # We recover the preimages of circles in the Roman surface
+    # under the map p_lst, by constructing for each candidate
+    # class the corresponding linear series.
+
+    # 2e0-e1-e2-e3-e4-e5-e6-e7-e8
+    b = [( a0 - 1, -a0 ), ( -a0, a0 - 1 )]
+    b += [( -a0 + 1, a0 ), ( a0, -a0 + 1 )]
+    b += [ ( a0 - 1, a0 ), ( -a0, -a0 + 1 )]
+    b += [( -a0 + 1, -a0 ), ( a0, a0 - 1 )]
+    bp_tree = BasePointTree()
+    for i in range( 6 ):
+        bp_tree.add( 'z', b[i], 1 )
+    NSTools.p( 'basepoints =', b )
+    NSTools.p( LinearSeries.get( [2], bp_tree ) )
+
+    # e0-e1-e2
     b = [( a0 - 1, -a0 ), ( -a0, a0 - 1 )]
     bp_tree = BasePointTree()
     bp = bp_tree.add( 'z', b[0], 1 )
@@ -415,6 +434,7 @@ def usecase__roman_circles():
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
+    # e0-e3-e4
     b = [( -a0 + 1, a0 ), ( a0, -a0 + 1 )]
     bp_tree = BasePointTree()
     bp = bp_tree.add( 'z', b[0], 1 )
@@ -422,6 +442,7 @@ def usecase__roman_circles():
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
+    # e0-e4-e5
     b = [ ( a0 - 1, a0 ), ( -a0, -a0 + 1 )]
     bp_tree = BasePointTree()
     bp = bp_tree.add( 'z', b[0], 1 )
@@ -429,6 +450,7 @@ def usecase__roman_circles():
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
+    # e0-e6-e7
     b = [( -a0 + 1, -a0 ), ( a0, a0 - 1 )]
     bp_tree = BasePointTree()
     bp = bp_tree.add( 'z', b[0], 1 )
@@ -450,7 +472,7 @@ if __name__ == '__main__':
     if 'OUTPUT_PATH' not in os.environ:
         os.environ['OUTPUT_PATH'] = './'
 
-    # NSTools.start_timer()
+    NSTools.start_timer()
 
     #
     # Should be between 3 and 9.
@@ -470,8 +492,9 @@ if __name__ == '__main__':
     # usecase__get_classes_dp1( rank )
     # usecase__hex_webs( rank )
     # usecase__graphs( rank )
-    # usecase__construct_surfaces()
-    usecase__roman_circles()
+    usecase__construct_surfaces()
+    # usecase__roman_circles()
+
 
     #########################################
     #                                       #
@@ -479,8 +502,8 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    # NSTools.end_timer()
-    # print( '\nThe End' )
+    NSTools.end_timer()
+    NSTools.p( 'The End' )
 
 
 

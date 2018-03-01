@@ -206,21 +206,24 @@ def contains_perm( f_lst_lst, c_lst ):
     return False
 
 
-def triples( dpl ):
+def triples( dpl, mval ):
     '''
     Parameters
     ----------
-    dpl : DPLattice
+    dpl  : DPLattice
+    mval : integer
     
     Returns
     -------
     list<(Div,Div,Div)>
         List of triples in "dpl.fam_lst":
-           [ (a,b,c),... ]
-        so that there does not exists e in "dpl.m1_lst"
-        with the property that a*e==b*e==c*e==0.
+            [ (a,b,c),... ]
+        so that 
+            (1) There does not exists e in "dpl.m1_lst"
+                with the property that a*e==b*e==c*e==0.
+            (2) 1 <= max( a*b, a*c, b*c ) <= mval.
     '''
-    key = 'triples__' + str( dpl ).replace( '\n', '---' )
+    key = 'triples__' + str( dpl ).replace( '\n', '---' ) + '---' + str( mval )
     if key in NSTools.get_tool_dct():
         return NSTools.get_tool_dct()[key]
 
@@ -231,13 +234,17 @@ def triples( dpl ):
     # that are not orthogonal to any element in e_lst
     t_lst = []
     idx_lst_lst = sage_Subsets( range( len( f_lst ) ), 3 )
-    eta = ETA( len( idx_lst_lst ), 100 )
+    eta = ETA( len( idx_lst_lst ), 500000 )
     for idx_lst in idx_lst_lst:
         eta.update( 't_lst' )
-        t = [ f_lst[idx] for idx in idx_lst ]
 
-        if max( [t[0] * t[1], t[1] * t[2], t[0] * t[2]] ) > 2:
-            continue
+        t = [ f_lst[idx] for idx in idx_lst ]
+        if t[0] * t[1] > mval: continue
+        if t[0] * t[2] > mval: continue
+        if t[1] * t[2] > mval: continue
+
+        # elements in f_lst correspond to divisor classes of curves on a
+        # surface and thus t[i]*t[j]>=1 for all i,j \in {0,1,2} so that i!=j.
 
         cont = False
         for e in e_lst:
@@ -256,29 +263,3 @@ def triples( dpl ):
     NSTools.save_tool_dct()
 
     return t_lst
-
-
-
-
-#     # construct list of pairs (a,b) s.t. a*b==2
-#     #
-#     p_lst = []
-#     for idx_lst in sage_Subsets( range( len( f_lst ) ), 2 ):
-#         p = [ f_lst[idx] for idx in idx_lst ]
-#         if p[0] * p[1] == 2: p_lst += [p]
-#     NSTools.p( 'p_lst =', p_lst )
-#
-#     # triples (a,b,c) s.t. a*b==2 and c*f==1 for all families f
-#     # and the triples are not orthogonal to any element in e_lst
-#     #
-#     w_lst = []
-#     eta = ETA( len( f_lst ), 10 )
-#     for f in f_lst:
-#         eta.update( 'w_lst' )
-#         if set( [ f * g for g in f_lst] ) == set( [0, 1] ):
-#             for w in [ p + [f] for p in p_lst ]:
-#                 if [0, 0, 0] not in [ [a * e for a in w] for e in e_lst ]:
-#                     if not contains_perm( w_lst, w ):
-#                         w_lst += [w]
-#     NSTools.p( 'w_lst =', w_lst )
-

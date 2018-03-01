@@ -148,7 +148,7 @@ class TestNSBasis( object ):
 
         dpl = DPLattice( d_lst, Md_lst, M )
 
-        t_lst = triples( dpl )
+        t_lst = triples( dpl, 2 )
         print( t_lst )
 
         assert str( t_lst ) == '[[e0-e1, e0-e2, 2e0-e2-e3-e4-e5]]'

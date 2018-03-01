@@ -74,6 +74,17 @@ class TestDivInLattice:
         NSTools.set_enable_tool_dct( True )
 
 
+    def test__get_divs__roman_surface( self ):
+
+        NSTools.set_enable_tool_dct( False )
+        h = Div.new( '4e0-e1-e2-e3-e4-e5-e6-e7-e8' )
+        out_lst = get_divs( h, 2, -2, False )
+        out_lst += get_divs( h, 2, -1, False )
+        print( out_lst )
+        assert str( out_lst ) == '[2e0-e1-e2-e3-e4-e5-e6, e0-e1-e2]'
+        NSTools.set_enable_tool_dct( True )
+
+
     def test__get_divs__fam_classes__rank_6__perm_false( self ):
         NSTools.set_enable_tool_dct( False )
         chk_lst = ['e0-e1', '2e0-e1-e2-e3-e4']
@@ -131,5 +142,8 @@ if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    TestDivInLattice().test__get_divs__fam_classes__rank_6__perm_true()
+    # TestDivInLattice().test__get_divs__fam_classes__rank_6__perm_true()
     # TestDivInLattice().test__get_divs__minus_2_classes__rank_5__perm_true()
+    # TestDivInLattice().test__get_divs__minus_1_classes__rank_9()
+    # TestDivInLattice().test__get_divs__roman_surface()
+

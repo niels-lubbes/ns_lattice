@@ -153,8 +153,7 @@ def get_divs( d, dc, cc, perm = False ):
                 raise Exception( 'dd_tail =', dd_tail )
             continue
 
-        # Cauchy-Schwarz inequality holds?
-        # Cauchy-Schwarz inequality: <x,y>^2 <= <x,x>*<y,y>
+        # Cauchy-Schwarz inequality <x,y>^2 <= <x,x>*<y,y> holds?
         #
         prv_eq_diff = cur_eq_diff
         cur_eq_diff = abs( dc_tail * dc_tail - dd_tail * cc_tail )
@@ -168,8 +167,6 @@ def get_divs( d, dc, cc, perm = False ):
             break  # out of while loop
 
         # obtain all possible [d1*c1+1,...,dr*cr+1]
-        # if d1==d2==...==dr and perm==True, then
-        # we do the permutations at
         #
         r = d.rank() - 1
         if perm and len( set( d[1:] ) ) != 1:

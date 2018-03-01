@@ -167,7 +167,7 @@ if __name__ == '__main__':
     NSTools.filter( None )
 
     # TestDPInvolutions().test__complete_basis__12_23_rank4()
-    TestDPInvolutions().test__complete_basis__1123_12_23_rank4()
+    # TestDPInvolutions().test__complete_basis__1123_12_23_rank4()
     # TestDPInvolutions().test__complete_basis__12__rank4()
     # TestDPInvolutions().test__complete_basis__1123__rank4()
     # TestDPInvolutions().test__complete_basis__1123_12__rank4()

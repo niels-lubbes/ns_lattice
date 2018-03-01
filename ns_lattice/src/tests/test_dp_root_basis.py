@@ -114,6 +114,6 @@ if __name__ == '__main__':
     NSTools.filter( None )
 
     # TestDPRootBasis().test__get_ext_graph()
-    TestDPRootBasis().test__get_root_bases_orbit__rank_3()
+    # TestDPRootBasis().test__get_root_bases_orbit__rank_3()
     # TestDPRootBasis().test__get_root_bases_orbit__rank_4()
 

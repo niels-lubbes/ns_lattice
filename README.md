@@ -196,6 +196,7 @@ print( dpl1 == dpl2 )
 
 ```
 Output:
+
     True
      
     
@@ -235,6 +236,7 @@ print 'dpl2 =', dpl2
 
 ```
 Output:
+
     dpl1 =
     ==================================================
     Degree          = 6

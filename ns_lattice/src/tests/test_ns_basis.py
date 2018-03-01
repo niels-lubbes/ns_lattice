@@ -62,14 +62,12 @@ class TestNSBasis( object ):
         print( str( int_mat ) )
         assert str( int_mat ) == '[(0, 1, 0, 0), (1, 0, 0, 0), (0, 0, -1, 0), (0, 0, 0, -1)]'
 
-
         NSTools.set_enable_tool_dct( True )
 
 
     def test__get_basis_lst__rank_4__True( self ):
 
         NSTools.set_enable_tool_dct( False )
-
 
         rank = 4
 
@@ -93,9 +91,6 @@ class TestNSBasis( object ):
             int_mat = list( dplB.m1_lst[0].int_mat )
             print( str( int_mat ) )
             assert str( int_mat ) == '[(0, 1, 0, 0), (1, 0, 0, 0), (0, 0, -1, 0), (0, 0, 0, -1)]'
-
-            # print( list( B ) )
-            # print( dplB )
 
         NSTools.set_enable_tool_dct( True )
 
@@ -165,7 +160,7 @@ if __name__ == '__main__':
     # TestNSBasis().test__get_basis_lst__rank_4__True()
     # TestNSBasis().test__get_webs__rank_4()
     # TestNSBasis().test__contains_perm__rank6()
-    TestNSBasis().test__triples()
+    # TestNSBasis().test__triples()
 
     pass
 

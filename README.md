@@ -44,6 +44,10 @@ sage -pip uninstall ns_lattice
 
 See also [this file](https://github.com/niels-lubbes/linear_series/blob/master/ns_lattice/src/ns_lattice/__main__.py) 
 for example usecases. 
+See the [source code](https://github.com/niels-lubbes/linear_series/blob/master/ns_lattice/src/ns_lattice)
+the io-specification of each function.
+The [test functions](https://github.com/niels-lubbes/linear_series/blob/master/ns_lattice/src/tests)
+might be informative for how to call function.
 
 For running the examples below, either copy paste the code into the Sage interface or run them as a Python module:
 
@@ -213,9 +217,9 @@ from ns_lattice.ns_basis import get_bases_lst
 from ns_lattice.class_ns_tools import NSTools
 from ns_lattice.sage_interface import sage_matrix
 from ns_lattice.sage_interface import sage_ZZ
-#from ns_lattice.sage_interface import sage_register_unpickle_override
-#sage_register_unpickle_override( 'class_div', 'Div', Div )
-#sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
+from ns_lattice.sage_interface import sage_register_unpickle_override
+sage_register_unpickle_override( 'class_div', 'Div', Div )
+sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
 NSTools.filter( 'no-output' ) # disable debug info
 
 # construct lattice

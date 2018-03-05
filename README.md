@@ -1,4 +1,4 @@
-# Neron-Severi lattice 
+# NS-Lattice 
 
 
 ## Introduction
@@ -47,7 +47,7 @@ for example usecases.
 See the [source code](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice)
 the io-specification of each function.
 The [test functions](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/tests)
-might be informative for how to call function.
+might be informative for how to call each function.
 
 For running the examples below, either copy paste the code into the Sage interface or run them as a Python module:
 

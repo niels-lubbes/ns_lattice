@@ -44,7 +44,7 @@ def usecase__get_tool_dct():
 
     # list keys
     for key in NSTools.get_tool_dct():
-        NSTools.p( 'key =', key )
+        NSTools.p( 'key =', key.replace( '\n', ' --- ' ) )
 
 
 def usecase__get_cls_root_bases( max_rank ):
@@ -442,7 +442,7 @@ def usecase__roman_circles():
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
-    # e0-e4-e5
+    # e0-e5-e6
     b = [ ( a0 - 1, a0 ), ( -a0, -a0 + 1 )]
     bp_tree = BasePointTree()
     bp = bp_tree.add( 'z', b[0], 1 )
@@ -450,7 +450,7 @@ def usecase__roman_circles():
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
-    # e0-e6-e7
+    # e0-e7-e8
     b = [( -a0 + 1, -a0 ), ( a0, a0 - 1 )]
     bp_tree = BasePointTree()
     bp = bp_tree.add( 'z', b[0], 1 )
@@ -465,8 +465,8 @@ if __name__ == '__main__':
 
     #  Debug output settings
     #
-    # NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
-    NSTools.filter( None )
+    NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
+    # NSTools.filter( None ) # uncomment to show all output
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
     if 'OUTPUT_PATH' not in os.environ:
@@ -487,13 +487,13 @@ if __name__ == '__main__':
     #########################################
 
     # usecase__get_tool_dct()
-    # usecase__get_cls_root_bases( rank )
-    # usecase__get_reduced_cls_dp_lattice( rank, True )
-    # usecase__get_classes_dp1( rank )
-    # usecase__hex_webs( rank )
-    # usecase__graphs( rank )
+    usecase__get_cls_root_bases( rank )
+    usecase__get_reduced_cls_dp_lattice( rank, False )
+    usecase__get_classes_dp1( rank )
+    usecase__hex_webs( rank )
+    usecase__graphs( rank )
     usecase__construct_surfaces()
-    # usecase__roman_circles()
+    usecase__roman_circles()
 
 
     #########################################

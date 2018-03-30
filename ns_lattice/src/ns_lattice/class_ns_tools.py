@@ -3,8 +3,8 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 7, 2017
 @author: Niels Lubbes
 '''
-from sage_interface import sage_load
-from sage_interface import sage_save
+from ns_lattice.sage_interface import sage_load
+from ns_lattice.sage_interface import sage_save
 
 import inspect
 import time

@@ -8,28 +8,28 @@ of weak Del Pezzo surfaces of degree between 1 and 7.
 '''
 import time
 
-from sage_interface import sage_identity_matrix
-from sage_interface import sage_ZZ
-from sage_interface import sage_QQ
-from sage_interface import sage_Subsets
-from sage_interface import sage_VectorSpace
-from sage_interface import sage_vector
+from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_ZZ
+from ns_lattice.sage_interface import sage_QQ
+from ns_lattice.sage_interface import sage_Subsets
+from ns_lattice.sage_interface import sage_VectorSpace
+from ns_lattice.sage_interface import sage_vector
 
-from div_in_lattice import get_divs
-from div_in_lattice import get_indecomp_divs
-from div_in_lattice import get_ak
+from ns_lattice.div_in_lattice import get_divs
+from ns_lattice.div_in_lattice import get_indecomp_divs
+from ns_lattice.div_in_lattice import get_ak
 
-from dp_root_bases import get_ext_graph
-from dp_root_bases import get_dynkin_type
-from dp_root_bases import get_root_bases_orbit
-from dp_root_bases import is_root_basis
+from ns_lattice.dp_root_bases import get_ext_graph
+from ns_lattice.dp_root_bases import get_dynkin_type
+from ns_lattice.dp_root_bases import get_root_bases_orbit
+from ns_lattice.dp_root_bases import is_root_basis
 
-from dp_involutions import basis_to_involution
-from dp_involutions import is_integral_involution
+from ns_lattice.dp_involutions import basis_to_involution
+from ns_lattice.dp_involutions import is_integral_involution
 
-from class_ns_tools import NSTools
+from ns_lattice.class_ns_tools import NSTools
 
-from class_div import Div
+from ns_lattice.class_div import Div
 
 
 class DPLattice:

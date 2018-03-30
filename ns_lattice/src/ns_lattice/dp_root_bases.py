@@ -9,24 +9,24 @@ of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 '''
 import time
 
-from sage_interface import sage_VectorSpace
-from sage_interface import sage_vector
-from sage_interface import sage_QQ
-from sage_interface import sage_identity_matrix
-from sage_interface import sage_Graph
-from sage_interface import sage_Partitions
-from sage_interface import sage_RootSystem
-from sage_interface import sage_Subsets
-from sage_interface import sage_Combinations
-from sage_interface import sage_Permutations
+from ns_lattice.sage_interface import sage_VectorSpace
+from ns_lattice.sage_interface import sage_vector
+from ns_lattice.sage_interface import sage_QQ
+from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_Graph
+from ns_lattice.sage_interface import sage_Partitions
+from ns_lattice.sage_interface import sage_RootSystem
+from ns_lattice.sage_interface import sage_Subsets
+from ns_lattice.sage_interface import sage_Combinations
+from ns_lattice.sage_interface import sage_Permutations
 
-from class_ns_tools import NSTools
+from ns_lattice.class_ns_tools import NSTools
 
-from class_div import Div
+from ns_lattice.class_div import Div
 
-from div_in_lattice import get_divs
-from div_in_lattice import get_indecomp_divs
-from div_in_lattice import get_ak
+from ns_lattice.div_in_lattice import get_divs
+from ns_lattice.div_in_lattice import get_indecomp_divs
+from ns_lattice.div_in_lattice import get_ak
 
 
 def is_root_basis( d_lst ):

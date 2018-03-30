@@ -4,9 +4,9 @@ Created on Jan 27, 2018
 @author: Niels Lubbes
 '''
 
-from sage_interface import sage_n
+from ns_lattice.sage_interface import sage_n
 
-from class_ns_tools import NSTools
+from ns_lattice.class_ns_tools import NSTools
 
 import time
 

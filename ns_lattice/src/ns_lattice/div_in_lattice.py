@@ -14,14 +14,14 @@ See
 
 import time
 
-from sage_interface import sage_Combinations
-from sage_interface import sage_Compositions
-from sage_interface import sage_Partitions
-from sage_interface import sage_ZZ
-from sage_interface import sage_Permutations
+from ns_lattice.sage_interface import sage_Combinations
+from ns_lattice.sage_interface import sage_Compositions
+from ns_lattice.sage_interface import sage_Partitions
+from ns_lattice.sage_interface import sage_ZZ
+from ns_lattice.sage_interface import sage_Permutations
 
-from class_ns_tools import NSTools
-from class_div import Div
+from ns_lattice.class_ns_tools import NSTools
+from ns_lattice.class_div import Div
 
 
 def get_divs( d, dc, cc, perm = False ):

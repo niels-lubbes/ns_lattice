@@ -3,23 +3,23 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 9, 2017
 @author: Niels Lubbes
 '''
-from sage_interface import sage_identity_matrix
-from sage_interface import sage_matrix
-from sage_interface import sage_ZZ
-from sage_interface import sage_Permutations
-from sage_interface import sage_Subsets
+from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_matrix
+from ns_lattice.sage_interface import sage_ZZ
+from ns_lattice.sage_interface import sage_Permutations
+from ns_lattice.sage_interface import sage_Subsets
 
-from class_div import Div
+from ns_lattice.class_div import Div
 
-from div_in_lattice import get_indecomp_divs
-from div_in_lattice import get_ak
-from div_in_lattice import get_divs
+from ns_lattice.div_in_lattice import get_indecomp_divs
+from ns_lattice.div_in_lattice import get_ak
+from ns_lattice.div_in_lattice import get_divs
 
-from class_dp_lattice import DPLattice
+from ns_lattice.class_dp_lattice import DPLattice
 
-from class_eta import ETA
+from ns_lattice.class_eta import ETA
 
-from class_ns_tools import NSTools
+from ns_lattice.class_ns_tools import NSTools
 
 
 def get_bases_lst( a_lst, M, d_lst, m1_lst, perm = False ):

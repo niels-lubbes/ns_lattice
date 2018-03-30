@@ -3,9 +3,9 @@ Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
 
-from sage_interface import sage_ZZ
-from sage_interface import sage_diagonal_matrix
-from sage_interface import sage_vector
+from ns_lattice.sage_interface import sage_ZZ
+from ns_lattice.sage_interface import sage_diagonal_matrix
+from ns_lattice.sage_interface import sage_vector
 
 
 class Div:

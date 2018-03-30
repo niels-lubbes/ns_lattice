@@ -4,13 +4,13 @@ Created on Dec 14, 2017
 @author: Niels Lubbes
 '''
 
-from sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_identity_matrix
 
-from class_div import Div
+from ns_lattice.class_div import Div
 
-from class_dp_lattice import DPLattice
+from ns_lattice.class_dp_lattice import DPLattice
 
-from class_ns_tools import NSTools
+from ns_lattice.class_ns_tools import NSTools
 
 
 def break_col( col, max_len, row_num ):

@@ -2,49 +2,39 @@
 Use of this source code is governed by a MIT-style license that can be found in the LICENSE file.
 Created on Aug 11, 2016
 @author: Niels Lubbes
-
 '''
+
 import sys
 import os
 
-from sage_interface import sage_matrix
-from sage_interface import sage_ZZ
-from sage_interface import sage_identity_matrix
-from sage_interface import sage_Subsets
-from sage_interface import sage_Permutations
-from sage_interface import sage_Graph
-from sage_interface import sage_gcd
-from sage_interface import sage_factor
+from ns_lattice.sage_interface import sage_matrix
+from ns_lattice.sage_interface import sage_ZZ
+from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.sage_interface import sage_Subsets
+from ns_lattice.sage_interface import sage_Permutations
+from ns_lattice.sage_interface import sage_Graph
+from ns_lattice.sage_interface import sage_gcd
+from ns_lattice.sage_interface import sage_factor
 
-from class_ns_tools import NSTools
+from ns_lattice.class_ns_tools import NSTools
 
-from class_div import Div
+from ns_lattice.class_div import Div
 
-from div_in_lattice import get_divs
-from div_in_lattice import get_ak
+from ns_lattice.div_in_lattice import get_divs
+from ns_lattice.div_in_lattice import get_ak
 
-from class_dp_lattice import DPLattice
+from ns_lattice.class_dp_lattice import DPLattice
 
-from ns_basis import get_bases_lst
-from ns_basis import get_webs
-from ns_basis import contains_perm
-from ns_basis import triples
+from ns_lattice.ns_basis import get_bases_lst
+from ns_lattice.ns_basis import get_webs
+from ns_lattice.ns_basis import contains_perm
+from ns_lattice.ns_basis import triples
+
+from ns_lattice.convert_to_tex import table_to_tex
 
 from linear_series.class_poly_ring import PolyRing
 from linear_series.class_base_points import BasePointTree
 from linear_series.class_linear_series import LinearSeries
-
-from convert_to_tex import table_to_tex
-
-
-def usecase__get_tool_dct():
-    '''    
-    List keys in NSTools.get_tool_dct().
-    '''
-
-    # list keys
-    for key in NSTools.get_tool_dct():
-        NSTools.p( 'key =', key.replace( '\n', ' --- ' ) )
 
 
 def usecase__get_cls_root_bases( max_rank ):
@@ -486,7 +476,6 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    # usecase__get_tool_dct()
     usecase__get_cls_root_bases( rank )
     usecase__get_reduced_cls_dp_lattice( rank, False )
     usecase__get_classes_dp1( rank )
@@ -494,7 +483,6 @@ if __name__ == '__main__':
     usecase__graphs( rank )
     usecase__construct_surfaces()
     usecase__roman_circles()
-
 
     #########################################
     #                                       #

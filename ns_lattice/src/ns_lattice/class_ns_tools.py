@@ -156,10 +156,8 @@ class NSTools():
 
                 NSTools.filter_unset()
                 NSTools.p( 'Cannot load ".__tool_dct": ', e )
-                NSTools.p( 'Exiting...' )
                 NSTools.filter_reset()
-                sys.exit()
-                # NSTools.__tool_dct = {}
+                NSTools.__tool_dct = {}
 
         return NSTools.__tool_dct
 

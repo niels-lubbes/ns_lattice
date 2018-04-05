@@ -10,4 +10,4 @@
 # md viewer files
 .*.md.html
 
-/src/test_tools.sobj
+/src/ns_lattice/test_tools.sobj

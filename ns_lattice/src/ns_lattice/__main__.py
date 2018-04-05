@@ -455,8 +455,10 @@ if __name__ == '__main__':
 
     #  Debug output settings
     #
-    NSTools.filter( '__main__.py' )  # only print if output by module <file_name>
-    # NSTools.filter( None ) # uncomment to show all output
+    mod_lst = []
+    mod_lst += ['__main__.py']
+    NSTools.filter( mod_lst )  # output only from specified modules
+    # NSTools.filter( None )  # print all verbose output, comment to disable.
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
     if 'OUTPUT_PATH' not in os.environ:

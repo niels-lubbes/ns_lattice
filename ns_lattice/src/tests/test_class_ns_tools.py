@@ -3,29 +3,29 @@ Use of this source code is governed by a MIT-style license that can be found in 
 Created on Feb 13, 2017
 @author: Niels Lubbes
 '''
+
 from ns_lattice.class_ns_tools import NSTools
+
 
 class TestClassNSTools:
 
 
     def test__p( self ):
 
-        nt = NSTools()
+        NSTools.filter( None )
+        assert NSTools.p( 'Hello world!' ) != None
 
-        nt.filter( None )
-        assert nt.p( 'Hello world!' ) != None
+        NSTools.filter( ['another_class.py'] )
+        assert NSTools.p( 'No output since called from another class.' ) == None
 
-        nt.filter( 'another_class.py' )
-        assert nt.p( 'No output since called from another class.' ) == None
+        NSTools.filter_unset()
+        assert NSTools.p( 'Filter is disabled so output this string.' ) != None
 
-        nt.filter_unset()
-        assert nt.p( 'Filter is disabled so output this string.' ) != None
+        NSTools.filter_reset()
+        assert NSTools.p( 'Filter is enabled again so do not output.' ) == None
 
-        nt.filter_reset()
-        assert nt.p( 'Filter is enabled again so do not output.' ) == None
-
-        nt.filter( 'test_class_ns_tools.py' )
-        assert nt.p( 'Only output if called from this class' ) != None
+        NSTools.filter( ['test_class_ns_tools.py'] )
+        assert NSTools.p( 'Only output if called from this class' ) != None
 
 
     def test__tool_dct( self ):

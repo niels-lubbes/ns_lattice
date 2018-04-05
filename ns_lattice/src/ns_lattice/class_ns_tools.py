@@ -34,23 +34,27 @@ class NSTools():
     __end_time = None
 
     # private static variables used by ".p()"
+    # If "__filter_fname_lst" equals [] then output is surpressed.
+    # If "__filter_fname_lst" equals None the no output is surpressed
     #
-    __filter_fname = None
-    __prev_filter_fname = None
+    __filter_fname_lst = []
+    __prev_filter_fname_lst = None
 
 
     @staticmethod
-    def filter( filter_fname ):
+    def filter( filter_fname_lst ):
         '''
-        It is adviced to access this method as NSTools.filter().  
+        It is adviced to access this method as statically as .filter().  
+        See .p() for more details.
         
         Parameters
         ----------
-        filter_fname : str 
-            File name. 
+        filter_fname_lst : list<str> 
+            List of file names for Python modules.
+            If None, then no output is surpressed by method ".p()". 
         '''
-        NSTools.__filter_fname = filter_fname
-        NSTools.__prev_filter_fname = filter_fname
+        NSTools.__filter_fname_lst = filter_fname_lst
+        NSTools.__prev_filter_fname_lst = filter_fname_lst
 
 
     @staticmethod
@@ -58,7 +62,7 @@ class NSTools():
         '''
         Output via ".out" will not be surpressed.
         '''
-        NSTools.__filter_fname = None
+        NSTools.__filter_fname_lst = None
 
 
     @staticmethod
@@ -66,7 +70,7 @@ class NSTools():
         '''
         Resets filter state to before previous ".filter_unset()" call.
         '''
-        NSTools.__filter_fname = NSTools.__prev_filter_fname
+        NSTools.__filter_fname_lst = NSTools.__prev_filter_fname_lst
 
 
     @staticmethod
@@ -93,13 +97,14 @@ class NSTools():
         '''
         # collect relevant info from stack trace
         sk_lst_lst = inspect.stack()
-        file_name = str( sk_lst_lst[1][1] )
+        file_name = os.path.basename( str( sk_lst_lst[1][1] ) )  # exclude path from file name
         line = str( sk_lst_lst[1][2] )
         method_name = str( sk_lst_lst[1][3] )
 
-        # only output when op is called from "op.input_file_name"
-        if NSTools.__filter_fname != None:
-            if not file_name.endswith( NSTools.__filter_fname ):
+        # only output when .p() is called from module whose
+        # file name is in .__filter_fname_lst
+        if NSTools.__filter_fname_lst != None:
+            if not file_name in NSTools.__filter_fname_lst:
                 return
 
         # construct output string

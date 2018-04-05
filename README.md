@@ -58,9 +58,14 @@ __Example 1: Finding classes in Neron-Severi lattice with prescribed intersectio
 ```python
 # import required libraries
 from ns_lattice.class_div import Div
+from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.div_in_lattice import get_divs
 from ns_lattice.sage_interface import sage_register_unpickle_override
+from ns_lattice.class_ns_tools import NSTools
+NSTools.filter([]) # disable verbose output
 sage_register_unpickle_override( 'class_div', 'Div', Div )
+sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
+
 
 # find (-1)-classes in Neron-Severi lattice of cubic del Pezzo surface
 h = Div.new('3e0-e1-e2-e3-e4-e5-e6',7)
@@ -80,6 +85,8 @@ __Example 2: Equivalence classes of Neron-Severi lattice of real sextic weak del
 # import required libraries
 from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.sage_interface import sage_register_unpickle_override
+from ns_lattice.class_ns_tools import NSTools
+NSTools.filter([]) # disable verbose output
 sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
 
 # classification of rank 4 lattices
@@ -109,6 +116,8 @@ from ns_lattice.class_div import Div
 from ns_lattice.dp_involutions import basis_to_involution
 from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.sage_interface import sage_register_unpickle_override
+from ns_lattice.class_ns_tools import NSTools
+NSTools.filter([]) # disable verbose output
 sage_register_unpickle_override( 'class_div', 'Div', Div )
 sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
 
@@ -170,9 +179,9 @@ from ns_lattice.dp_involutions import basis_to_involution
 from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.sage_interface import sage_register_unpickle_override
 from ns_lattice.class_ns_tools import NSTools
+NSTools.filter([]) # disable verbose output
 sage_register_unpickle_override( 'class_div', 'Div', Div )
 sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
-NSTools.filter( 'no-output' ) # disable debug info
 
 # construct first lattice
 a1=Div.new('e2-e4',6)
@@ -214,13 +223,13 @@ from ns_lattice.class_div import Div
 from ns_lattice.dp_involutions import basis_to_involution
 from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.ns_basis import get_bases_lst
-from ns_lattice.class_ns_tools import NSTools
 from ns_lattice.sage_interface import sage_matrix
 from ns_lattice.sage_interface import sage_ZZ
 from ns_lattice.sage_interface import sage_register_unpickle_override
+from ns_lattice.class_ns_tools import NSTools
+NSTools.filter([]) # disable verbose output
 sage_register_unpickle_override( 'class_div', 'Div', Div )
 sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
-NSTools.filter( 'no-output' ) # disable debug info
 
 # construct lattice
 a = Div.new('e0-e1-e2-e3',4)

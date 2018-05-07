@@ -484,7 +484,7 @@ if __name__ == '__main__':
     usecase__hex_webs( rank )
     usecase__graphs( rank )
     usecase__construct_surfaces()
-    usecase__roman_circles()
+    # usecase__roman_circles() # takes about 3 minutes
 
     #########################################
     #                                       #

@@ -13,7 +13,7 @@ from setuptools import setup
 
 setup( 
     name = 'ns_lattice',
-    version = '1',
+    version = '2',
     description = 'Algorithms for computing in Neron-Severi lattice',
     classifiers = [
         'Development Status :: 3 - Alpha',
@@ -28,7 +28,8 @@ setup(
     license = 'MIT',
     package_dir = {'ns_lattice': 'src/ns_lattice'},
     packages = ['ns_lattice'],
-    include_package_data = True,
+    package_data = {'ns_lattice': ['ns_tools.sobj']},
+    # include_package_data = True,
     install_requires = ['linear_series'],
     test_suite = 'nose.collector',
     tests_require = ['nose'],

@@ -11,29 +11,29 @@ https://pypi.python.org/pypi?%3Aaction=list_classifiers
 from setuptools import setup
 
 
-setup( name = 'ns_lattice',
-       version = '0',
-       description = 'Algorithms for computing in Neron-Severi lattice',
-       classifiers = [
-           'Development Status :: 3 - Alpha',
-           'License :: OSI Approved :: MIT License',
-           'Programming Language :: Python :: 2',
-           'Programming Language :: Python :: 3',
-           'Topic :: Scientific/Engineering :: Mathematics',
-           ],
-      keywords = 'Neron-Severi-lattice',
-      url = 'http://github.com/niels-lubbes/ns_lattice',
-      author = 'Niels Lubbes',
-      license = 'MIT',
-      package_dir = {'': 'src'},
-      packages = ['ns_lattice'],
-      install_requires = ['linear_series'],
-      test_suite = 'nose.collector',
-      tests_require = ['nose'],
-      entry_points = {
-          'console_scripts': ['run-lattice=ns_lattice.__main__:main'],
-      },
-      include_package_data = True,
-      zip_safe = False )
-
-
+setup( 
+    name = 'ns_lattice',
+    version = '1',
+    description = 'Algorithms for computing in Neron-Severi lattice',
+    classifiers = [
+        'Development Status :: 3 - Alpha',
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 3',
+        'Topic :: Scientific/Engineering :: Mathematics',
+        ],
+    keywords = 'Neron-Severi-lattice',
+    url = 'http://github.com/niels-lubbes/ns_lattice',
+    author = 'Niels Lubbes',
+    license = 'MIT',
+    package_dir = {'ns_lattice': 'src/ns_lattice'},
+    packages = ['ns_lattice'],
+    include_package_data = True,
+    install_requires = ['linear_series'],
+    test_suite = 'nose.collector',
+    tests_require = ['nose'],
+    entry_points = {
+        'console_scripts': ['run-lattice=ns_lattice.__main__:main'],
+    },
+    zip_safe = False
+    )

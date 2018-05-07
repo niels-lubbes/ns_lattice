@@ -56,18 +56,10 @@ might be informative for how to call each function.
 
 __Example 1: Finding classes in Neron-Severi lattice with prescribed intersection products__
 ```python
-# import required libraries
-from ns_lattice.class_div import Div
-from ns_lattice.class_dp_lattice import DPLattice
-from ns_lattice.div_in_lattice import get_divs
-from ns_lattice.sage_interface import sage_register_unpickle_override
-from ns_lattice.class_ns_tools import NSTools
-NSTools.filter([]) # disable verbose output
-sage_register_unpickle_override( 'class_div', 'Div', Div )
-sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
-
-
 # find (-1)-classes in Neron-Severi lattice of cubic del Pezzo surface
+from ns_lattice.class_div import Div
+from ns_lattice.div_in_lattice import get_divs
+
 h = Div.new('3e0-e1-e2-e3-e4-e5-e6',7)
 print( get_divs( h, 1, -1, False ) )
 print( get_divs( h, 1, -1, True ) )
@@ -82,14 +74,8 @@ Output:
     
 __Example 2: Equivalence classes of Neron-Severi lattice of real sextic weak del Pezzo surface__
 ```python
-# import required libraries
-from ns_lattice.class_dp_lattice import DPLattice
-from ns_lattice.sage_interface import sage_register_unpickle_override
-from ns_lattice.class_ns_tools import NSTools
-NSTools.filter([]) # disable verbose output
-sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
-
 # classification of rank 4 lattices
+from ns_lattice.class_dp_lattice import DPLattice
 for dpl in DPLattice.get_reduced_cls( 4 ): print dpl.get_marked_Mtype(),'\t', dpl.type
 ```
 Output:    
@@ -111,17 +97,11 @@ Output:
  
 __Example 3: Create Neron-Severi lattice of weak del Pezzo surface of degree 4__
  ```python
-# import required libraries
+# construct lattice
 from ns_lattice.class_div import Div
 from ns_lattice.dp_involutions import basis_to_involution
 from ns_lattice.class_dp_lattice import DPLattice
-from ns_lattice.sage_interface import sage_register_unpickle_override
-from ns_lattice.class_ns_tools import NSTools
-NSTools.filter([]) # disable verbose output
-sage_register_unpickle_override( 'class_div', 'Div', Div )
-sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
 
-# construct lattice
 a1=Div.new('e2-e4',6)
 a2=Div.new('e3-e5',6)
 a3=Div.new('e0-e1-e2-e4',6)
@@ -177,11 +157,6 @@ __Example 4: Determine isomorphism of Neron-Severi lattices of real weak del Pez
 from ns_lattice.class_div import Div
 from ns_lattice.dp_involutions import basis_to_involution
 from ns_lattice.class_dp_lattice import DPLattice
-from ns_lattice.sage_interface import sage_register_unpickle_override
-from ns_lattice.class_ns_tools import NSTools
-NSTools.filter([]) # disable verbose output
-sage_register_unpickle_override( 'class_div', 'Div', Div )
-sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
 
 # construct first lattice
 a1=Div.new('e2-e4',6)
@@ -225,11 +200,6 @@ from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.ns_basis import get_bases_lst
 from ns_lattice.sage_interface import sage_matrix
 from ns_lattice.sage_interface import sage_ZZ
-from ns_lattice.sage_interface import sage_register_unpickle_override
-from ns_lattice.class_ns_tools import NSTools
-NSTools.filter([]) # disable verbose output
-sage_register_unpickle_override( 'class_div', 'Div', Div )
-sage_register_unpickle_override( 'class_dp_lattice', 'DPLattice', DPLattice )
 
 # construct lattice
 a = Div.new('e0-e1-e2-e3',4)

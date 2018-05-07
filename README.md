@@ -76,6 +76,9 @@ __Example 2: Equivalence classes of Neron-Severi lattice of real sextic weak del
 ```python
 # classification of rank 4 lattices
 from ns_lattice.class_dp_lattice import DPLattice
+from ns_lattice.class_ns_tools import NSTools
+# NSTools.filter(None) uncomment to show verbose output
+
 for dpl in DPLattice.get_reduced_cls( 4 ): print dpl.get_marked_Mtype(),'\t', dpl.type
 ```
 Output:    

@@ -72,7 +72,6 @@ class TestClassDPLattice():
         assert len( bas_lst ) == 6
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_cls_root_bases__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
         rank = 4
@@ -151,7 +150,7 @@ class TestClassDPLattice():
         # comment for long computation
         return
 
-        # NSTools.set_enable_tool_dct( False )
+        NSTools.set_enable_tool_dct( False )
         NSTools.filter( None )
 
         rank = 5
@@ -163,7 +162,7 @@ class TestClassDPLattice():
         type_lst = []
         for dpl in dpl_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
-            print( type_lst[-1] )
+            print( type_lst[-1], dpl.is_real_minimal() )
         print( type_lst )
         print( len( dpl_lst ) )
 
@@ -176,7 +175,7 @@ if __name__ == '__main__':
     # NSTools.filter( 'class_dp_lattice.py' )
 
     # TestClassDPLattice().test__eq()
-    TestClassDPLattice().test__get_marked_Mtype()
+    # TestClassDPLattice().test__get_marked_Mtype()
     # TestClassDPLattice().test__get_cls_root_bases__rank_3()
     # TestClassDPLattice().test__get_cls_root_bases__rank_4()
     # TestClassDPLattice().test__get_cls_invo__rank_4()

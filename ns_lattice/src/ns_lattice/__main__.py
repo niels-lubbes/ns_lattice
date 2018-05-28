@@ -101,10 +101,10 @@ def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
             row += [dpl.get_degree()]
             row += [dpl.get_marked_Mtype()]
             row += [dpl.type]
-            if dpl.contains_fam_pair():
-                row += ['y']
-            else:
-                row += ['n']
+            s = 'y' if dpl.contains_fam_pair() else 'n'
+            if dpl.is_real_minimal():
+               s += '*'
+            row += [ s ]
             row += dpl.get_numbers()[1:3] + dpl.get_numbers()[4:]
 
             tab1 += [row]
@@ -479,7 +479,7 @@ if __name__ == '__main__':
     #########################################
 
     usecase__get_cls_root_bases( rank )
-    usecase__get_reduced_cls_dp_lattice( rank, False )
+    usecase__get_reduced_cls_dp_lattice( rank, True )
     usecase__get_classes_dp1( rank )
     usecase__hex_webs( rank )
     usecase__graphs( rank )

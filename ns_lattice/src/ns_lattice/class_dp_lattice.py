@@ -109,7 +109,7 @@ class DPLattice:
     self.real_fam_lst : list<Div>
         A list "Div" objects that represent real classes in "self.fam_lst".
         Thus these classes are send to itself by M.
-        Geometrically these classes correspond to a real families of conics        
+        Geometrically these classes correspond to a real families of conics.        
    
     self.or_lst : list<Div>
         A list of "Div" objects that represents roots that are orthogonal to
@@ -181,7 +181,7 @@ class DPLattice:
             should be initialized.
         
         level : int
-            A positive number.
+            A non-negative number.
         '''
 
         # M, Md_lst and d_lst are set.
@@ -333,6 +333,32 @@ class DPLattice:
                 if f1 * f2 == 1:
                     return True
         return False
+
+
+    def is_real_minimal( self ):
+        '''
+        Parameters
+        ----------
+        self : DPLattice
+        
+        Returns
+        -------
+        bool
+            True if self.m1_lst does not contain classes u and v 
+            such that either  
+            * u.mat_mul( self.M ) == v and u*v==0, or 
+            * u.mat_mul( self.M ) == u.
+            This means that self is the DPLattice of a 
+            real-minimal weak del Pezzo surface. Thus no
+            disjoint complex conjugate exceptional curves
+            or real exceptional curves can be contracted.          
+        '''
+        self.set_attributes( 0 )
+        for u in self.m1_lst:
+            v = u.mat_mul( self.M )
+            if v * u == 0 or v == u:
+                return False
+        return True
 
 
     def get_marked_Mtype( self ):

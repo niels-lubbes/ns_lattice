@@ -396,7 +396,7 @@ class DPLattice:
         comp_lst = get_graph( self.d_lst ).connected_components()
         comp_lst.reverse()  # smaller components first
         if comp_lst == []:
-            return 'A_0'
+            return 'A0'
 
         # construct list of types
         type_lst = []

@@ -64,11 +64,17 @@ def break_col( col, max_len, row_num ):
 
 def refine_table( table, max_len = 50, row_num = 5 ):
     '''
-    Break a long row into several short rows
+    Refines a table by breaking long rows into several short rows.
     
     Parameters
     ----------
-    row : list<list<object>>
+    table : list<list<object>>
+    
+    max_len : int
+        See break_col().
+    
+    row_num : int
+        See break_col().
     
     Returns
     -------
@@ -93,6 +99,7 @@ def get_table_header( h_lst ):
     Parameters
     ----------
     h_lst : list<object>
+        List of header names.
     
     Returns
     -------
@@ -142,7 +149,9 @@ def table_to_tex( h_lst, table, replace_dct = {}, col_idx = -1, max_len = 60, ro
         A dictionary whose keys and values are strings.
     
     col_idx : int
-        Index of a column.
+        Index of a column. If the value in this column changes from
+        row to row, then an horizontal separator line is added. 
+        If col_idx has value -1, then no separator lines are added.
     
     Returns
     -------
@@ -195,3 +204,87 @@ def table_to_tex( h_lst, table, replace_dct = {}, col_idx = -1, max_len = 60, ro
     # add footer for table in the end
     out += get_table_footer()
     return out
+
+
+def cls_to_tex( h_lst, table, row_num, asides, lbl = None ):
+    '''
+    Create tex code for the classification of Neron-Severi lattices.
+    
+    Parameters
+    ----------
+    h_lst : list<string>
+        A list of string defining the column headers of a table.
+    
+    table : list<list<object>>
+        A list of lists represent rows in a table.
+     
+    row_num : int
+        The maximal number of rows of a table.
+        
+    asides : int
+        The number of table alongside each other.
+
+    lbl : string
+        Tex parameters for inner table. If None, then 
+        default value is used.
+           
+    Returns
+    -------
+    string
+        A string representing a table of tables in Tex format.       
+    '''
+    if lbl == None:
+        lbl = len( h_lst ) * 'l'
+
+    outer_start = '\\begin{tabular}{@{}' + ( asides - 1 ) * '@{}c@{}|' + '@{}c@{}}\n'  # start outer table
+    inner_start = '\\begin{tabular}{' + lbl + '}\n'  # start inner table
+    outer_end = '\\end{tabular}\n'  # end outer table
+    inner_end = '\\end{tabular}\n'  # end inner table
+
+    inner_row = '\\' + '\\' + '\n'
+    outer_col = '&\n'
+
+    out = ''
+    out += '{\\tiny %\n'
+    out += outer_start
+    out += inner_start
+
+    row_idx = 0
+    aside_idx = 0
+    for row in table:
+
+        # tex code for row
+        for col in row:
+            out += '$' + str( col ) + ' $' + ' &'
+
+        # omit the last &-separator and add row separator symbol
+        out = out[:-1] + inner_row
+
+        row_idx += 1
+
+        if row_idx == row_num:
+            out += inner_end
+            if aside_idx < asides - 1:
+                out += outer_col
+                out += inner_start
+                row_idx = 0
+                aside_idx += 1
+            else:
+                out += outer_end
+                out += '\n\n\\newpage\n\n'
+                out += outer_start
+                out += inner_start
+                row_idx = 0
+                aside_idx = 0
+
+
+    if row_idx != 0:
+        out += inner_end
+    out += outer_end
+    out += '}\n'
+
+    return out
+
+
+
+

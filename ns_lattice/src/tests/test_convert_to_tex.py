@@ -10,7 +10,9 @@ from ns_lattice.class_ns_tools import NSTools
 
 from ns_lattice.convert_to_tex import break_col
 from ns_lattice.convert_to_tex import refine_table
+from ns_lattice.convert_to_tex import cls_to_tex
 
+from ns_lattice.class_dp_lattice import DPLattice
 
 
 class TestConvertToTex:
@@ -43,11 +45,34 @@ class TestConvertToTex:
         assert str( tab ) == "[['a, ', 'b, ', 'c', 'd,q'], ['1, ', 'u, ', '', ''], ['2, ', 'v, ', '', ''], ['3, ', 'w, ', '', ''], ['', '', 'c', 'd,q'], ['(aaaaa, ', '[bbbbb, ', '', ''], ['ccccccc, ', 'cccccccc]', '', ''], ['3)', '', '', '']]"
 
 
+    def test__cls_to_tex( self ):
+
+        tab = []
+        idx = 0
+        for rank in range( 3, 9 + 1 ):
+            for dpl in DPLattice.get_reduced_cls( rank, False ):
+                row = []
+
+                row += [idx]
+                row += [dpl.get_degree()]
+                row += [dpl.get_marked_Mtype()]
+                row += [dpl.type]
+                row += [dpl.get_numbers()[1]]
+                row += [dpl.get_numbers()[5]]
+
+                tab += [row]
+                idx += 1
+
+        out = cls_to_tex( ['', 'deg', 'real', 'sing', '\#E', '\#G'], tab, 65, 2, 'llllrr' )
+        print( out )
+
+
 if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    TestConvertToTex().test__break_col()
+    # TestConvertToTex().test__break_col()
     # TestConvertToTex().test__refine_table()
+    TestConvertToTex().test__cls_to_tex()
 
     pass

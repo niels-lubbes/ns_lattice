@@ -170,6 +170,25 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
+    def test__get_real_type( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        dpl_lst = DPLattice.get_cls_real_dp( 4 )
+
+        type_lst = []
+        for dpl in dpl_lst:
+            type_lst += [( dpl.get_marked_Mtype(), dpl.get_real_type() )]
+
+        out = ''
+        for type in type_lst:
+            print( type[0] + ', ' + type[1] )
+            out += type[0] + ',' + type[1] + '; '
+        print( out )
+
+        assert out == "A0,A_0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1',A_0; A1,A_0; A1',{A1}; A1,{A1}; A1',{A2}; 2A1,A_0; "
+        NSTools.set_enable_tool_dct( True )
+
+
 if __name__ == '__main__':
 
     # NSTools.filter( 'class_dp_lattice.py' )
@@ -182,4 +201,7 @@ if __name__ == '__main__':
     # TestClassDPLattice().test__get_cls_real_dp__rank_3()
     # TestClassDPLattice().test__get_cls_real_dp__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__large_rank()
+
+    TestClassDPLattice().test__get_real_type()
+
     pass

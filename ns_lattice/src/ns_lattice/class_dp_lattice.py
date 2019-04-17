@@ -19,6 +19,7 @@ from ns_lattice.div_in_lattice import get_divs
 from ns_lattice.div_in_lattice import get_indecomp_divs
 from ns_lattice.div_in_lattice import get_ak
 
+from ns_lattice.dp_root_bases import get_graph
 from ns_lattice.dp_root_bases import get_ext_graph
 from ns_lattice.dp_root_bases import get_dynkin_type
 from ns_lattice.dp_root_bases import get_root_bases_orbit
@@ -379,6 +380,48 @@ class DPLattice:
             mark = "'"
 
         return self.Mtype + mark
+
+
+    def get_real_type( self ):
+        '''
+        Gets the Dynkin type (self.type) of self.d_lst. 
+        The components of the Dynkin diagram that are preserved by
+        the involution induced by the real structure are marked. 
+                 
+        Returns
+        -------
+        string
+            Dynkin types of components 
+        '''
+        comp_lst = get_graph( self.d_lst ).connected_components()
+        comp_lst.reverse()  # smaller components first
+        if comp_lst == []:
+            return 'A_0'
+
+        # construct list of types
+        type_lst = []
+        for comp in comp_lst:
+            c_lst = [ self.d_lst[i] for i in comp]
+            mc_lst = [ c.mat_mul( self.M ) for c in c_lst ]
+            mc_lst.sort()
+            type = get_dynkin_type( c_lst )
+
+            if mc_lst == c_lst and c_lst != []:
+                type_lst += ['{' + type + '}']
+            else:
+                type_lst += [type]
+
+        # construct string
+        out = ''
+        while type_lst != []:
+            type = type_lst[0]
+            num = type_lst.count( type )
+            if num != 1: out += str( num )
+            out += type + '+'
+            type_lst = [ elt for elt in type_lst if elt != type ]
+        out = out[:-1]  # remove last plus
+
+        return out
 
 
     def get_basis_change( self, B ):

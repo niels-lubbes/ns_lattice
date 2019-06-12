@@ -1,6 +1,7 @@
 '''
 Use of this source code is governed by a MIT-style license that can be found in the LICENSE file.
 Created on Jan 27, 2018
+
 @author: Niels Lubbes
 '''
 
@@ -13,7 +14,8 @@ import time
 
 class ETA( object ):
     '''
-    For estimation when a loop in a program terminates.
+    For estimating the time it takes for a loop in a program to terminate 
+    (ETA=estimated time of arrival).
     During the loop feedback is printed.  
     '''
 
@@ -41,9 +43,8 @@ class ETA( object ):
 
     def update( self, info ):
         '''
-        Prints estimation for when program terminates
-        (ETA=estimated time of arrival). 
-        Should be called inside a loop.  
+        Prints an estimation for the time it takes for a program to 
+        terminate.
         
         Parameters
         ----------

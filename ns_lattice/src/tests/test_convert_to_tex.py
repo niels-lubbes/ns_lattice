@@ -13,6 +13,8 @@ from ns_lattice.convert_to_tex import refine_table
 from ns_lattice.convert_to_tex import cls_to_tex
 
 from ns_lattice.class_dp_lattice import DPLattice
+from ns_lattice.sage_interface import sage_identity_matrix
+from ns_lattice.class_div import Div
 
 
 class TestConvertToTex:
@@ -47,23 +49,97 @@ class TestConvertToTex:
 
     def test__cls_to_tex( self ):
 
+        sym_lst = []
+        for rank in range( 3, 9 + 1 ):
+            for dpl in DPLattice.get_reduced_cls( rank, False ):
+                lst1 = [Div( row ).mat_mul( dpl.M ) for row in sage_identity_matrix( rank ) ]
+                for elt in lst1 + dpl.d_lst:
+                    sym_lst += [   Div( elt.e_lst + ( 9 - len( elt.e_lst ) ) * [0] ) ]
+
+        abc = 'abcdefghijklmnopqrstuvwxyz'
+        ch_lst = []
+        ch_lst += [ ch for ch in '012345678' + abc ]
+        ch_lst += [ chr( ord( ch ) - 32 ) for ch in abc  ]
+        ch_lst += [ '\\^' + ch for ch in abc  ]
+        sym_lst = list( set( sym_lst ) )
+        sym_lst.sort()
+        e0 = Div( [1, 0, 0, 0, 0, 0, 0, 0, 0 ] )
+        sym_lst.remove( e0 )
+        sym_lst = [e0] + sym_lst
+        legend = []
+        dct = {}
+        for i in range( len( sym_lst ) ):
+            dct.update( {str( sym_lst[i] ):ch_lst[i]} )
+            legend += [[ch_lst[i] + ':', ( '$' + str( sym_lst[i] ) + '$' ).replace( 'e', 'e_' ) ]]
+        legend += [['', ''], ['', '']]
+
+
+
+
+        out = ''
+        out += 'A dictionary for symbols in the columns $A_\\sigma$ and $B$:\n\\\\\n'
+        out += cls_to_tex( [], legend, [27], 3, 'l@{~}l' ).replace( '{@{}@{}c@{}|@{}c@{}|@{}c@{}}', '{@{}@{}c@{}@{}c@{}@{}c@{}}' )
+        out += '\n\n'
+
+        dct1 = {'A':'A_', 'D':'D_', 'E':'E_', '{':'\\underline{'}
         tab = []
+        tab += [
+            ['i  ', '$9$', "$A_0 $", '$A_0$', '$0$', '$1$', ''],
+            7 * [''],
+            ['ii ', '$8$', "$A_0 $", '$A_0$', '$0$', '$2$', ''],
+            ['iii', '$8$', "$A_0 $", '$A_0$', '$0$', '$1$', ''],
+            ['iv ', '$8$', "$A_0 $", '$A_0$', '$1$', '$1$', ''],
+            ['v  ', '$8$', "$A_0 $", '$A_1$', '$0$', '$1$', '*'],
+            7 * [''],
+            ]
         idx = 0
         for rank in range( 3, 9 + 1 ):
             for dpl in DPLattice.get_reduced_cls( rank, False ):
-                row = []
 
-                row += [idx]
-                row += [dpl.get_degree()]
-                row += [dpl.get_marked_Mtype()]
-                row += [dpl.type]
-                row += [dpl.get_numbers()[1]]
-                row += [dpl.get_numbers()[5]]
+                col1 = '$' + str( idx ) + '$'
 
-                tab += [row]
+                col2 = '$' + str( dpl.get_degree() ) + '$'
+
+                col3 = '$' + str( dpl.get_marked_Mtype() ) + '$'
+                for key in dct1:
+                    col3 = str( col3 ).replace( key, dct1[key] )
+
+                col4 = '$' + str( dpl.get_real_type() ) + '$'
+                for key in dct1:
+                    col4 = str( col4 ).replace( key, dct1[key] )
+
+                col5 = '$' + str( dpl.get_numbers()[4] ) + '$'
+
+                col6 = '$' + str( dpl.get_numbers()[5] ) + '$'
+
+                lst1 = [ str( Div( rw ).mat_mul( dpl.M ) ) for rw in sage_identity_matrix( rank ) ]
+                col7 = ''
+                for elt in lst1: col7 += dct[elt]
+                if col7 in ['012', '0123', '01234', '012345', '0123456', '01234567', '012345678']:
+                    col7 = ''
+
+                lst2 = [ str( d ) for d in dpl.d_lst ]
+                col8 = '';
+                for elt in lst2: col8 += dct[elt]
+
+
+                if col4 in ['$7\underline{A_1}$', '$8\underline{A_1}$', '$4\underline{A_1}+\underline{D_4}$']:
+                    col1 = '$\\times$'
+
+
+                tab += [[col1, col2, col3, col4, col5, col6, col7 + '\#' + col8]]
                 idx += 1
+            if rank != 5:
+                tab += [7 * ['']]
 
-        out = cls_to_tex( ['', 'deg', 'real', 'sing', '\#E', '\#G'], tab, 65, 2, 'llllrr' )
+        # tab += 10 * [7 * ['']]
+
+        #         i     d     A     B     E     G     AB
+        hl = '@{~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~}'
+        out += cls_to_tex( ['', 'd', '$D(A)$', '$D(B)$', '$\#E$', '$\#G$', '$\sigma_A\#B$'], tab, [18, 18, 65, 65, 62, 62], 2, hl )
+
+        out = '{\\tiny %\n' + out + '}\n'
+
         print( out )
 
 
@@ -74,5 +150,21 @@ if __name__ == '__main__':
     # TestConvertToTex().test__break_col()
     # TestConvertToTex().test__refine_table()
     TestConvertToTex().test__cls_to_tex()
+
+#     from ns_lattice.dp_root_bases import get_graph
+#
+#     cls = DPLattice.get_reduced_cls( 9, False )
+#     dlp = [c for c in cls if c.type == '4A2'][0]
+#     print( dlp.get_real_type() )
+#     print( dlp.d_lst )
+#
+#     print( dlp )
+#
+#     comp_lst = get_graph( dlp.d_lst ).connected_components()
+#     comp_lst.reverse()  # smaller components first
+#
+#     for comp in comp_lst:
+#         print( comp )
+
 
     pass

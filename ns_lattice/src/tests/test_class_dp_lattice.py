@@ -185,7 +185,8 @@ class TestClassDPLattice():
             out += type[0] + ',' + type[1] + '; '
         print( out )
 
-        assert out == "A0,A_0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1',A_0; A1,A_0; A1',{A1}; A1,{A1}; A1',{A2}; 2A1,A_0; "
+        assert out.strip() == "A0,A0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1',A0; A1,A0; A1',{A1}; A1,{A1}; A1',{A2}; 2A1,A0;"
+
         NSTools.set_enable_tool_dct( True )
 
 
@@ -201,7 +202,6 @@ if __name__ == '__main__':
     # TestClassDPLattice().test__get_cls_real_dp__rank_3()
     # TestClassDPLattice().test__get_cls_real_dp__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__large_rank()
-
     TestClassDPLattice().test__get_real_type()
 
     pass

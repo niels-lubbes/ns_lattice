@@ -47,6 +47,7 @@ class TestClassDPLattice():
         dpl = DPLattice( d_lst, Md_lst, M )
 
         print( dpl.get_marked_Mtype() )
+        print( dpl.Mtype )
 
         assert dpl.get_marked_Mtype() == "2A1'"
         NSTools.set_enable_tool_dct( True )
@@ -108,11 +109,11 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_real_dp__rank_3( self ):
+    def test__get_cls_real_dp_slow__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
 
         rank = 3
-        dpl_lst = DPLattice.get_cls_real_dp( rank )
+        dpl_lst = DPLattice.get_cls_real_dp_slow( rank )
 
         for dpl in dpl_lst:
             dpl.set_attributes( 8 )
@@ -127,11 +128,11 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_real_dp__rank_4( self ):
+    def test__get_cls_real_dp_slow__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
 
         rank = 4
-        dpl_lst = DPLattice.get_cls_real_dp( rank )
+        dpl_lst = DPLattice.get_cls_real_dp_slow( rank )
 
         for dpl in dpl_lst:
             dpl.set_attributes( 8 )
@@ -142,7 +143,40 @@ class TestClassDPLattice():
             print( type_lst[-1] )
         print( type_lst )
 
-        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
+        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
+        NSTools.set_enable_tool_dct( True )
+
+
+    def test__get_cls_real_dp__rank_3( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        rank = 3
+        dpl_lst = DPLattice.get_cls_real_dp( rank )
+
+        type_lst = []
+        for dpl in dpl_lst:
+            type_lst += [( dpl.Mtype, dpl.type )]
+        print( type_lst )
+
+        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A1', 'A0')]"
+        NSTools.set_enable_tool_dct( True )
+
+
+    def test__get_cls_real_dp__rank_4( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        rank = 4
+        dpl_lst = DPLattice.get_cls_real_dp( rank )
+
+        type_lst = []
+        for dpl in dpl_lst:
+            type_lst += [( dpl.Mtype, dpl.type )]
+            print( dpl.get_marked_Mtype(), dpl.type )
+
+        print( type_lst )
+
+        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
+
         NSTools.set_enable_tool_dct( True )
 
 
@@ -173,7 +207,7 @@ class TestClassDPLattice():
     def test__get_real_type( self ):
         NSTools.set_enable_tool_dct( False )
 
-        dpl_lst = DPLattice.get_cls_real_dp( 4 )
+        dpl_lst = DPLattice.get_cls_real_dp_slow( 4 )
 
         type_lst = []
         for dpl in dpl_lst:
@@ -185,23 +219,24 @@ class TestClassDPLattice():
             out += type[0] + ',' + type[1] + '; '
         print( out )
 
-        assert out.strip() == "A0,A0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1',A0; A1,A0; A1',{A1}; A1,{A1}; A1',{A2}; 2A1,A0;"
-
+        assert out.strip() == "A0,A0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1,A0; A1,{A1}; A1',A0; A1',{A1}; A1',{A2}; 2A1,A0;"
         NSTools.set_enable_tool_dct( True )
 
 
 if __name__ == '__main__':
 
-    # NSTools.filter( 'class_dp_lattice.py' )
+    NSTools.filter( 'class_dp_lattice.py' )
 
     # TestClassDPLattice().test__eq()
     # TestClassDPLattice().test__get_marked_Mtype()
     # TestClassDPLattice().test__get_cls_root_bases__rank_3()
     # TestClassDPLattice().test__get_cls_root_bases__rank_4()
     # TestClassDPLattice().test__get_cls_invo__rank_4()
-    # TestClassDPLattice().test__get_cls_real_dp__rank_3()
-    # TestClassDPLattice().test__get_cls_real_dp__rank_4()
+    # TestClassDPLattice().test__get_cls_real_dp_slow__rank_3()
+    # TestClassDPLattice().test__get_cls_real_dp_slow__rank_4()
     # TestClassDPLattice().test__get_cls_real_dp__large_rank()
     TestClassDPLattice().test__get_real_type()
+    # TestClassDPLattice().test__get_cls_real_dp__rank_3()
+    # TestClassDPLattice().test__get_cls_real_dp__rank_4()
 
     pass

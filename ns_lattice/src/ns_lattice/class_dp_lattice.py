@@ -841,6 +841,9 @@ class DPLattice:
         if self.Mtype != other.Mtype:
             return self.type < other.type
 
+        if self.get_marked_Mtype() != other.get_marked_type():
+            return self.get_marked_Mtype() < other.get_marked_Mtype()
+
         if self.type != other.type:
             return self.type < other.type
 

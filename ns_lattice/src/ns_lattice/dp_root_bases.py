@@ -105,13 +105,12 @@ def get_ext_graph( d_lst, M ):
     -------
         A labeled "sage_Graph()" where the elements 
         of "d_lst" are the vertices. 
-        A pair of vertices are connected 
+        A pair of non-orthogonal vertices are connected 
         by and edge labeled with their 
         non-zero intersection product. 
         Two vertices which are related 
         via M are connected with an edge labeled 1000.
-        Labeled self-loops are also included.
-        Two orthogonal vertices are connected 
+        Labeled self-loops are also included.        
     '''
     NSTools.p( 'd_lst =', len( d_lst ), d_lst, ', M =', list( M ) )
 

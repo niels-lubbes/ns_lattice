@@ -4,8 +4,6 @@ Created on Dec 14, 2017
 @author: Niels Lubbes
 '''
 
-from ns_lattice.sage_interface import sage_identity_matrix
-
 from ns_lattice.class_div import Div
 
 from ns_lattice.class_dp_lattice import DPLattice
@@ -206,7 +204,7 @@ def table_to_tex( h_lst, table, replace_dct = {}, col_idx = -1, max_len = 60, ro
     return out
 
 
-def cls_to_tex( h_lst, table, row_num, asides, lbl = None ):
+def cls_to_tex( h_lst, table, row_num_lst, asides, lbl = None ):
     '''
     Create tex code for the classification of Neron-Severi lattices.
     
@@ -218,8 +216,10 @@ def cls_to_tex( h_lst, table, row_num, asides, lbl = None ):
     table : list<list<object>>
         A list of lists represent rows in a table.
      
-    row_num : int
-        The maximal number of rows of a table.
+    row_num_lst : list<int>
+        The maximal number of rows for each of subsequent table. 
+        If there are more tables, then listed row numbers, then
+        the last row number will be reused indefinitely. 
         
     asides : int
         The number of table alongside each other.
@@ -236,8 +236,15 @@ def cls_to_tex( h_lst, table, row_num, asides, lbl = None ):
     if lbl == None:
         lbl = len( h_lst ) * 'l'
 
+
+    inner_head = ''
+    if h_lst != []:
+        for h in h_lst:
+            inner_head += h + ' &'
+        inner_head = inner_head[:-1] + '\\\\\\hline\n'
+
     outer_start = '\\begin{tabular}{@{}' + ( asides - 1 ) * '@{}c@{}|' + '@{}c@{}}\n'  # start outer table
-    inner_start = '\\begin{tabular}{' + lbl + '}\n'  # start inner table
+    inner_start = '\\begin{tabular}{' + lbl + '}\n' + inner_head  # start inner table
     outer_end = '\\end{tabular}\n'  # end outer table
     inner_end = '\\end{tabular}\n'  # end inner table
 
@@ -245,7 +252,6 @@ def cls_to_tex( h_lst, table, row_num, asides, lbl = None ):
     outer_col = '&\n'
 
     out = ''
-    out += '{\\tiny %\n'
     out += outer_start
     out += inner_start
 
@@ -255,33 +261,36 @@ def cls_to_tex( h_lst, table, row_num, asides, lbl = None ):
 
         # tex code for row
         for col in row:
-            out += '$' + str( col ) + ' $' + ' &'
+
+            out += str( col ) + ' &'
 
         # omit the last &-separator and add row separator symbol
         out = out[:-1] + inner_row
 
         row_idx += 1
 
-        if row_idx == row_num:
+        if row_idx == row_num_lst[0]:
+            row_idx = 0
+            if row == table[-1]:
+                break
             out += inner_end
+            if len( row_num_lst ) > 1:
+                row_num_lst = row_num_lst[1:]
             if aside_idx < asides - 1:
                 out += outer_col
                 out += inner_start
-                row_idx = 0
                 aside_idx += 1
             else:
                 out += outer_end
                 out += '\n\n\\newpage\n\n'
                 out += outer_start
                 out += inner_start
-                row_idx = 0
                 aside_idx = 0
 
 
-    if row_idx != 0:
-        out += inner_end
+    out += inner_end
     out += outer_end
-    out += '}\n'
+
 
     return out
 

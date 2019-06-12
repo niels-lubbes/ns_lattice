@@ -406,7 +406,7 @@ class DPLattice:
             mc_lst.sort()
             type = get_dynkin_type( c_lst )
 
-            if mc_lst == c_lst and c_lst != []:
+            if set( mc_lst ) == set( c_lst ) and c_lst != []:
                 type_lst += ['{' + type + '}']
             else:
                 type_lst += [type]

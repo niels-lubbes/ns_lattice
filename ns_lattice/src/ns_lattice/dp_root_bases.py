@@ -264,6 +264,42 @@ def get_dynkin_type( d_lst ):
     raise ValueError( 'Could not recognize Dynkin type: ', d_lst )
 
 
+def convert_dynkin_type_to_lst( type ):
+    '''
+    Converts a Dynkin type string to a sorted list of 
+    irreducible Dynkin types.
+     
+    For example if type is '2A1+D4', then the output is 
+    ['A1','A1','D4']. If the type is '2A1+A2+A3', 
+    then the output is ['A1','A1','A2','A3'].     
+    
+    
+    Parameters
+    ----------
+    type: string
+        A string representing a Dynkin type. 
+        We assume that an irreducible rootsystem
+        occurs with multiplicity at most 9. 
+        For example '10A1' is not allowed, but '9A1'
+        is allowed. 
+    
+    Returns
+    -------
+    list<string>
+        A list of string representing the Dynkin type 
+        of an irreducible root system.
+    '''
+    t_lst = type.split( '+' )
+    out_lst = []
+    for t in t_lst:
+        if t[0] not in ['A', 'D', 'E']:
+            mult, subtype = int( t[0] ), t[1:]
+        else:
+            mult, subtype = 1, t
+        out_lst += mult * [ subtype ]
+    return sorted( out_lst )
+
+
 def get_root_bases_orbit( d_lst, positive = True ):
     '''
     Computes the orbit of a root base under the Weyl group.

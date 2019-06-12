@@ -15,6 +15,7 @@ from ns_lattice.dp_root_bases import is_root_basis
 from ns_lattice.dp_root_bases import get_graph
 from ns_lattice.dp_root_bases import get_ext_graph
 from ns_lattice.dp_root_bases import get_dynkin_type
+from ns_lattice.dp_root_bases import convert_dynkin_type_to_lst
 from ns_lattice.dp_root_bases import get_root_bases_orbit
 
 
@@ -75,6 +76,15 @@ class TestDPRootBasis():
         NSTools.set_enable_tool_dct( True )
 
 
+    def test__convert_dynkin_type_to_lst( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        assert convert_dynkin_type_to_lst( '2A1+D4' ) == ['A1', 'A1', 'D4']
+        assert convert_dynkin_type_to_lst( '2A1+A2+A3' ) == ['A1', 'A1', 'A2', 'A3']
+
+        NSTools.set_enable_tool_dct( True )
+
+
     def test__get_root_bases_orbit__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -116,4 +126,4 @@ if __name__ == '__main__':
     # TestDPRootBasis().test__get_ext_graph()
     # TestDPRootBasis().test__get_root_bases_orbit__rank_3()
     # TestDPRootBasis().test__get_root_bases_orbit__rank_4()
-
+    TestDPRootBasis().test__convert_dynkin_type_to_lst()

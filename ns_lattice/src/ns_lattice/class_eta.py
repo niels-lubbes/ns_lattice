@@ -41,16 +41,17 @@ class ETA( object ):
         self.eta = None  # estimated time of arrival in minutes
 
 
-    def update( self, info ):
+    def update( self, *info_lst ):
         '''
         Prints an estimation for the time it takes for a program to 
-        terminate.
+        terminate (ETA for short). We refer to the program termination 
+        as arrival.
         
         Parameters
         ----------
-        info : str
-            A string of additional information that
-            is printed together with ETA.
+        *info_lst : string
+            Variable length argument list consisting of 
+            additional information that is printed together with ETA.
         '''
         if self.counter % self.ival == 0:
             self.istart = time.time()
@@ -63,9 +64,13 @@ class ETA( object ):
             otime = sage_n( ( time.time() - self.ostart ) / 60, digits = 5 )
             self.eta = sage_n( itime * ( self.total - self.counter ), digits = 5 )
 
+            s = ''
+            for info in info_lst:
+                s += str( info ) + ' '
+
             NSTools.p( 'ETA =', self.eta, 'm,',
                        'counter =', self.counter, '/', self.total, ',',
-                       'time =', otime, 'm',
-                       'info =', info )
+                       'time =', otime, 'm,',
+                       'info =', s )
 
 

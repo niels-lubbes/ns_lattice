@@ -20,5 +20,6 @@ class TestClassETA():
 
 
 if __name__ == '__main__':
+    NSTools.filter( ['class_eta.py'] )
     NSTools.filter( None )
     TestClassETA().test__update()

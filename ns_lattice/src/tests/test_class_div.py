@@ -9,6 +9,8 @@ from ns_lattice.sage_interface import sage_matrix
 
 from ns_lattice.class_div import Div
 
+from ns_lattice.class_ns_tools import NSTools
+
 
 class TestClassDiv:
 
@@ -83,6 +85,25 @@ class TestClassDiv:
         assert Div.new( 'e0-e3', 6 ).get_basis_change( B ).get_label() == 'e0+e1-e2-e3'
         assert Div.new( '2e0-e1-e3-e4-e5', 6 ).get_basis_change( B ).get_label() == '2e0+e1-e2-e3-e4-e5'
         assert Div.new( '2e0-e2-e3-e4-e5', 6 ).get_basis_change( B ).get_label() == 'e0+2e1-e2-e3-e4-e5'
+
+
+    def test__is_positive( self ):
+        assert Div.new( 'e0-e1', 6 ).is_positive()
+        assert Div.new( 'e1-e2', 6 ).is_positive()
+        assert not Div.new( '-e2+e1', 6 ).is_positive()
+        assert not Div.new( '-e0+e1+e2', 6 ).is_positive()
+
+
+if __name__ == '__main__':
+
+    NSTools.filter( None )
+
+
+    TestClassDiv().test__is_positive()
+
+    pass
+
+
 
 
 

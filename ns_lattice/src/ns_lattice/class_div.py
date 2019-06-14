@@ -11,28 +11,19 @@ from ns_lattice.sage_interface import sage_vector
 class Div:
     '''Element in Neron-Severi lattice.
     
-    The class represents an element in the Neron-Severi lattice
+    The class represents a divisor class in the Neron-Severi lattice
     with respect to the standard basis:
         <e0,e1,e2,...>
-    
-
-    Parameters
-    ----------
-    e_lst : list<sage_ZZ>
-        A list of integers presents 
-    
-    int_mat : list<sage_matrix> 
-        A matrix over ZZ of rank "len(e_lst)" represents
-        the unimodular intersection product for divisor.                                  
     
     
     Attributes
     ----------            
-    e_lst : list<Integer>
-        List describes a divisor in terms of a standard basis. 
+    e_lst : list<sage_ZZ>
+        List describes a divisor in terms of the standard basis. 
     
     int_mat : sage_matrix<sage_ZZ>
-        Matrix defines the intersection product.
+        A matrix over ZZ of rank "len(e_lst)" represents
+        the unimodular intersection product for the divisor. 
         
     '''
 
@@ -195,6 +186,20 @@ class Div:
 
     def rank( self ):
         return len( self.e_lst )
+
+
+    def is_positive( self ):
+        '''
+        Returns
+        -------
+        bool
+            Return True iff the first nonzero entry of the self.e_lst 
+            is positive. The zero divisor is also positive.
+        '''
+        for e in self.e_lst:
+            if e != 0:
+                return e > 0
+        return True
 
 
     @staticmethod

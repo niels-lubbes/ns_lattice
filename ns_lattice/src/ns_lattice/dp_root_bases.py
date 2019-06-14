@@ -264,7 +264,7 @@ def get_dynkin_type( d_lst ):
     raise ValueError( 'Could not recognize Dynkin type: ', d_lst )
 
 
-def convert_dynkin_type_to_lst( type ):
+def convert_type( type ):
     '''
     Converts a Dynkin type string to a sorted list of 
     irreducible Dynkin types.
@@ -272,8 +272,8 @@ def convert_dynkin_type_to_lst( type ):
     For example if type is '2A1+D4', then the output is 
     ['A1','A1','D4']. If the type is '2A1+A2+A3', 
     then the output is ['A1','A1','A2','A3'].     
-    
-    
+    We exclude elements that are 'A0'.
+        
     Parameters
     ----------
     type: string
@@ -297,6 +297,7 @@ def convert_dynkin_type_to_lst( type ):
         else:
             mult, subtype = 1, t
         out_lst += mult * [ subtype ]
+    out_lst = [out for out in out_lst if out != 'A0']
     return sorted( out_lst )
 
 
@@ -404,4 +405,12 @@ def get_root_bases_orbit( d_lst, positive = True ):
     NSTools.p( '#orbit(' + str( d_lst ) + ') =', len( pd_lst_lst ) )
 
     return pd_lst_lst
+
+
+
+
+
+
+
+
 

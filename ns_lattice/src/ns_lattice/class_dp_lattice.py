@@ -22,7 +22,7 @@ from ns_lattice.div_in_lattice import get_ak
 from ns_lattice.dp_root_bases import get_graph
 from ns_lattice.dp_root_bases import get_ext_graph
 from ns_lattice.dp_root_bases import get_dynkin_type
-from ns_lattice.dp_root_bases import convert_dynkin_type_to_lst
+from ns_lattice.dp_root_bases import convert_type
 from ns_lattice.dp_root_bases import get_root_bases_orbit
 from ns_lattice.dp_root_bases import is_root_basis
 
@@ -126,12 +126,6 @@ class DPLattice:
     self.G : sage_Graph
         The Cremona invariant for the current lattice.
     '''
-
-    # Static variable. If False, then equivalent real structures with
-    # different Dynkin types are considered equivalent. Equivalent real
-    # structures can have several Dynkin types. We set this variable to
-    # False in order to register this. See also get_reduced_cls()
-    weak_equality = False
 
     def __init__( self, d_lst, Md_lst, M ):
         '''
@@ -465,7 +459,7 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_root_bases( rank = 9 ):
+    def get_bas_lst( rank = 9 ):
         '''
         See [Algorithm 5, http://arxiv.org/abs/1302.6678] for more info. 
         
@@ -491,10 +485,12 @@ class DPLattice:
             the vector space associated to the Neron-Severi lattice 
             of a weak Del Pezzo surface.
         '''
-        # classification of root bases in cache?
-        key = 'get_cls_root_bases_' + str( rank )
+        # check whether classification of root bases is in cache
+        key = 'get_bas_lst__' + str( rank )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
+
+        NSTools.p( 'start' )
 
         A = [ 12, 23, 34, 45, 56, 67, 78]
         B = [ 1123, 1145, 1456, 1567, 1678, 278 ]
@@ -508,36 +504,25 @@ class DPLattice:
             lst1 = [ Div.new( str( e ), rank ) for e in lst1 if rank >= Div.get_min_rank( str( e ) ) ]
             lst2 = [ Div.new( str( e ), rank ) for e in lst2 if rank >= Div.get_min_rank( str( e ) ) ]
 
-            # data for ETA computation
-            total = len( sage_Subsets( range( len( lst1 ) ) ) )
-            total *= len( sage_Subsets( range( len( lst2 ) ) ) )
-            counter = 0
-            ival = 20
-
-            NSTools.p( 'inside loop: ', lst1, lst2, ', rank = ', rank )
+            # the involution is trivial
+            Md_lst = []
+            M = sage_identity_matrix( sage_QQ, rank )
 
             # loop through the lists
-            for idx2_lst in sage_Subsets( range( len( lst2 ) ) ):
-                for idx1_lst in sage_Subsets( range( len( lst1 ) ) ):
+            sub1 = sage_Subsets( range( len( lst1 ) ) )
+            sub2 = sage_Subsets( range( len( lst2 ) ) )
+            eta = ETA( len( sub1 ) * len( sub2 ), 20 )
+            for idx2_lst in sub2:
+                for idx1_lst in sub1:
 
-                    # ETA
-                    if counter % ival == 0:
-                        start = time.time()
-                    counter += 1
-                    if counter % ival == 0:
-                        passed_time = time.time() - start
-                        NSTools.p( 'ETA in minutes =', passed_time * ( total - counter ) / ( ival * 60 ), idx1_lst, idx2_lst, ', rank =', rank )
+                    eta.update( 'get_bas_lst rank =', rank )
 
-                    # construct d_lst as a union
-                    d_lst = []
-                    d_lst += [ lst1[idx1] for idx1 in idx1_lst ]
+                    d_lst = [ lst1[idx1] for idx1 in idx1_lst ]
                     d_lst += [ lst2[idx2] for idx2 in idx2_lst ]
 
                     if not is_root_basis( d_lst ):
                         continue
 
-                    Md_lst = []
-                    M = sage_identity_matrix( sage_QQ, rank )
                     dpl = DPLattice( d_lst, Md_lst, M )
 
                     if dpl not in dpl_lst:
@@ -553,7 +538,7 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_involutions( rank = 9 ):
+    def get_inv_lst( rank = 9 ):
         '''
         Outputs a list representing a classification of root 
         subsystems that define unimodular involutions on the 
@@ -583,23 +568,30 @@ class DPLattice:
             subsystem defines a unimodular involution.  
         '''
         # check cache
-        key = 'get_cls_invo_' + str( rank )
+        key = 'get_inv_lst__' + str( rank )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
 
-        bas_lst = DPLattice.get_cls_root_bases( rank )
-        counter = 0
-        total = len( bas_lst )
+        bas_lst = DPLattice.get_bas_lst( rank )
+
+        NSTools.p( 'start' )
+
         inv_lst = []
+        eta = ETA( len( bas_lst ), 1 )
         for bas in bas_lst:
-            NSTools.p( 'counter =', counter , '/', total, ', root base = ', bas.d_lst )
-            counter += 1
+            eta.update( bas.type )
+
             M = basis_to_involution( bas.d_lst, rank )
             if not is_integral_involution( M ):
                 continue
             inv = DPLattice( [], bas.d_lst, M )
             inv.set_attributes()
-            inv_lst += [ inv ]
+
+            # real structures with different Dynkin types may be equivalent
+            if inv not in inv_lst:
+                inv_lst += [ inv ]
+            else:
+                NSTools.p( 'Found ambitious type for real structure:', bas.type )
 
         # store in cache
         inv_lst.sort()
@@ -610,7 +602,7 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_real_dp_slow( rank = 7 ):
+    def get_cls_slow( rank = 7 ):
         '''        
         Use get_cls_real_dp() for a faster method. This method does not terminate
         within reasonable time if rank>7. We still keep the method in order to 
@@ -633,55 +625,25 @@ class DPLattice:
                 diagonal matrix with diagonal: (1,-1,...,-1). 
         '''
         # check cache
-        key = 'get_cls_real_dp_' + str( rank )
+        key = 'get_cls_slow__' + str( rank )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
 
-        inv_lst = DPLattice.get_cls_involutions( rank )
-        bas_lst = DPLattice.get_cls_root_bases( rank )
-
-
-        # ETA
-        ostart = time.time()
-        ototal = len( bas_lst ) * len( inv_lst )
-        ocounter = 0
-        icounter = 0
-        ival = 20
-        total_orbit_len = 0
+        inv_lst = DPLattice.get_inv_lst( rank )
+        bas_lst = DPLattice.get_bas_lst( rank )
 
 
         # we fix an involution up to equivalence and go through
         # all possible root bases for singularities.
         dpl_lst = []
+        eta = ETA( len( bas_lst ) * len( inv_lst ), 20 )
         for inv in inv_lst:
             for bas in bas_lst:
 
                 orbit_lst = get_root_bases_orbit( bas.d_lst )
-
-                # ETA outer loop
-                ocounter += 1
-                otime = ( time.time() - ostart ) / 60
-                total_orbit_len += len( orbit_lst )
-                avg_orbit_len = total_orbit_len / ocounter
-                itotal = ( avg_orbit_len * ototal )
-                NSTools.p( '#orbit =', len( orbit_lst ),
-                           '(average =', avg_orbit_len, '),',
-                           'ocounter =', ocounter, '/', ototal, ',',
-                           'rank =', rank,
-                           'total minutes passed =', otime,
-                           'ETA in minutes =', ( otime / ocounter ) * ( ototal - ocounter ) )
-
+                eta.update( 'len( orbit_lst ) =', len( orbit_lst ) )
 
                 for d_lst in orbit_lst:
-
-                    # ETA inner loop
-                    if icounter % ival == 0:
-                        istart = time.time()
-                    icounter += 1
-                    if icounter % ival == 0:
-                        itime = ( time.time() - istart ) / 60
-                        NSTools.p( 'ETA in minutes =', ( itime / ival ) * ( itotal - icounter ), ',',
-                                   'icounter =', icounter, '/', itotal )
 
                     # check whether involution inv.M preserves d_lst
                     dm_lst = [ d.mat_mul( inv.M ) for d in d_lst ]
@@ -696,7 +658,6 @@ class DPLattice:
                         dpl.set_attributes()
                         dpl_lst += [dpl]
 
-
         # store in cache
         dpl_lst.sort()
         NSTools.get_tool_dct()[key] = dpl_lst
@@ -706,7 +667,234 @@ class DPLattice:
 
 
     @staticmethod
-    def get_cls_real_dp( rank = 9 ):
+    def get_part_roots( inv ):
+        '''
+        Return two subsets of roots using the input involution.
+        
+        This method is used by get_cls().        
+                    
+        Parameters
+        ----------
+        inv : DPLattice
+            We expect inv.type=='A0'.
+            We will use inv.Mtype and inv.M. 
+        
+        Returns
+        -------
+        list<Div>, list<Div>
+            Let R be defined by the list
+                get_divs( get_ak( inv.get_rank() ), 0, -2, True )
+            whose elements are Div objects.
+            If r is a Div object, then M(r) is shorthand notation for 
+                r.mat_mul(inv.M)
+            and r>0 means
+                r.is_positive()
+            The two returned lists correspond respectively to                       
+                S := { r in R | M(r)=r }            
+            and
+                Q union Q' := { r in R | M(r) not in {r,-r} and r*M(r)>0 and r>0 and M(r)>0 }
+            where Q = M(Q').                        
+        '''
+        r_lst = get_divs( get_ak( inv.get_rank() ), 0, -2, True )
+        s_lst = [ r for r in r_lst if r.mat_mul( inv.M ) == r ]
+        tq_lst = [ r for r in r_lst if r.mat_mul( inv.M ) not in [r, r.int_mul( -1 )] ]
+        tq_lst = [ q for q in tq_lst if q * q.mat_mul( inv.M ) >= 0 and q.is_positive() and q.mat_mul( inv.M ).is_positive() ]
+
+        q_lst = []
+        for q in sorted( tq_lst ):
+            if q not in q_lst and q.mat_mul( inv.M ) not in q_lst:
+                q_lst += [q]
+
+        NSTools.p( 'r_lst      =', r_lst )
+        NSTools.p( 's_lst      =', s_lst )
+        NSTools.p( 'q_lst      =', q_lst )
+        NSTools.p( '       M -->', [q.mat_mul( inv.M ) for q in q_lst] )
+        NSTools.p( 'inv.Md_lst =', inv.Md_lst )
+
+        return s_lst, q_lst
+
+
+    @staticmethod
+    def get_num_types( inv, dpl, bas_lst ):
+        '''
+        Computes the maximal number of root basis in the 
+        eigenspace of eigenvalue 1 of the involution defined by M.inv.   
+
+        For example, if rank==6 and inv.Mtype=='A1' and dpl.type=='2A1',
+        then there exists exactly one DPLattice bas in bas_lst such that bas.type=='3A1'        
+        and such that d_lst is 
+            [e1-e2, e0-e1-e2-e5, e0-e3-e4-e5] 
+        or equivalently
+            [e1-e2, e0-e4-e5, e0-e1-e2-e3].
+        However the following two bases of type 2A1
+            [e0-e1-e2-e5, e0-e3-e4-e5] and [e0-e4-e5, e0-e1-e2-e3]
+        are inequivalent and e1-e2 (the eigenvector of (-1)) is orthogonal to both of them.
+        In this case we return 2.
+                 
+        For example, if rank==6 and inv.Mtype=='A1' and dpl.type=='A1',
+        then there exist exactly two DPLattices in bas_lst with type=='2A1'.
+        In this case we return 2.
+
+        This method is used by get_cls().
+        
+        Parameters
+        ----------
+        inv : DPLattice
+        
+        dpl : DPLattice
+        
+        bas_lst : list<DPLattice>
+            We expect this to be the output of get_bas_lst()
+            Thus a list of inequivalent DPLattice objects
+         
+        Returns
+        -------
+        int
+            If there does not exists a DPLattice in bas_lst whose type is 
+            inv.Mtype and bas.type combined, then return 0. 
+            Otherwise return the number of DPLattices in bas_lst 
+            with the same type as bas.type. We expect this number 
+            to be either 1 or 2.                  
+        '''
+        num = 0  # number of root subsystems with fixed Dynkin type
+        a_lst = convert_type( inv.Mtype )
+        b_lst = convert_type( dpl.type )
+        dpl_lst = []
+        for bas in bas_lst:
+            if sorted( a_lst + b_lst ) == convert_type( bas.type ):
+                num += 1
+            if bas.type == dpl.type:
+                dpl_lst += [dpl]
+        if num == 0:
+            return 0
+        else:
+            return max( len( dpl_lst ), num )
+
+
+    @staticmethod
+    def is_inv_basis( d_lst, dtype ):
+        '''
+        This method is used by get_cls().
+                
+        Parameters:
+        -----------
+        d_lst: list<Div>
+            List of divisors representing a root bases.
+            
+        dtype: string
+            The Dynkin type of the root bases represented by d_lst.
+                        
+        Returns
+        -------
+        bool
+            True iff there exists a basis of Dynkin type "dtype" that is invariant 
+            under an involution such that this basis does not have  
+            elements that are fixed by this involution.
+            
+        Notes
+        -----
+        For example '3A2+2A1' is a candidate, but 'A3+A2' and 'A1+A3' are not.
+        
+        '''
+        if 'E' in dtype:
+            return False
+
+        if 'D' in dtype:
+            return False
+
+        if len( d_lst ) % 2 != 0:
+            return False
+
+        tp_lst = convert_type( dtype )
+
+        # create the list on_lst of odd integers n such that An is contained in type
+        on_lst = [ tp[1:] for tp in tp_lst if int( tp[1:] ) % 2 != 0 ]
+        for on in on_lst:
+
+            # if n is odd, then An must occur in pairs
+            if tp_lst.count( 'A' + on ) % 2 != 0:
+                return False
+
+        return True
+
+
+    @staticmethod
+    def seek_bases( inv, d_lst, r_lst, num = -1, b_lst = [], bas_lst = [] ):
+        '''
+        This method is used by get_cls().
+        
+        Parameters
+        ----------
+        inv : DPLattice
+            We use inv.Md_lst and inv.M.
+        
+        d_lst : list<Div>
+            We use the intersection matrix associated to d_lst. 
+        
+        r_lst : list<Div>     
+            A list of roots in which we look for bases.
+        
+        num : int
+            If not -1 we stop after we found num different bases.
+            If -1, then we assume that b.mat_mul(inv.M) not in b_lst
+            for all b in b_lst.
+        
+        b_lst : list<Div>
+            Used for recursive calling this method and 
+            represents (a subset of) a candidate root bases.
+        
+        bas_lst : list<DPLattice>
+            Used for recursive calling this method and
+            is the list of inequivalent DPLattice objects that
+            is returned by this method. 
+            
+        Returns 
+        -------
+        list<DPLattice>
+            A list of DPLattice objects "bas"
+            such that bas.type is equal to the Dynkin type of d_lst            
+            and bas.Mtype==inv.Mtype and bas.M==inv.M.
+            If num!=-1, then the lattice objects are inequivalent
+            and the Dynkin type is instead two times the type of d_lst.        
+        '''
+
+        # check whether the constructed bases defines new DPLattice objects
+        if len( b_lst ) == len( d_lst ):
+
+            # make b_lst is invariant under the involution
+            if num == -1:
+                b_lst += [b.mat_mul( inv.M ) for b in b_lst]
+
+            # create a new basis
+            bas = DPLattice( b_lst, inv.Md_lst, inv.M )
+
+            # check whether there is an equivalent object in bas_lst
+            if num != -1 and bas in bas_lst:
+                return bas_lst
+
+            # return bas_lst appended with the new DPLattice object
+            return bas_lst + [bas]
+
+        # go through all possible roots to build up a basis like d_lst
+        s = d_lst[ len( b_lst ) ]
+        m_lst = [ d * s for d in d_lst  ][:len( b_lst )]
+        for r in r_lst:
+
+            # check intersection properties
+            if [b * r for b in b_lst] == m_lst:
+
+                # recursive call
+                bas_lst = DPLattice.seek_bases( inv, d_lst, r_lst, num, b_lst + [r], bas_lst )
+
+                # break out of for loop if we found enough DPLattice objects
+                if len( bas_lst ) == num:
+                    break
+
+        return bas_lst
+
+
+    @staticmethod
+    def get_cls( rank = 9 ):
         '''
         Parameters
         ----------
@@ -725,147 +913,75 @@ class DPLattice:
                 diagonal matrix with diagonal: (1,-1,...,-1). 
         '''
         # check cache
-        key = 'get_cls_real_dp_fast_' + str( rank )
-        if key in NSTools.get_tool_dct():
-            return NSTools.get_tool_dct()[key]
+        key = 'get_cls__' + str( rank )
+        # TODO TODO TODO remove FALSE!
+        if False:
+            if key in NSTools.get_tool_dct():
+                return NSTools.get_tool_dct()[key]
 
-        inv_lst = DPLattice.get_cls_involutions( rank )
-        bas_lst = DPLattice.get_cls_root_bases( rank )
-
-        r_lst = get_divs( get_ak( rank ), 0, -2, True )
-
-
-        eta = ETA( len( inv_lst ), 1 )
-
+        # determine possible root bases and involutions
         #
-        # We loop through all involutions up to equivalence.
+        inv_lst = DPLattice.get_inv_lst( rank )
+        bas_lst = DPLattice.get_bas_lst( rank )
+        NSTools.p( 'inv_lst =', [inv.get_marked_Mtype() for inv in inv_lst] )
+        NSTools.p( 'bas_lst =', [bas.type for bas in bas_lst] )
+
+
+        # we initialize the output list with DPLattice objects such that Mtype is 'A0'
         #
-        dpl_lst = bas_lst
+        dpl_lst = [ bas for bas in bas_lst ]
+
+
+        # we loop through all involutions
+        #
+        eta = ETA( ( len( inv_lst ) - 1 ) * len( bas_lst ), 1 )
         for inv in inv_lst:
-
             if inv.Mtype == 'A0':
                 continue
 
-            eta.update( inv.Mtype )
-
+            # Construct the list dp1_lst of root bases that are contained in s_lst.
             #
-            # We divide r_lst into four disjoint subsets such that
-            #     r_lst == rm_lst+rp_lst+rr_lst+rs_lst
-            # and
-            # * rm_lst: eigenvectors of the involution inv.M with eigenvalue -1
-            # * rp_lst: eigenvectors of the involution inv.M with eigenvalue 1
-            # * the involution of an element in rr_lst is in rs_lst.
-            #
-            #
-            rm_lst = [ r for r in r_lst if r.mat_mul( inv.M ) == r.int_mul( -1 ) ]
-            rp_lst = [ r for r in r_lst if r.mat_mul( inv.M ) == r ]
-            rr_lst = []
-            for r in r_lst:
-                if r not in rm_lst + rp_lst + rr_lst:
-                    if r.mat_mul( inv.M ) not in rr_lst:
-                        rr_lst += [r]
-            rs_lst = [r.mat_mul( inv.M ) for r in rr_lst]
-            assert sorted( r_lst ) == sorted( rm_lst + rp_lst + rr_lst + rs_lst )
-            NSTools.p( 'Mtype =', inv.Mtype, ', bas_lst =', [bas.type for bas in bas_lst ] )
-            NSTools.p( '\t rm_lst =', rm_lst )
-            NSTools.p( '\t rp_lst =', rp_lst )
-            NSTools.p( '\t rr_lst =', rr_lst )
-            NSTools.p( '\t rs_lst =', rs_lst )
-
-
-            #
-            # Construct a list dp1_lst of root bases that are contained in rp_lst.
-            # Each root bases is represented by a DPLattice object.
-            #
-            dpl1_lst = []
+            s_lst, q_lst = DPLattice.get_part_roots( inv )
+            dpls_lst = [inv]  # list of DPLattice objects for s_lst
+            dplq_lst = [inv]  # list of DPLattice objects for q_lst
             for bas in bas_lst:
+                eta.update( inv.get_marked_Mtype() + ',' + bas.type )
 
-                #
-                # Count, up to equivalence, the maximum number of root subsystems in rp_lst
-                # that have the same type as bas.type.
-                #
-                # For example, if rank==4 and inv.Mtype=='A1' and bas.type=='A1',
-                # then we count the number of root subsytems of type 2A1 in the root system A1+A2.
-                #
-                maxnum = 0
-                t1_lst = sorted( convert_dynkin_type_to_lst( inv.Mtype ) + convert_dynkin_type_to_lst( bas.type ) )
-                t1_lst = [ t1 for t1 in t1_lst if t1 != 'A0' ]
-                for bas2 in bas_lst:
-                    if t1_lst == convert_dynkin_type_to_lst( bas2.type ):
-                        maxnum += 1
-                NSTools.p( '\t\t bas =', bas.type, ', t1_lst =', t1_lst, ', maxnum =', maxnum )
-                if maxnum == 0:
+                if bas.type == 'A0':
                     continue
 
-                #
-                # Go through all subsets of rp_lst of prescribed length
-                # until all root bases in rp_lst of type bas.type are found.
-                #
-                foundnum = 0
-                subsets = sage_Subsets( range( len( rp_lst ) ), len( bas.d_lst ) )
-                rps_lst = []
-                eta1 = ETA( len( subsets ), 20 )
-                for idx_lst in subsets:
-                    sub = [ rp_lst[idx] for idx in idx_lst ]
-                    eta1.update( sub )
-                    if not is_root_basis( sub ):
-                        continue
-                    if get_dynkin_type( sub ) != bas.type:
-                        continue
-                    rps = DPLattice( sub, inv.Md_lst, inv.M )
-                    if rps in rps_lst:
-                        continue
-                    rps.set_attributes( 8 )
-                    rps_lst += [rps]
-                    foundnum += 1
-                    if foundnum == maxnum:
-                        break
-                dpl1_lst += rps_lst
-            #
-            # end of loop for constructing dp1_lst
-            NSTools.p( '\t dpl1_lst =', [( dpl.Mtype, dpl.type ) for dpl in dpl1_lst] )
+                # construct bases of type bas.type in s_lst
+                num = DPLattice.get_num_types( inv, bas, bas_lst )
+                if num > 0:
+                    tmp_lst = DPLattice.seek_bases( inv, bas.d_lst, s_lst, num )
+                    for tmp in tmp_lst:
+                        if tmp not in dpls_lst:
+                            dpls_lst += [tmp]
 
-            #
-            # We construct a list dp2_lst that consist of root bases containing
-            # elements of both rp_lst and rr_lst+rs_lst.
-            #
-            # For each DPLattice in dp1_lst we combine with roots in rr_lst and
-            # their involuted roots in rs_lst.
-            #
-            #
-            dpl2_lst = []
-            for dpl1 in dpl1_lst:
-                rr_short_lst = []
-                for rr in rr_lst:
-                    if set( [rr * d for d in dpl1.d_lst] + [rr.mat_mul( inv.M ) * d for d in dpl1.d_lst] ) in [{0, 1}, {1}, {}]:
-                        rr_short_lst += [rr]
-                subsets = sage_Subsets( range( len( rr_short_lst ) ) )
-                eta2 = ETA( len( subsets ), 20 )
-                for idx_lst in subsets:
-                    sub1 = [ rr_short_lst[idx] for idx in idx_lst ]
-                    sub2 = [ rr.mat_mul( inv.M ) for rr in sub1]
-                    sub = dpl1.d_lst + sub1 + sub2
-                    eta2.update( sub )
-                    # notice that sub may be the emptyset
-                    if not is_root_basis( sub ):
-                        continue
-                    rrs = DPLattice( sub, inv.Md_lst, inv.M )
-                    if rrs in dpl2_lst:
-                        continue
-                    rrs.set_attributes( 8 )
-                    dpl2_lst += [rrs]
-            #
-            # end of loop for constructing dp2_lst
-            NSTools.p( '\t dpl2_lst =', [( dpl.Mtype, dpl.type ) for dpl in dpl2_lst] )
+                # construct bases of type bas.type in q_lst
+                # if DPLattice.is_inv_basis( bas.d_lst, bas.type ):
+                dplq_lst += DPLattice.seek_bases( inv, bas.d_lst, q_lst )
 
-            #
-            # We add the obtained DPLattice objects with
-            # given involution inv.M to dpl_lst.
-            #
-            dpl_lst += dpl2_lst
-        #
-        # end of loop for involutions
 
+            # construct a list of combinations of DPLattice objects in
+            # dpls_lst and dplq_lst
+            #
+            for dpls in dpls_lst:
+                for dplq in dplq_lst:
+                    d_lst = dpls.d_lst + dplq.d_lst  # notice that d_lst can be equal to []
+                    if is_root_basis( d_lst ):
+                        dpls.set_attributes( 8 )
+                        dplq.set_attributes( 8 )
+                        NSTools.p( inv.get_marked_Mtype() + ', ' + dpls.type + '[+]' + dplq.type,
+                                   '; dpls.d_lst =', dpls.d_lst,
+                                   ', dplq.d_lst =', dplq.d_lst,
+                                   ', s_lst =', s_lst,
+                                   ', q_lst =', q_lst,
+                                   ', inv.Md_lst =', inv.Md_lst )
+                        dpl = DPLattice( d_lst, inv.Md_lst, inv.M )
+                        if dpl not in dpl_lst:
+                            dpl.set_attributes()
+                            dpl_lst += [dpl]
 
         # store in cache
         dpl_lst.sort()
@@ -873,55 +989,6 @@ class DPLattice:
         NSTools.save_tool_dct()
 
         return dpl_lst
-
-
-    @staticmethod
-    def get_reduced_cls( rank = 9, invo_cls = False ):
-        '''
-        Parameters
-        ----------
-        rank : int
-        invo_cls : bool
-        
-        Returns
-        -------
-        Classification of DPLattices using weak equivalence. 
-        If rank>7, then either dpl.type or dpl.Mtype equals A0.        
-        If "invo_cls==True", then only return DPLattices dpl 
-        such that dpl.type equals 'A0'.   
-        '''
-        # check cache
-        key = 'get_reduced_cls' + str( ( rank, invo_cls ) )
-        if key in NSTools.get_tool_dct():
-            return NSTools.get_tool_dct()[key]
-
-        # obtain nonreduced classification
-        dpl_lst = []
-        if invo_cls:
-            dpl_lst = DPLattice.get_cls_involutions( rank )
-        else:
-            dpl_lst = DPLattice.get_cls_real_dp( rank )
-
-        # reduce classification
-        DPLattice.weak_equality = True  # see DPLattice.__eq__()
-        out_lst = []
-        for dpl in dpl_lst:
-
-            if not dpl in out_lst:
-                out_lst += [dpl]
-            else:
-                # dpl is already in list using weak equality
-                for i in range( len( out_lst ) ):
-                    if out_lst[i] == dpl and out_lst[i].Mtype < dpl.Mtype:
-                        out_lst[i] = dpl
-                        break
-        DPLattice.weak_equality = False
-
-        # store in cache
-        NSTools.get_tool_dct()[key] = out_lst
-        NSTools.save_tool_dct()
-
-        return out_lst
 
 
     # overloading of "=="
@@ -970,22 +1037,12 @@ class DPLattice:
         if self.type != other.type:
             return False
 
-        # Dynkin type real structures agree?
-        self.set_attributes( 8 )
-        other.set_attributes( 8 )
-        if not DPLattice.weak_equality:
-            # In a finer classification, this check should be
-            # omitted, since equivalent real structures may have
-            # different Dynkin types.
-            if self.Mtype != other.Mtype:
-                return False
+        # Mtype may differ for equivalent DPLattice objects
 
         # check Cremona invariant
         self.set_attributes( 9 )
         other.set_attributes( 9 )
         if not self.G.is_isomorphic( other.G, edge_labels = True ):
-            if not DPLattice.weak_equality:
-                NSTools.p( 'Non isomorphic graphs (unexpected position): ', self, other )
             return False
 
         return True
@@ -1038,7 +1095,7 @@ class DPLattice:
         s += 'Degree          = ' + str( self.get_degree() ) + '\n'
         s += 'Rank            = ' + str( self.get_rank() ) + '\n'
         s += 'Intersection    = ' + str( list( self.m1_lst[0].int_mat ) ) + '\n'
-        s += 'Real structure  = ' + str( self.Mtype ) + '\n'
+        s += 'Real structure  = ' + str( self.get_marked_Mtype() ) + '\n'
         s += 'Singularities   = ' + str( self.type ) + '\n'
         s += 'Cardinalities   = ' + '(' + str( len( self.or_lst ) ) + ', ' + str( len( self.sr_lst ) ) + ')\n'
 

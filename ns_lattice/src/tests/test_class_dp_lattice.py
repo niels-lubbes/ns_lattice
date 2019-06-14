@@ -10,6 +10,8 @@ from ns_lattice.sage_interface import sage_matrix
 
 from ns_lattice.class_div import Div
 
+from ns_lattice.dp_root_bases import get_dynkin_type
+
 from ns_lattice.class_ns_tools import NSTools
 
 from ns_lattice.class_dp_lattice import DPLattice
@@ -53,48 +55,38 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_root_bases__rank_3( self ):
+    def test__get_bas_lst__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
-        bas_lst = DPLattice.get_cls_root_bases( 3 )
-        print( len( bas_lst ) )
-        for dpl in bas_lst:
-            print( dpl )
+        bas_lst = DPLattice.get_bas_lst( 3 )
         assert len( bas_lst ) == 2
+        for bas in bas_lst:
+            print( bas )
+        print( len( bas_lst ) )
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_root_bases__rank_4( self ):
+    def test__get_bas_lst__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
-        rank = 4
-        bas_lst = DPLattice.get_cls_root_bases( rank )
+        bas_lst = DPLattice.get_bas_lst( 4 )
+        for bas in bas_lst:
+            print( bas )
+
         print( len( bas_lst ) )
-        for dpl in bas_lst:
-            print( dpl )
         assert len( bas_lst ) == 6
-        NSTools.set_enable_tool_dct( True )
-
-    def test__get_cls_root_bases__rank_4( self ):
-        NSTools.set_enable_tool_dct( False )
-        rank = 4
-        bas_lst = DPLattice.get_cls_root_bases( rank )
-        print( len( bas_lst ) )
-        for dpl in bas_lst:
-            dpl.set_attributes( 8 )
 
         type_lst = []
-        for dpl in bas_lst:
-            type_lst += [( dpl.Mtype, dpl.type )]
-            print( type_lst[-1] )
-
-        assert len( bas_lst ) == 6
+        for bas in bas_lst:
+            type_lst += [( bas.Mtype, bas.type )]
+        print( type_lst )
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2')]"
+
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_involutions__rank_4( self ):
+    def test__get_inv_lst__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
         rank = 4
-        inv_lst = DPLattice.get_cls_involutions( rank )
+        inv_lst = DPLattice.get_inv_lst( rank )
         print( len( inv_lst ) )
         for inv in inv_lst:
             inv.set_attributes( 8 )
@@ -109,11 +101,11 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_real_dp_slow__rank_3( self ):
+    def test__get_cls_slow__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
 
         rank = 3
-        dpl_lst = DPLattice.get_cls_real_dp_slow( rank )
+        dpl_lst = DPLattice.get_cls_slow( rank )
 
         for dpl in dpl_lst:
             dpl.set_attributes( 8 )
@@ -128,11 +120,11 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_real_dp_slow__rank_4( self ):
+    def test__get_cls_slow__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
 
         rank = 4
-        dpl_lst = DPLattice.get_cls_real_dp_slow( rank )
+        dpl_lst = DPLattice.get_cls_slow( rank )
 
         for dpl in dpl_lst:
             dpl.set_attributes( 8 )
@@ -147,12 +139,26 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_real_dp__rank_3( self ):
+    def test__is_inv_basis( self ):
         NSTools.set_enable_tool_dct( False )
 
-        rank = 3
-        dpl_lst = DPLattice.get_cls_real_dp( rank )
+        # 4A1
+        d_lst = [ 'e2-e4', 'e3-e5', 'e0-e1-e2-e4', 'e0-e1-e3-e5']
+        d_lst = [ Div.new( d, 6 ) for d in d_lst ]
+        assert DPLattice.is_inv_basis( d_lst, get_dynkin_type( d_lst ) )
 
+        # A1+A3
+        d_lst = [ 'e1-e2', 'e3-e4', 'e4-e5', 'e5-e6']
+        d_lst = [ Div.new( d, 7 ) for d in d_lst ]
+        assert not DPLattice.is_inv_basis( d_lst, get_dynkin_type( d_lst ) )
+
+        NSTools.set_enable_tool_dct( True )
+
+
+    def test__get_cls__rank_3( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        dpl_lst = DPLattice.get_cls( 3 )
         type_lst = []
         for dpl in dpl_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
@@ -162,52 +168,25 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__get_cls_real_dp__rank_4( self ):
+    def test__get_cls__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
 
-        rank = 4
-        dpl_lst = DPLattice.get_cls_real_dp( rank )
-
+        dpl_lst = DPLattice.get_cls( 4 )
         type_lst = []
         for dpl in dpl_lst:
             type_lst += [( dpl.Mtype, dpl.type )]
             print( dpl.get_marked_Mtype(), dpl.type )
 
         print( type_lst )
-
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
 
-        NSTools.set_enable_tool_dct( True )
-
-
-    def test__get_cls_real_dp__large_rank( self ):
-        # comment for long computation
-        return
-
-        NSTools.set_enable_tool_dct( False )
-        NSTools.filter( None )
-
-        rank = 5
-        dpl_lst = DPLattice.get_cls_real_dp( rank )
-
-        for dpl in dpl_lst:
-            dpl.set_attributes( 8 )
-
-        type_lst = []
-        for dpl in dpl_lst:
-            type_lst += [( dpl.Mtype, dpl.type )]
-            print( type_lst[-1], dpl.is_real_minimal() )
-        print( type_lst )
-        print( len( dpl_lst ) )
-
-        assert len( dpl_lst ) == 12  # 5=12, 6=
         NSTools.set_enable_tool_dct( True )
 
 
     def test__get_real_type( self ):
         NSTools.set_enable_tool_dct( False )
 
-        dpl_lst = DPLattice.get_cls_real_dp_slow( 4 )
+        dpl_lst = DPLattice.get_cls_slow( 4 )
 
         type_lst = []
         for dpl in dpl_lst:
@@ -223,20 +202,66 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
+    def test__get_cls__large_rank( self ):
+
+        # comment for long computation
+        # return
+
+
+        # NSTools.set_enable_tool_dct( False )
+        NSTools.filter( ['class_dp_lattice.py', 'class_eta.py'] )
+
+        dpl_lst = DPLattice.get_cls( 8 )  # argument is rank
+
+        pair_lst = []
+        for dpl in dpl_lst:
+            pair = ( dpl.get_marked_Mtype(), dpl.get_real_type() )
+            pair_lst += [ pair ]
+            print( pair )
+
+        print( pair_lst )
+        print( len( dpl_lst ) )
+
+        assert len( dpl_lst ) == 52  # 5=12, 6=52, 7=56
+        # NSTools.set_enable_tool_dct( True )
+
+
+
+
+
 if __name__ == '__main__':
 
-    NSTools.filter( 'class_dp_lattice.py' )
+    NSTools.filter( ['class_dp_lattice.py', 'class_eta.py'] )
+    # NSTools.filter( None )
 
     # TestClassDPLattice().test__eq()
     # TestClassDPLattice().test__get_marked_Mtype()
-    # TestClassDPLattice().test__get_cls_root_bases__rank_3()
-    # TestClassDPLattice().test__get_cls_root_bases__rank_4()
-    # TestClassDPLattice().test__get_cls_invo__rank_4()
-    # TestClassDPLattice().test__get_cls_real_dp_slow__rank_3()
-    # TestClassDPLattice().test__get_cls_real_dp_slow__rank_4()
-    # TestClassDPLattice().test__get_cls_real_dp__large_rank()
-    TestClassDPLattice().test__get_real_type()
-    # TestClassDPLattice().test__get_cls_real_dp__rank_3()
-    # TestClassDPLattice().test__get_cls_real_dp__rank_4()
+    # TestClassDPLattice().test__get_bas_lst__rank_3()
+    # TestClassDPLattice().test__get_bas_lst__rank_4()
+    # TestClassDPLattice().test__get_inv_lst__rank_4()
+    # TestClassDPLattice().test__get_cls_slow__rank_3()
+    # TestClassDPLattice().test__get_cls_slow__rank_4()
+    # TestClassDPLattice().test__is_inv_basis()
+    # TestClassDPLattice().test__get_cls__rank_3()
+    # TestClassDPLattice().test__get_cls__rank_4()
+    # TestClassDPLattice().test__get_real_type()
+    TestClassDPLattice().test__get_cls__large_rank()
 
     pass
+
+
+            #         M = sage_identity_matrix( 6 )
+        #
+        #         d_lst = [ 'e0-e1-e2-e5', 'e0-e3-e4-e5']
+        #         d_lst = [ Div.new( d, 6 ) for d in d_lst ]
+        #         dpl1 = DPLattice( d_lst, [], M )
+        #         print( dpl1 )
+        #
+        #         d_lst = [ 'e4-e5', 'e0-e1-e2-e3']
+        #         d_lst = [ Div.new( d, 6 ) for d in d_lst ]
+        #         dpl2 = DPLattice( d_lst, [], M )
+        #         print( dpl2 )
+        #
+        #         print( dpl1 == dpl2 )
+        #
+        #         return

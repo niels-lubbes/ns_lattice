@@ -26,18 +26,13 @@ from ns_lattice.div_in_lattice import get_ak
 from ns_lattice.class_dp_lattice import DPLattice
 
 from ns_lattice.ns_basis import get_bases_lst
-from ns_lattice.ns_basis import get_webs
-from ns_lattice.ns_basis import contains_perm
-from ns_lattice.ns_basis import triples
-
-from ns_lattice.convert_to_tex import table_to_tex
 
 from linear_series.class_poly_ring import PolyRing
 from linear_series.class_base_points import BasePointTree
 from linear_series.class_linear_series import LinearSeries
 
 
-def usecase__get_cls_root_bases( max_rank ):
+def usecase__get_cls( max_rank ):
     '''
     Classification of root bases in root system of rank at most "max_rank".
     See "DPLattice.get_cls_root_bases()".
@@ -47,160 +42,17 @@ def usecase__get_cls_root_bases( max_rank ):
     max_rank : int
         Maximal rank.  
     '''
-    NSTools.p( 'Classification of root bases.' )
-
+    s = ''
     for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_cls_root_bases( rank ):
-            print( str( rank ) + '\t' + dpl.type + '\t\t\t' + str( dpl.d_lst ) )
-        print( 'total = ' + str( len( DPLattice.get_cls_root_bases( rank ) ) ) )
+        for dpl in DPLattice.get_cls( rank ):
+            s += str( rank ) + '\t'
+            s += dpl.get_marked_Mtype() + '\t'
+            s += dpl.get_real_type() + '\t'
+            s += dpl.get_numbers() + '\t'
+            s += '\n'
+        s += 80 * '-' + '\n'
 
-
-def usecase__get_reduced_cls_dp_lattice( max_rank, tex = False ):
-    '''
-    We output a table where each row corresponds to exactly 
-    one isomorphism class of a Neron-Severi lattices of weak 
-    del Pezzo surfaces.
-          
-    See "DPLattice.usecase__get_reduced_cls_dp_lattice()".  
-    
-    The table headers of the output table mean the following:
-        #(-1)  : length of DPLattice.m1_lst
-        #R(-1) : length of DPLattice.real_m1_lst 
-        #(0)   : length of DPLattice.fam_lst
-        #R(0)  : length of DPLattice.real_fam_lst
-        P1xP1  : y iff there exists f and g in DPLattice.real_fam_lst such that f*g=1   
-    
-    Parameters
-    ----------
-    max_rank : int
-        Maximal rank for the root system associated to singularities and
-        involutions of weak del Pezzo surfaces.
-                    
-    tex : bool
-        If True, then output the classification as a table in Tex code.
-        The following Tex macros are used for the table header:        
-            \newcommand{\MmfD}{{\mathfrak{D}}}
-            \newcommand{\MbbP}{{\mathbb{P}}}    
-            \newcommand{\Mrow}[3]{\ensuremath{#1\colon #2\longrightarrow #3}}             
-    '''
-    NSTools.p( 'Reduced classification of DPLattice objects.' )
-
-    #
-    # table 1
-    #
-    tab1 = []
-    h1_lst = ['', 'deg', 'real', 'sing', 'P1xP1', '#(-1)', '#(0)', '#R(-1)', '#R(0)']
-    t1_lst = [ '', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\MmfD(B(Y))$',
-                '$\MbbP^1\\times\MbbP^1$', '$\#E_\star(Y)$',
-                '$\#F_\star(Y)$', '$\#E_\MbbR(Y)$', '$\#G(Y)$' ]
-    idx = 0
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_reduced_cls( rank, False ):
-            row = []
-            row += [idx]
-            row += [dpl.get_degree()]
-            row += [dpl.get_marked_Mtype()]
-            row += [dpl.type]
-            s = 'y' if dpl.contains_fam_pair() else 'n'
-            if dpl.is_real_minimal():
-               s += '*'
-            row += [ s ]
-            row += dpl.get_numbers()[1:3] + dpl.get_numbers()[4:]
-
-            tab1 += [row]
-            idx += 1
-
-    #
-    # table 2
-    #
-    tab2 = []
-    h2_lst = ['', 'deg', 'real', 'involution' ]
-    t2_lst = ['', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\sigma_*$']
-    idx = 0
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_reduced_cls( rank, True ):
-            div_tup = tuple( [Div( row ).mat_mul( dpl.M ) for row in sage_identity_matrix( rank ) ] )
-
-            row = []
-            row += [ idx ]
-            row += [ dpl.get_degree() ]
-            row += [ dpl.get_marked_Mtype() ]
-            row += [ div_tup ]
-
-            tab2 += [row]
-            idx += 1
-
-    #
-    # table 3
-    #
-    tab3 = []
-    h3_lst = ['', 'deg', 'real', 'sing', 'root base' ]
-    t3_lst = ['', '$\deg(Y)$', '$\MmfD(A(Y))$', '$\MmfD(B(Y))$', '$B(Y)$']
-    idx = 0
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_reduced_cls( rank, False ):
-
-            row = []
-            row += [idx]
-            row += [dpl.get_degree()]
-            row += [dpl.get_marked_Mtype()]
-            row += [dpl.type]
-            row += [[ d for d in dpl.d_lst ]]
-
-            tab3 += [row]
-            idx += 1
-
-    #
-    # ordering for the tables
-    #
-    tab_h_lst = [( tab2, h2_lst, t2_lst ), ( tab3, h3_lst, t3_lst ), ( tab1, h1_lst, t1_lst )]
-
-    #
-    # output the tables
-    #
-    if not tex:
-
-        for tab, h_lst, t_lst in tab_h_lst:
-
-            num_cols = len( tab[0] )
-            tab = [['------'] * num_cols] + tab
-            tab = [h_lst] + tab
-            tab = [['------'] * num_cols] + tab
-            tab += [['------'] * num_cols]
-            row_format = "{:<10}" * num_cols  # each column is 8 chars.
-
-            for row in tab:
-                print( row_format.format( *row ) )
-            for rank in range( 3, max_rank + 1 ):
-                print( 'deg =', 10 - rank, ' #lattice-classes =', len( DPLattice.get_reduced_cls( rank ) ) )
-
-            print( 80 * '=' )
-
-    else:
-
-        #
-        # parameters for table_to_tex()
-        #
-        max_len = 61
-        row_num = 9
-        replace_dct = {'A':'A_', 'D':'D_', 'E':'E_', 'e':'e_', '[':'\\{', ']':'\\}'}
-        col_idx = 1
-
-        s = ''
-        s += '\n\n\subsection{Classification of involution $\Mrow{\sigma_*}{N(Y)}{N(Y)}$}'
-        s += '\n\label{sec:t1}\n\n'
-        s += table_to_tex( t2_lst, tab2, replace_dct, col_idx, max_len, row_num )
-
-        s += '\n\n\subsection{Classification of root base $B(Y)$ of singular locus}'
-        s += '\n\label{sec:t2}\n\n'
-        s += table_to_tex( t3_lst, tab3, replace_dct, col_idx, max_len, row_num )
-
-
-        s += '\n\n\subsection{Cardinalities of distinguished subsets of $N(Y)$}'
-        s += '\n\label{sec:t3}\n\n'
-        s += table_to_tex( t1_lst, tab1, replace_dct, col_idx, max_len, row_num )
-
-        print( s )
+    NSTools.p( 'Classification of root bases:\n' + s )
 
 
 def usecase__get_classes_dp1( rank ):
@@ -235,36 +87,12 @@ def usecase__get_classes_dp1( rank ):
             NSTools.p( '\t\t', c, '\t\t', c.get_basis_change( B ) )
 
 
-def usecase__hex_webs( max_rank ):
-    '''
-    Characterize triples of families of conics on weak del Pezzo surfaces
-    that are not orthogonal to any (-1)-curve. 
-    
-    Parameters
-    ----------
-    max_rank : int  
-    '''
-
-    for rank in range( 5, max_rank + 1 ):
-        NSTools.p( 'rank =', rank )
-        for dpl in DPLattice.get_cls_root_bases( rank ):
-
-            t_lst = triples( dpl, 1 )
-            if t_lst != []:
-                NSTools.p( dpl )
-                NSTools.p( 'dpl.d_lst  =', dpl.d_lst )
-                NSTools.p( 'dpl.M      =', list( dpl.M ) )
-                NSTools.p( 'dpl.Md_lst =', dpl.Md_lst )
-                NSTools.p( '::: t_lst  =', t_lst )
-                NSTools.p( 10 * '=*' )
-
-
 def usecase__graphs( rank ):
     '''
     M. Meringer: Fast Generation of Regular Graphs and Construction of Cages. Journal of Graph Theory 30, 137-146, 1999.
     '''
     rank = 7
-    dpl = DPLattice.get_cls_root_bases( rank )[0]
+    dpl = DPLattice.get_cls( rank )[0]
     f_lst = dpl.real_fam_lst
 
     G = sage_Graph()
@@ -342,7 +170,7 @@ def usecase__construct_surfaces():
     NSTools.p( 'Neron-Severi lattice =', dpl )
 
     # search representative for the equivalence class in classification
-    assert dpl in DPLattice.get_reduced_cls( rank )
+    assert dpl in DPLattice.get_cls( rank )
 
 
 def usecase__roman_circles():
@@ -457,6 +285,8 @@ if __name__ == '__main__':
     #
     mod_lst = []
     mod_lst += ['__main__.py']
+    mod_lst += ['class_dp_lattice.py']
+    mod_lst += ['class_eta.py']
     NSTools.filter( mod_lst )  # output only from specified modules
     # NSTools.filter( None )  # print all verbose output, comment to disable.
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
@@ -478,13 +308,11 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    usecase__get_cls_root_bases( rank )
-    usecase__get_reduced_cls_dp_lattice( rank, True )
-    usecase__get_classes_dp1( rank )
-    usecase__hex_webs( rank )
-    usecase__graphs( rank )
-    usecase__construct_surfaces()
-    # usecase__roman_circles() # takes about 3 minutes
+    usecase__get_cls( rank )
+    # usecase__get_classes_dp1( rank )
+    # usecase__graphs( rank )
+    # usecase__construct_surfaces()
+    # usecase__roman_circles()  # takes about 3 minutes
 
     #########################################
     #                                       #

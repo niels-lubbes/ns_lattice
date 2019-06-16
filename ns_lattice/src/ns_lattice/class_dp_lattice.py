@@ -110,20 +110,20 @@ class DPLattice:
         Geometrically these classes correspond to real lines.
         
         
-    self.real_fam_lst : list<Div>
+    real_fam_lst : list<Div>
         A list "Div" objects that represent real classes in "self.fam_lst".
         Thus these classes are send to itself by M.
         Geometrically these classes correspond to a real families of conics.        
    
-    self.or_lst : list<Div>
+    or_lst : list<Div>
         A list of "Div" objects that represents roots that are orthogonal to
         "self.d_lst".  
 
-    self.sr_lst : list<Div>
+    sr_lst : list<Div>
         A list of "Div" objects that represents roots that are contained in
         the subspace spanned by "self.d_lst".  
     
-    self.G : sage_Graph
+    G : sage_Graph
         The Cremona invariant for the current lattice.
     '''
 
@@ -587,11 +587,15 @@ class DPLattice:
             inv = DPLattice( [], bas.d_lst, M )
             inv.set_attributes()
 
+            NSTools.p( 'Found type of involution: ', bas.type )
+
             # real structures with different Dynkin types may be equivalent
             if inv not in inv_lst:
                 inv_lst += [ inv ]
             else:
-                NSTools.p( 'Found ambitious type for real structure:', bas.type )
+                NSTools.p( '\tAmbitious type:', bas.type, [inv2.Mtype for inv2 in inv_lst if inv == inv2] )
+                inv_lst = [inv2 for inv2 in inv_lst if not inv2 == inv] + [inv]
+
 
         # store in cache
         inv_lst.sort()
@@ -667,6 +671,90 @@ class DPLattice:
 
 
     @staticmethod
+    def get_num_types( inv, bas, bas_lst, fast = False ):
+        '''
+        Returns the number of root bases in the 
+        eigenspace of eigenvalue 1 of the involution 
+        defined by M.inv.   
+        
+        If this number is unknown, then -1 is returned.
+
+        This method is used by get_cls() before 
+        calling seek_bases().
+        
+        Parameters
+        ----------
+        inv : DPLattice
+        
+        bas : DPLattice
+        
+        bas_lst : list<DPLattice>
+            We expect this to be the output of get_bas_lst()
+            Thus a list of inequivalent DPLattice objects
+         
+        fast : boolean
+            If True, then the exact numbers are returned 
+            in case the root system in the eigenspace for 1 
+            is either D6 or E7.
+         
+        Returns
+        -------
+        int
+            If there does not exists a DPLattice in bas_lst whose type is 
+            inv.Mtype and bas.type combined, then return 0. 
+            Otherwise return either -1 or the 
+            number of root bases in the eigenspace of eigenvalue 1 
+            of the involution defined by M.inv. 
+            We expect this number to be at most 3.                         
+        '''
+
+        t1_lst = convert_type( inv.Mtype )
+        t2_lst = convert_type( bas.type )
+
+        type_exists = False
+        for bas2 in bas_lst:
+            if sorted( t1_lst + t2_lst ) == convert_type( bas2.type ):
+                type_exists = True
+                break
+
+        if not type_exists:
+            return 0
+
+        if not fast or inv.get_rank() <= 7:
+            return -1
+
+        # computes the roots in the eigenspace of eigenvalue 1
+        # of the involution defined by inv
+        #
+        r_lst = get_divs( get_ak( inv.get_rank() ), 0, -2, True )
+        s_lst = [ r for r in r_lst if r.mat_mul( inv.M ) == r ]
+
+        if len( s_lst ) == 30:  # D6 since #roots=60=2*30
+            if bas.type in ['2A1', 'A3', '4A1', '2A1+A3', 'A5']:
+                return 2
+            if bas.type in ['3A1', 'A1+A3']:
+                return 3
+            return 1
+
+        if len( s_lst ) == 63:  # E7 since #roots=126=2*63
+            if bas.type in ['3A1', '4A1', 'A5', 'A1+A3', '2A1+A3', 'A1+A5']:
+                return 2
+            return 1
+
+        if len( s_lst ) == 13 and inv.get_rank() == 8:  # A1+D4
+            if bas.type in ['A1', 'A3', '4A1', 'A1+A3']:
+                return 2
+            if bas.type in ['2A1', '3A1']:
+                return 3
+            return 1
+
+        if len( s_lst ) == 12 and inv.get_rank() in [8, 9]:  # D4
+            return 1
+
+        return -1
+
+
+    @staticmethod
     def get_part_roots( inv ):
         '''
         Return two subsets of roots using the input involution.
@@ -705,121 +793,17 @@ class DPLattice:
             if q not in q_lst and q.mat_mul( inv.M ) not in q_lst:
                 q_lst += [q]
 
-        NSTools.p( 'r_lst      =', r_lst )
-        NSTools.p( 's_lst      =', s_lst )
-        NSTools.p( 'q_lst      =', q_lst )
-        NSTools.p( '       M -->', [q.mat_mul( inv.M ) for q in q_lst] )
+        NSTools.p( 'r_lst      =', len( r_lst ), r_lst )
+        NSTools.p( 's_lst      =', len( s_lst ), s_lst )
+        NSTools.p( 'q_lst      =', len( q_lst ), q_lst )
+        NSTools.p( '       M -->', len( q_lst ), [q.mat_mul( inv.M ) for q in q_lst] )
         NSTools.p( 'inv.Md_lst =', inv.Md_lst )
 
         return s_lst, q_lst
 
 
     @staticmethod
-    def get_num_types( inv, dpl, bas_lst ):
-        '''
-        Computes the maximal number of root basis in the 
-        eigenspace of eigenvalue 1 of the involution defined by M.inv.   
-
-        For example, if rank==6 and inv.Mtype=='A1' and dpl.type=='2A1',
-        then there exists exactly one DPLattice bas in bas_lst such that bas.type=='3A1'        
-        and such that d_lst is 
-            [e1-e2, e0-e1-e2-e5, e0-e3-e4-e5] 
-        or equivalently
-            [e1-e2, e0-e4-e5, e0-e1-e2-e3].
-        However the following two bases of type 2A1
-            [e0-e1-e2-e5, e0-e3-e4-e5] and [e0-e4-e5, e0-e1-e2-e3]
-        are inequivalent and e1-e2 (the eigenvector of (-1)) is orthogonal to both of them.
-        In this case we return 2.
-                 
-        For example, if rank==6 and inv.Mtype=='A1' and dpl.type=='A1',
-        then there exist exactly two DPLattices in bas_lst with type=='2A1'.
-        In this case we return 2.
-
-        This method is used by get_cls().
-        
-        Parameters
-        ----------
-        inv : DPLattice
-        
-        dpl : DPLattice
-        
-        bas_lst : list<DPLattice>
-            We expect this to be the output of get_bas_lst()
-            Thus a list of inequivalent DPLattice objects
-         
-        Returns
-        -------
-        int
-            If there does not exists a DPLattice in bas_lst whose type is 
-            inv.Mtype and bas.type combined, then return 0. 
-            Otherwise return the number of DPLattices in bas_lst 
-            with the same type as bas.type. We expect this number 
-            to be either 1 or 2.                  
-        '''
-        num = 0  # number of root subsystems with fixed Dynkin type
-        a_lst = convert_type( inv.Mtype )
-        b_lst = convert_type( dpl.type )
-        dpl_lst = []
-        for bas in bas_lst:
-            if sorted( a_lst + b_lst ) == convert_type( bas.type ):
-                num += 1
-            if bas.type == dpl.type:
-                dpl_lst += [dpl]
-        if num == 0:
-            return 0
-        else:
-            return max( len( dpl_lst ), num )
-
-
-    @staticmethod
-    def is_inv_basis( d_lst, dtype ):
-        '''
-        This method is used by get_cls().
-                
-        Parameters:
-        -----------
-        d_lst: list<Div>
-            List of divisors representing a root bases.
-            
-        dtype: string
-            The Dynkin type of the root bases represented by d_lst.
-                        
-        Returns
-        -------
-        bool
-            True iff there exists a basis of Dynkin type "dtype" that is invariant 
-            under an involution such that this basis does not have  
-            elements that are fixed by this involution.
-            
-        Notes
-        -----
-        For example '3A2+2A1' is a candidate, but 'A3+A2' and 'A1+A3' are not.
-        
-        '''
-        if 'E' in dtype:
-            return False
-
-        if 'D' in dtype:
-            return False
-
-        if len( d_lst ) % 2 != 0:
-            return False
-
-        tp_lst = convert_type( dtype )
-
-        # create the list on_lst of odd integers n such that An is contained in type
-        on_lst = [ tp[1:] for tp in tp_lst if int( tp[1:] ) % 2 != 0 ]
-        for on in on_lst:
-
-            # if n is odd, then An must occur in pairs
-            if tp_lst.count( 'A' + on ) % 2 != 0:
-                return False
-
-        return True
-
-
-    @staticmethod
-    def seek_bases( inv, d_lst, r_lst, num = -1, b_lst = [], bas_lst = [] ):
+    def seek_bases( inv, d_lst, r_lst, eq, num = -1, b_lst = [], bas_lst = [] ):
         '''
         This method is used by get_cls().
         
@@ -834,10 +818,15 @@ class DPLattice:
         r_lst : list<Div>     
             A list of roots in which we look for bases.
         
+        eq : boolean
+            If True, then the returned bases are pairwise
+            non-equivalent.
+        
         num : int
-            If not -1 we stop after we found num different bases.
-            If -1, then we assume that b.mat_mul(inv.M) not in b_lst
-            for all b in b_lst.
+            If num>0, then the method will terminate if 
+            the number of bases found is equal to num.
+            If num==-1, then the method continues until
+            all possible bases have been reached.
         
         b_lst : list<Div>
             Used for recursive calling this method and 
@@ -845,7 +834,7 @@ class DPLattice:
         
         bas_lst : list<DPLattice>
             Used for recursive calling this method and
-            is the list of inequivalent DPLattice objects that
+            is the list of DPLattice objects that
             is returned by this method. 
             
         Returns 
@@ -854,53 +843,70 @@ class DPLattice:
             A list of DPLattice objects "bas"
             such that bas.type is equal to the Dynkin type of d_lst            
             and bas.Mtype==inv.Mtype and bas.M==inv.M.
-            If num!=-1, then the lattice objects are inequivalent
-            and the Dynkin type is instead two times the type of d_lst.        
+            
+            If eq==True, then the lattice objects are pairwise
+            non-equivalent.
+            
+            If num>0, then the method terminates if the number 
+            of bases that are found is equal to num.
         '''
 
-        # check whether the constructed bases defines new DPLattice objects
+        # check whether the constructed basis defines a new DPLattice object
         if len( b_lst ) == len( d_lst ):
 
-            # make b_lst is invariant under the involution
-            if num == -1:
-                b_lst += [b.mat_mul( inv.M ) for b in b_lst]
+            # check if a permutation of b_lst occurred
+            if not eq:
+                for bas in bas_lst:
+                    if set( bas.d_lst ) == set( b_lst ):
+                        return bas_lst
 
             # create a new basis
             bas = DPLattice( b_lst, inv.Md_lst, inv.M )
 
             # check whether there is an equivalent object in bas_lst
-            if num != -1 and bas in bas_lst:
+            if eq and bas in bas_lst:
                 return bas_lst
 
             # return bas_lst appended with the new DPLattice object
             return bas_lst + [bas]
 
-        # go through all possible roots to build up a basis like d_lst
-        s = d_lst[ len( b_lst ) ]
-        m_lst = [ d * s for d in d_lst  ][:len( b_lst )]
-        for r in r_lst:
+        else:
 
-            # check intersection properties
-            if [b * r for b in b_lst] == m_lst:
+            # construct list with intersection numbers
+            s = d_lst[ len( b_lst ) ]
+            m_lst = [ d * s for d in d_lst[:len( b_lst )] ]
 
-                # recursive call
-                bas_lst = DPLattice.seek_bases( inv, d_lst, r_lst, num, b_lst + [r], bas_lst )
+            # go through all possible roots to build up a basis like d_lst
+            for r in r_lst:
 
-                # break out of for loop if we found enough DPLattice objects
-                if len( bas_lst ) == num:
-                    break
+                # check intersection number properties
+                if [b * r for b in b_lst] == m_lst:
 
-        return bas_lst
+                    # recursive call
+                    bas_lst = DPLattice.seek_bases( inv, d_lst, r_lst, eq, num, b_lst + [r], bas_lst )
+
+                    # break out of loop if num bases are found
+                    if num > 0 and len( bas_lst ) == num:
+                        break
+
+            return bas_lst
 
 
     @staticmethod
-    def get_cls( rank = 9 ):
+    def get_cls( rank = 9, fast = False ):
         '''
         Parameters
         ----------
         max_rank : int
             An integer in [3,...,9].           
     
+        fast : boolean
+            If True, then get_num_types() is called
+            with the fast option so that the computation
+            takes considerable less time. The correctness
+            proof depends additionally on the classification 
+            of root subsystems of E7 and D6. 
+        
         Returns
         -------
         list<DPLattice>
@@ -913,29 +919,29 @@ class DPLattice:
                 diagonal matrix with diagonal: (1,-1,...,-1). 
         '''
         # check cache
-        key = 'get_cls__' + str( rank )
-        # TODO TODO TODO remove FALSE!
-        if False:
-            if key in NSTools.get_tool_dct():
-                return NSTools.get_tool_dct()[key]
+        #
+        key = 'get_cls__' + str( rank ) + '_' + str( fast )
+        if key in NSTools.get_tool_dct():
+            return NSTools.get_tool_dct()[key]
+
 
         # determine possible root bases and involutions
         #
         inv_lst = DPLattice.get_inv_lst( rank )
         bas_lst = DPLattice.get_bas_lst( rank )
-        NSTools.p( 'inv_lst =', [inv.get_marked_Mtype() for inv in inv_lst] )
-        NSTools.p( 'bas_lst =', [bas.type for bas in bas_lst] )
-
+        NSTools.p( 'inv_lst =', len( inv_lst ), [inv.get_marked_Mtype() for inv in inv_lst] )
+        NSTools.p( 'bas_lst =', len( bas_lst ), [bas.type for bas in bas_lst] )
 
         # we initialize the output list with DPLattice objects such that Mtype is 'A0'
         #
         dpl_lst = [ bas for bas in bas_lst ]
 
-
         # we loop through all involutions
         #
-        eta = ETA( ( len( inv_lst ) - 1 ) * len( bas_lst ), 1 )
+        eta = ETA( len( inv_lst ), 1 )
         for inv in inv_lst:
+
+            eta.update( inv.get_marked_Mtype(), [inv1.get_marked_Mtype() for inv1 in inv_lst] )
             if inv.Mtype == 'A0':
                 continue
 
@@ -944,28 +950,33 @@ class DPLattice:
             s_lst, q_lst = DPLattice.get_part_roots( inv )
             dpls_lst = [inv]  # list of DPLattice objects for s_lst
             dplq_lst = [inv]  # list of DPLattice objects for q_lst
+            visited_type_lst = ['A0']
             for bas in bas_lst:
-                eta.update( inv.get_marked_Mtype() + ',' + bas.type )
 
-                if bas.type == 'A0':
+                NSTools.p( inv.get_marked_Mtype() + ',' + bas.get_real_type() + ';' )
+
+                # each type in bas_lst is treated only once
+                if bas.type in visited_type_lst:
                     continue
+                visited_type_lst += [bas.type]
 
                 # construct bases of type bas.type in s_lst
-                num = DPLattice.get_num_types( inv, bas, bas_lst )
-                if num > 0:
-                    tmp_lst = DPLattice.seek_bases( inv, bas.d_lst, s_lst, num )
-                    for tmp in tmp_lst:
-                        if tmp not in dpls_lst:
-                            dpls_lst += [tmp]
+                num = DPLattice.get_num_types( inv, bas, bas_lst, fast )
+                if num != 0:
+                    dpls_lst += DPLattice.seek_bases( inv, bas.d_lst, s_lst, True, num )
 
                 # construct bases of type bas.type in q_lst
-                # if DPLattice.is_inv_basis( bas.d_lst, bas.type ):
-                dplq_lst += DPLattice.seek_bases( inv, bas.d_lst, q_lst )
+                tmp_lst = DPLattice.seek_bases( inv, bas.d_lst, q_lst, False )
+                for tmp in tmp_lst:
+                    tmp.d_lst += [d.mat_mul( inv.M ) for d in tmp.d_lst ]
+                    tmp.d_lst.sort()
+                    dplq_lst += [tmp]
 
 
             # construct a list of combinations of DPLattice objects in
             # dpls_lst and dplq_lst
             #
+            NSTools.p( 'len(dpls_lst) =', len( dpls_lst ), ', len(dplq_lst) =', len( dplq_lst ), ', total =', len( dpls_lst ) * len( dplq_lst ) )
             for dpls in dpls_lst:
                 for dplq in dplq_lst:
                     d_lst = dpls.d_lst + dplq.d_lst  # notice that d_lst can be equal to []
@@ -984,6 +995,7 @@ class DPLattice:
                             dpl_lst += [dpl]
 
         # store in cache
+        #
         dpl_lst.sort()
         NSTools.get_tool_dct()[key] = dpl_lst
         NSTools.save_tool_dct()
@@ -1063,7 +1075,7 @@ class DPLattice:
         other.set_attributes( 8 )
 
         if self.Mtype != other.Mtype:
-            return self.type < other.type
+            return self.Mtype < other.Mtype
 
         if self.get_marked_Mtype() != other.get_marked_Mtype():
             return self.get_marked_Mtype() < other.get_marked_Mtype()
@@ -1071,17 +1083,19 @@ class DPLattice:
         if len( self.d_lst ) != len( other.d_lst ):
             return len( self.d_lst ) < len( other.d_lst )
 
-        if self.type != other.type:
-            return self.type < other.type
+        # more real lines implies smaller self.type!
+
+        if len( self.real_m1_lst ) != len( other.real_m1_lst ):
+            return len( self.real_m1_lst ) > len( other.real_m1_lst )
+
+        if len( self.m1_lst ) != len( other.m1_lst ):
+            return len( self.m1_lst ) > len( other.m1_lst )
 
         if len( self.real_fam_lst ) != len( other.real_fam_lst ):
             return len( self.real_fam_lst ) > len( other.real_fam_lst )
 
         if len( self.fam_lst ) != len( other.fam_lst ):
-            return len( self.fam_lst ) < len( other.fam_lst )
-
-        if len( self.m1_lst ) != len( other.m1_lst ):
-            return len( self.m1_lst ) < len( other.m1_lst )
+            return len( self.fam_lst ) > len( other.fam_lst )
 
 
     # overloading of "str()": human readable string representation of object

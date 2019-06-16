@@ -139,22 +139,6 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
-    def test__is_inv_basis( self ):
-        NSTools.set_enable_tool_dct( False )
-
-        # 4A1
-        d_lst = [ 'e2-e4', 'e3-e5', 'e0-e1-e2-e4', 'e0-e1-e3-e5']
-        d_lst = [ Div.new( d, 6 ) for d in d_lst ]
-        assert DPLattice.is_inv_basis( d_lst, get_dynkin_type( d_lst ) )
-
-        # A1+A3
-        d_lst = [ 'e1-e2', 'e3-e4', 'e4-e5', 'e5-e6']
-        d_lst = [ Div.new( d, 7 ) for d in d_lst ]
-        assert not DPLattice.is_inv_basis( d_lst, get_dynkin_type( d_lst ) )
-
-        NSTools.set_enable_tool_dct( True )
-
-
     def test__get_cls__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -207,11 +191,10 @@ class TestClassDPLattice():
         # comment for long computation
         # return
 
-
         # NSTools.set_enable_tool_dct( False )
         NSTools.filter( ['class_dp_lattice.py', 'class_eta.py'] )
 
-        dpl_lst = DPLattice.get_cls( 8 )  # argument is rank
+        dpl_lst = DPLattice.get_cls( 8, True )  # argument is rank
 
         pair_lst = []
         for dpl in dpl_lst:
@@ -222,7 +205,7 @@ class TestClassDPLattice():
         print( pair_lst )
         print( len( dpl_lst ) )
 
-        assert len( dpl_lst ) == 52  # 5=12, 6=52, 7=56
+        assert len( dpl_lst ) == 56  # 5=12, 6=52, 7=56
         # NSTools.set_enable_tool_dct( True )
 
 
@@ -249,19 +232,3 @@ if __name__ == '__main__':
 
     pass
 
-
-            #         M = sage_identity_matrix( 6 )
-        #
-        #         d_lst = [ 'e0-e1-e2-e5', 'e0-e3-e4-e5']
-        #         d_lst = [ Div.new( d, 6 ) for d in d_lst ]
-        #         dpl1 = DPLattice( d_lst, [], M )
-        #         print( dpl1 )
-        #
-        #         d_lst = [ 'e4-e5', 'e0-e1-e2-e3']
-        #         d_lst = [ Div.new( d, 6 ) for d in d_lst ]
-        #         dpl2 = DPLattice( d_lst, [], M )
-        #         print( dpl2 )
-        #
-        #         print( dpl1 == dpl2 )
-        #
-        #         return

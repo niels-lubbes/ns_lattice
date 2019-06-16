@@ -44,11 +44,11 @@ def usecase__get_cls( max_rank ):
     '''
     s = ''
     for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_cls( rank ):
+        for dpl in DPLattice.get_cls( rank, True ):
             s += str( rank ) + '\t'
             s += dpl.get_marked_Mtype() + '\t'
             s += dpl.get_real_type() + '\t'
-            s += dpl.get_numbers() + '\t'
+            s += str( dpl.get_numbers() ) + '\t'
             s += '\n'
         s += 80 * '-' + '\n'
 

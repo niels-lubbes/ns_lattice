@@ -272,7 +272,7 @@ def convert_type( type ):
     For example if type is '2A1+D4', then the output is 
     ['A1','A1','D4']. If the type is '2A1+A2+A3', 
     then the output is ['A1','A1','A2','A3'].     
-    We exclude elements that are 'A0'.
+    We exclude elements that are equal to 'A0'.
         
     Parameters
     ----------

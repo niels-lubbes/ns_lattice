@@ -30,12 +30,14 @@ class ETA( object ):
             Number of times the loop needs to be traced.
         
         ival : int
-            Number of traced loops in program until
+            Nonzero number of traced loops in program until
             feedback about etimated end time is printed        
         '''
         self.ostart = time.time()  # start time
         self.total = total  # total number of loops
-        self.ival = ival  # number of loops after which eta is updated
+        self.ival = 1
+        if ival > 0:
+            self.ival = ival  # number of loops after which eta is updated
         self.counter = 0  # loop counter
         self.istart = None  # start time which is updated after ival loops.
         self.eta = None  # estimated time of arrival in minutes

@@ -21,8 +21,7 @@ class ETA( object ):
 
     def __init__( self, total, ival ):
         '''
-
-        Should be called before a loop in the program starts.        
+        Should be called before a loop in starts.        
         
         Parameters
         ----------
@@ -33,18 +32,32 @@ class ETA( object ):
             Nonzero number of traced loops in program until
             feedback about etimated end time is printed        
         '''
-        self.ostart = time.time()  # start time
-        self.total = total  # total number of loops
+
+        # total number of loops
+        self.total = total
+
+        # number of loops after which eta is updated
         self.ival = 1
         if ival > 0:
-            self.ival = ival  # number of loops after which eta is updated
-        self.counter = 0  # loop counter
-        self.istart = None  # start time which is updated after ival loops.
-        self.eta = None  # estimated time of arrival in minutes
+            self.ival = ival
+
+        # loop counter
+        self.counter = 0
+
+        # times
+        self.ini_time = self.time()  # time when method was called
+        self.prv_time = self.ini_time  # time which is updated after ival loops.
+        self.eta_time = 0  # estimated time of arrival in minutes
+
+
+    def time( self ):
+        return time.time()
 
 
     def update( self, *info_lst ):
         '''
+        Should be called inside a loop.
+        
         Prints an estimation for the time it takes for a program to 
         terminate (ETA for short). We refer to the program termination 
         as arrival.
@@ -55,24 +68,27 @@ class ETA( object ):
             Variable length argument list consisting of 
             additional information that is printed together with ETA.
         '''
-        if self.counter % self.ival == 0:
-            self.istart = time.time()
-
-        self.counter += 1
 
         if self.counter % self.ival == 0:
+            cur_time = self.time()
 
-            itime = ( time.time() - self.istart ) / ( 60 * self.ival )
-            otime = sage_n( ( time.time() - self.ostart ) / 60, digits = 5 )
-            self.eta = sage_n( itime * ( self.total - self.counter ), digits = 5 )
+            ival_time = ( cur_time - self.prv_time ) / ( 60 * self.ival )
+            passed_time = sage_n( ( cur_time - self.ini_time ) / 60, digits = 5 )
+            self.eta_time = sage_n( ival_time * ( self.total - self.counter ), digits = 5 )
 
             s = ''
             for info in info_lst:
                 s += str( info ) + ' '
 
-            NSTools.p( 'ETA =', self.eta, 'm,',
+            NSTools.p( 'ETA =', self.eta_time, 'm,',
                        'counter =', self.counter, '/', self.total, ',',
-                       'time =', otime, 'm,',
+                       'time =', passed_time, 'm,',
                        'info =', s )
 
+            # update previous time
+            self.prv_time = cur_time
+
+
+        # increase counter
+        self.counter += 1
 

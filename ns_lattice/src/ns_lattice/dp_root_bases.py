@@ -46,6 +46,7 @@ def is_root_basis( d_lst ):
         and their pairwise product is either -2, 0 or 1.               
     '''
 
+    # check empty-list
     if d_lst == []:
         return True
 
@@ -56,6 +57,10 @@ def is_root_basis( d_lst ):
                 return False
 
     # check linear independence
+    # Linear independent vectors with pairwise positive intersection product
+    # must form a root basis. Thus vectors of positive roots in the corresponding
+    # root system are all positive
+    #
     V = sage_VectorSpace( sage_QQ, d_lst[0].rank() )
     W = V.subspace( [d.e_lst for d in d_lst] )
     return W.rank() == len( d_lst )

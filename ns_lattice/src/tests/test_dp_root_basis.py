@@ -22,6 +22,9 @@ from ns_lattice.dp_root_bases import get_root_bases_orbit
 class TestDPRootBasis():
 
     def test__is_root_basis( self ):
+
+        assert is_root_basis( [] )
+
         bas_lst = [1123 ]
         assert is_root_basis( [Div.new( str( bas ), 4 ) for bas in bas_lst] )
 

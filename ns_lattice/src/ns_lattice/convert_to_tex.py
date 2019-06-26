@@ -10,290 +10,223 @@ from ns_lattice.class_dp_lattice import DPLattice
 
 from ns_lattice.class_ns_tools import NSTools
 
+from ns_lattice.sage_interface import sage_identity_matrix
 
-def break_col( col, max_len, row_num ):
+
+def cls_to_tex():
     '''
-    Splits a string by commas in to a list of "row_num" substrings.
-    The length of each substring should not exceed "max_len", if
-    this is possible by splitting via commas.
+    Create tex code for the output of DPLattice.get_cls()
     
-    Parameters
-    ----------
-    col : int
-    max_len : int
-    row_num : int
-    
-    Returns
-    -------
-    list<string>        
-    '''
-
-    col = str( col )
-
-    col_lst = []
-    if ',' not in col or len( col ) < max_len:
-        col_lst = [ str( col ) ]
-    else:
-        s_lst = str( col ).split( ',' )
-        ts = ''
-        for s in s_lst:
-
-            if len( ts + s + ', ' ) >= max_len:
-                col_lst += [ts]
-                ts = ''
-
-            ts += s + ', '
-            if ts[-3:] in ['), ', '], ']:
-                ts = ts[:-2]  # remove the comma at the end
-
-        # add remainder
-        col_lst += [ts]
-
-    # we cannot break up a column in too many rows
-    if row_num - len( col_lst ) < 0:
-        raise Exception( 'Parameter row_num is too small: ', row_num, '<', len( col_lst ) )
-
-    # return row_num columns
-    for i in range( row_num - len( col_lst ) ):
-        col_lst += ['']
-
-    return col_lst
-
-
-def refine_table( table, max_len = 50, row_num = 5 ):
-    '''
-    Refines a table by breaking long rows into several short rows.
-    
-    Parameters
-    ----------
-    table : list<list<object>>
-    
-    max_len : int
-        See break_col().
-    
-    row_num : int
-        See break_col().
-    
-    Returns
-    -------
-    list<list<object>>    
-    '''
-    new_table = []
-    for ri in range( len( table ) ):
-        for i in range( row_num ):
-
-            new_row = []
-            for ci in range( len( table[ri] ) ):
-                new_row += [ break_col( table[ri][ci], max_len, row_num )[i] ]
-                # NSTools.p( table[ri][ci], new_row, break_col( table[ri][ci], max_len, row_num ) )
-            if set( new_row ) != {''}:
-                new_table += [new_row]
-
-    return new_table
-
-
-def get_table_header( h_lst ):
-    '''
-    Parameters
-    ----------
-    h_lst : list<object>
-        List of header names.
-    
+  
     Returns
     -------
     string
-        Table header in Tex.
+        A string representing a table of tables in Tex format.
+        The table represent the classification of Neron-Severi
+        lattice of weak del Pezzo surfaces.       
     '''
 
-    h_str = ''
-    h_str += '\n' + '\\begin{center}'
-    h_str += '\n' + '{\\tiny'
-    h_str += '\n' + '\\begin{longtable}{|' + ( len( h_lst ) * 'c|' ) + '}'
-    h_str += '\n' + '\\hline'
-    h_str += '\n'
-    for h in h_lst:
-        h_str += str( h ) + '&'
-    h_str = h_str[:-1]
-    h_str += '\n' + '\\\\\\hline\\hline\\endhead'
-    return h_str
+    # create a list of occuring divisors
+    #
+    div_lst = []
+    for rank in range( 3, 9 + 1 ):
+        for dpl in DPLattice.get_cls( rank ):
+
+            # construct list for involution (e0,...,er)|-->(i0,...,ir)
+            i_lst = [Div( row ).mat_mul( dpl.M ) for row in sage_identity_matrix( rank ) ]
+
+            # add each divisor that occurs to div_lst
+            for elt in i_lst + dpl.d_lst:
+                div_lst += [   Div( elt.e_lst + ( 9 - len( elt.e_lst ) ) * [0] ) ]
+    div_lst = list( set( div_lst ) )
+    div_lst.sort()
+    e0 = Div( [1, 0, 0, 0, 0, 0, 0, 0, 0 ] )
+    div_lst.remove( e0 )
+    div_lst = [e0] + div_lst
 
 
-def get_table_footer():
-    '''
-    Returns
-    -------
-    string
-        Table footer in Tex.
-    '''
-    f_str = ''
-    f_str += '\n' + '\\end{longtable}'
-    f_str += '\n' + '}'
-    f_str += '\n' + '\\end{center}'
-    return f_str
+    # create dictionary characters for elements in div_lst
+    #
+    abc = 'abcdefghijklmnopqrstuvwxyz'
+    ch_lst = []
+    ch_lst += [ ch for ch in '012345678' + abc ]
+    # ch_lst += [ chr( ord( ch ) - 32 ) for ch in abc  ]  # capital letters
+    ch_lst += [ '\\.' + ch for ch in abc  ]
+    ch_lst += [ '\\"' + ch for ch in abc  ]
+    ch_lst += [ '\\^' + ch for ch in abc  ]
+    ch_lst += [ '\\u{' + ch + '}' for ch in abc  ]
+    ch_lst += [ '\\~' + ch for ch in abc  ]
+    NSTools.p( '(len(ch_lst), len(div_lst)) =', ( len( ch_lst ), len( div_lst ) ) )
+
+    assert len( ch_lst ) >= len( div_lst )
 
 
-def table_to_tex( h_lst, table, replace_dct = {}, col_idx = -1, max_len = 60, row_num = 10 ):
-    '''
-    Parameters
-    ----------
-    h_lst : list<string>
-        A list of string defining the column 
-        headers of a table.
-    
-    table : list<list<object>>
-        A list of lists represent rows in a table.
-    
-    replace_dct : dict<string:string>
-        A dictionary whose keys and values are strings.
-    
-    col_idx : int
-        Index of a column. If the value in this column changes from
-        row to row, then an horizontal separator line is added. 
-        If col_idx has value -1, then no separator lines are added.
-    
-    Returns
-    -------
-    string
-        A string representing "table" in Tex format.
-        The column headers are defined by "h_lst".
-        The characters in each column entry are adapted using
-        dictionary "replace_dct" so that key is replaced with value.  
-        If the "col_idx"-th column changes at the subsequent row,
-        then a horizontal line separator is added. 
-        If a column entry is longer than "max_len" characters, 
-        then then it is broken up in several rows, by the splitting 
-        the string with respect to the comma.         
-    '''
-    out = ''
-    out += get_table_header( h_lst )
+    # create legend and dictionary
+    #
+    lgd_lst = []
+    sym_dct = {}
+    for i in range( len( div_lst ) ):
+        sym_dct.update( {str( div_lst[i] ):ch_lst[i]} )
+        lgd_lst += [[ch_lst[i] + ':', ( '$' + str( div_lst[i] ) + '$' ).replace( 'e', 'e_' ) ]]
+    while len( lgd_lst ) % 3 != 0:
+        lgd_lst += [['', '']]
+    nnrows = len( lgd_lst ) / 3
 
-    # split columns that are too long in several rows
-    table = refine_table( table, max_len, row_num )
-
-    # construct tex string for each row in table
-    prv_val = '' if col_idx == -1 else table[0][col_idx]
-    for row in table:
-
-        # Check whether to add a horizontal separator line in table.
-        # We take in account that a row may be split up in several rows.
-        cur_val = '' if col_idx == -1 else row[col_idx]
-        if cur_val == '':
-            cur_val = prv_val
-        if cur_val != prv_val:
-            out += '\\hline' + '\n'
-        prv_val = cur_val
-
-        # tex code for row
-        for col in row:
-
-            # replace characters in column string
-            for key in replace_dct:
-                col = str( col ).replace( key, replace_dct[key] )
-
-            # tex code for a column
-            out += '$' + str( col ) + ' $' + ' &'
-
-        # omit the last &-separator
-        out = out[:-1]
-
-        # tex code for ending a table row
-        out += '\\' + '\\' + '\\hline' + '\n'
-
-    # add footer for table in the end
-    out += get_table_footer()
-    return out
+    # create tex for legend
+    #
+    tex_lgd = ''
+    tex_lgd += 'A dictionary for symbols in the columns $\\sigma_A$ and $B$:\n\\\\\n'
+    tex_lgd += '\\begin{tabular}{@{}l@{}l@{~~~~}l@{}l@{~~~~}l@{}l@{}}\n'
+    for idx in range( nnrows ):
+        c1, c2, c3, c4, c5, c6 = lgd_lst[idx] + lgd_lst[idx + nnrows] + lgd_lst[idx + 2 * nnrows]
+        tex_lgd += c1 + ' & ' + c2 + ' & ' + c3 + ' & ' + c4 + ' & ' + c5 + ' & ' + c6
+        tex_lgd += '\\\\\n'
+    tex_lgd += '\\end{tabular}\n\n'
 
 
-def cls_to_tex( h_lst, table, row_num_lst, asides, lbl = None ):
-    '''
-    Create tex code for the classification of Neron-Severi lattices.
-    
-    Parameters
-    ----------
-    h_lst : list<string>
-        A list of string defining the column headers of a table.
-    
-    table : list<list<object>>
-        A list of lists represent rows in a table.
-     
-    row_num_lst : list<int>
-        The maximal number of rows for each of subsequent table. 
-        If there are more tables, then listed row numbers, then
-        the last row number will be reused indefinitely. 
-        
-    asides : int
-        The number of table alongside each other.
+    # number of rows of the big table
+    #
+    nrows = 57
 
-    lbl : string
-        Tex parameters for inner table. If None, then 
-        default value is used.
-           
-    Returns
-    -------
-    string
-        A string representing a table of tables in Tex format.       
-    '''
-    if lbl == None:
-        lbl = len( h_lst ) * 'l'
+    # dictionary for replacing string symbols
+    #
+    rep_dct = {'A':'A_', 'D':'D_', 'E':'E_', '{':'\\underline{', '[':'\\udot{', ']':'}'}
 
+    # create classification table
+    #
+    tab_lst = []
 
-    inner_head = ''
-    if h_lst != []:
-        for h in h_lst:
-            inner_head += h + ' &'
-        inner_head = inner_head[:-1] + '\\\\\\hline\n'
+    # rank 1 and 2
+    tab9 = [['i  ', '$9$', "$A_0 $", '$A_0$', '$0$', '$1$', '']]
+    tab8 = [['ii ', '$8$', "$A_0 $", '$A_0$', '$0$', '$2$', ''],
+            ['iii', '$8$', "$A_0 $", '$A_0$', '$0$', '$1$', ''],
+            ['iv ', '$8$', "$A_0 $", '$A_0$', '$1$', '$1$', ''],
+            ['v  ', '$8$', "$A_0 $", '$A_1$', '$0$', '$1$', '']]
+    tab_lst += [ tab9, tab8 ]
 
-    outer_start = '\\begin{tabular}{@{}' + ( asides - 1 ) * '@{}c@{}|' + '@{}c@{}}\n'  # start outer table
-    inner_start = '\\begin{tabular}{' + lbl + '}\n' + inner_head  # start inner table
-    outer_end = '\\end{tabular}\n'  # end outer table
-    inner_end = '\\end{tabular}\n'  # end inner table
+    # rank 3,4,5,6,7,8 and 9
+    idx = 0
+    Mtype_lst = ['A1', '4A1']  # for breaking up table for degree 2 case
+    for rank in range( 3, 9 + 1 ):
 
-    inner_row = '\\' + '\\' + '\n'
-    outer_col = '&\n'
+        tab = []
+        for dpl in DPLattice.get_cls( rank ):
 
-    out = ''
-    out += outer_start
-    out += inner_start
+            col1 = '$' + str( idx ) + '$'
 
-    row_idx = 0
-    aside_idx = 0
-    for row in table:
+            col2 = '$' + str( dpl.get_degree() ) + '$'
 
-        # tex code for row
-        for col in row:
+            col3 = '$' + str( dpl.get_marked_Mtype() ) + '$'
+            for key in rep_dct:
+                col3 = str( col3 ).replace( key, rep_dct[key] )
 
-            out += str( col ) + ' &'
+            col4 = '$' + str( dpl.get_real_type() ) + '$'
+            for key in rep_dct:
+                col4 = str( col4 ).replace( key, rep_dct[key] )
 
-        # omit the last &-separator and add row separator symbol
-        out = out[:-1] + inner_row
+            col5 = '$' + str( dpl.get_numbers()[4] ) + '$'
 
-        row_idx += 1
+            col6 = '$' + str( dpl.get_numbers()[5] ) + '$'
 
-        if row_idx == row_num_lst[0]:
-            row_idx = 0
-            if row == table[-1]:
-                break
-            out += inner_end
-            if len( row_num_lst ) > 1:
-                row_num_lst = row_num_lst[1:]
-            if aside_idx < asides - 1:
-                out += outer_col
-                out += inner_start
-                aside_idx += 1
-            else:
-                out += outer_end
-                out += '\n\n\\newpage\n\n'
-                out += outer_start
-                out += inner_start
-                aside_idx = 0
+            i_lst = [ str( Div( rw ).mat_mul( dpl.M ) ) for rw in sage_identity_matrix( rank ) ]
+            col7 = ''
+            for i in i_lst:
+                col7 += sym_dct[i]
+            if col7 in ['012', '0123', '01234', '012345', '0123456', '01234567', '012345678']:
+                col7 = ''
+
+            col8 = ''
+            for d in dpl.d_lst:
+                col8 += sym_dct[str( d )]
+
+            # these subroot systems cannot be realized as weak del Pezzo surfaces
+            if col4 in ['$7\underline{A_1}$', '$8\underline{A_1}$', '$4\underline{A_1}+\underline{D_4}$']:
+                col1 = '$\\times$'
+
+            # break (sometimes) the table for degree 2 according to Mtype
+
+            if dpl.get_degree() == 2 and dpl.Mtype in Mtype_lst:
+                nheaders = len( tab ) / nrows
+                while len( tab ) % nrows != nrows - 1 - nheaders:
+                    tab += [7 * ['']]
+                Mtype_lst.remove( dpl.Mtype )
 
 
-    out += inner_end
-    out += outer_end
+            tab += [[col1, col2, col3, col4, col5, col6, col7 + '||' + col8]]
+            idx += 1
 
+        tab_lst += [ tab ]
+
+
+    # reformat table
+    #
+    #         i     d     A     B     E     G     Ac%Bc
+    hl = '@{~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~~~}'
+    hrow = ['', 'd', '$D(A)$', '$D(B)$', '$\#E$', '$\#G$', '$\sigma_A||B$']
+    etab_lst = []
+    etab = [hrow]
+    tab_idx = 0
+    for tab in tab_lst:
+
+        for row in tab:
+            if len( etab ) >= nrows:
+                etab_lst += [etab]
+                etab = [hrow]
+            etab += [row]
+
+        if len( etab ) < nrows and tab_idx <= 3:
+            etab += [7 * ['']]  # add empty row to separate tables with different rank
+        else:
+            for i in range( nrows - len( etab ) ):
+                etab += [7 * ['']]  # add empty rows to fill up table
+            etab_lst += [etab]
+            etab = [hrow]
+
+        tab_idx += 1
+    NSTools.p( 'etab_lst: ', [len( etab ) for etab in etab_lst] )
+
+
+    # create tex for main classification table
+    #
+    tex_tab = ''
+    tab_idx = 0
+    for etab in etab_lst:
+
+        if tab_idx % 2 == 0:
+            tex_tab += '\\begin{tabular}{@{}l@{~}|@{~}l@{}}\n'
+        elif tab_idx % 2 == 1:
+            tex_tab += '&\n'
+
+        tex_tab += '\\begin{tabular}{' + hl + '}\n'
+        for row in etab:
+            col1, col2, col3, col4, col5, col6, col78 = row
+            tex_tab += col1 + ' & ' + col2 + ' & ' + col3 + ' & ' + col4 + ' & '
+            tex_tab += col5 + ' & ' + col6 + ' & ' + col78
+            tex_tab += ' \\\\\n'
+            if row == hrow:
+                tex_tab += '\\hline\n'
+
+        tex_tab += '\\end{tabular}\n'
+
+        if tab_idx % 2 == 1:
+            tex_tab += '\\end{tabular}\n\n'
+
+        tab_idx += 1
+
+    if tab_idx % 2 == 1:
+        tex_tab += '&\n'
+        tex_tab += '\\end{tabular}\n\n'
+
+    # creating tex for commands
+    tex_cmd = ''
+    tex_cmd += '\\setstretch{1.4}'  # \usepackage{setspace}
+    tex_cmd += '\n'
+    tex_cmd += '\\newcommand{\\udot}[1]{\\tikz[baseline=(todotted.base)]{\\node[inner sep=1pt,outer sep=0pt] (todotted) {$#1$};\\draw[densely dotted] (todotted.south west) -- (todotted.south east);}}'
+    tex_cmd += '\n'
+    tex_cmd += '\\newcommand{\\udash}[1]{\\tikz[baseline=(todotted.base)]{\\node[inner sep=1pt,outer sep=0pt] (todotted) {$#1$};\\draw[densely dashed] (todotted.south west) -- (todotted.south east);}}'
+    tex_cmd += '\n\n'
+
+    out = tex_cmd + '{\\tiny %\n' + tex_lgd + '\n' + tex_tab + '}\n'
 
     return out
-
-
-
 

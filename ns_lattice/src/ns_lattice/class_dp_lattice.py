@@ -972,7 +972,8 @@ class DPLattice:
             return []
 
         # check cache
-        key = 'get_CLS' + str( rank )
+        # key = 'get_CLS' + str( rank )
+        key = 'get_cls_' + str( rank )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
         NSTools.p( 'rank =', rank )
@@ -1035,6 +1036,8 @@ class DPLattice:
                     bas2_lst += DPLattice.seek_bases( inv, bas.d_lst, s_lst )
 
                 # collect bases of type bas.type in q_lst
+                if 2 * len( bas.d_lst ) > rank - 1:
+                    continue  # the rank of a root subsystem is bounded by rank-1
                 tmp_lst = DPLattice.seek_bases( inv, bas.d_lst, q_lst )
                 for tmp in tmp_lst:
                     tmp.d_lst += [d.mat_mul( inv.M ) for d in tmp.d_lst ]
@@ -1075,6 +1078,8 @@ class DPLattice:
                     for bas3 in bas3_lst:
                         eta.update( 'last loop in get_cls: ( bas1.type, bas2.type, bas3.type )=', ( bas1.type, bas2.type, bas3.type ) )
                         d_lst = bas1.d_lst + bas2.d_lst + bas3.d_lst  # notice that d_lst can be equal to []
+                        if len( d_lst ) > rank - 1:
+                            continue  # the rank of a root subsystem is bounded by rank-1
                         if is_root_basis( d_lst ):
                             dpl = DPLattice( d_lst, inv.Md_lst, inv.M )
                             if dpl not in dpl_lst:

@@ -7,6 +7,7 @@ Created on Aug 11, 2016
 import sys
 import os
 
+
 from ns_lattice.sage_interface import sage_matrix
 from ns_lattice.sage_interface import sage_ZZ
 from ns_lattice.sage_interface import sage_identity_matrix
@@ -42,17 +43,25 @@ def usecase__get_cls( max_rank ):
     max_rank : int
         Maximal rank.  
     '''
-    s = ''
-    for rank in range( 3, max_rank + 1 ):
-        for dpl in DPLattice.get_cls( rank, True ):
-            s += str( rank ) + '\t'
-            s += dpl.get_marked_Mtype() + '\t'
-            s += dpl.get_real_type() + '\t'
-            s += str( dpl.get_numbers() ) + '\t'
-            s += '\n'
-        s += 80 * '-' + '\n'
 
-    NSTools.p( 'Classification of root bases:\n' + s )
+    row_format = '{:>5}{:>8}{:>16}{:>5}{:>5}{:>5}{:>5}{:>6}'
+    for rank in range( 3, max_rank + 1 ):
+
+        dpl_lst = DPLattice.get_cls( rank )
+        row_lst = [['Mtype', 'type', '#-2', '#-1', '#fam', '#-2R', '#-1R', '#famR']]
+        for dpl in sorted( dpl_lst ):
+            row_lst += [[rank, dpl.get_marked_Mtype(), dpl.get_real_type() ] + list( dpl.get_numbers() )]
+        s = ''
+        for row in row_lst:
+            s += row_format.format( *row ) + '\n'
+
+        NSTools.p( 'Classification of root bases:\n' + s )
+        NSTools.p( 'rank =', rank, ', len =', len( dpl_lst ) )
+        NSTools.p( 80 * '#' )
+
+    for rank in range( 3, max_rank + 1 ):
+        NSTools.p( 'rank =', rank, ', len =', len( DPLattice.get_cls( rank ) ) )
+    NSTools.p( 80 * '#' )
 
 
 def usecase__get_classes_dp1( rank ):

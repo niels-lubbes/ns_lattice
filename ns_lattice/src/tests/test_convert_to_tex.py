@@ -15,7 +15,7 @@ class TestConvertToTex:
 
     def test__cls_to_tex( self ):
 
-        if 'get_CLS9' not in NSTools.get_tool_dct():
+        if 'get_cls_9' not in NSTools.get_tool_dct():
             return
         out = cls_to_tex()
         print( out )

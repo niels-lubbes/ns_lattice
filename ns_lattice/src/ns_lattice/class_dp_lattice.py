@@ -972,7 +972,6 @@ class DPLattice:
             return []
 
         # check cache
-        # key = 'get_CLS' + str( rank )
         key = 'get_cls_' + str( rank )
         if key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]

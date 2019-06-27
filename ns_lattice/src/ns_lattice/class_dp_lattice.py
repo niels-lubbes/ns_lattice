@@ -586,13 +586,14 @@ class DPLattice:
         '''
         # check cache
         key = 'get_inv_lst__' + str( rank )
-        if key in NSTools.get_tool_dct():
+        if False and key in NSTools.get_tool_dct():
             return NSTools.get_tool_dct()[key]
 
         bas_lst = DPLattice.get_bas_lst( rank )
 
-        NSTools.p( 'start' )
+        NSTools.p( 'rank =', rank )
 
+        amb_lst = []
         inv_lst = []
         eta = ETA( len( bas_lst ), 1 )
         for bas in bas_lst:
@@ -610,8 +611,16 @@ class DPLattice:
             if inv not in inv_lst:
                 inv_lst += [ inv ]
             else:
-                NSTools.p( '\tAmbitious type:', bas.type, [inv2.Mtype for inv2 in inv_lst if inv == inv2] )
-                inv_lst = [inv2 for inv2 in inv_lst if not inv2 == inv] + [inv]
+                amb_lst += [inv]
+                inv_prv = [inv2 for inv2 in inv_lst if inv == inv2][0]
+                inv_lst = [inv2 for inv2 in inv_lst if not inv2 == inv]
+                if inv > inv_prv:
+                    inv_lst += [inv]
+                else:
+                    inv_lst += [inv_prv]
+                NSTools.p( '\tAmbitious type:', inv.Mtype, '==', inv_prv.Mtype,
+                           ' inv>inv_prv: ', inv > inv_prv,
+                           ' ambitious types =', [ amb.Mtype for amb in amb_lst if amb == inv ] )
 
 
         # store in cache

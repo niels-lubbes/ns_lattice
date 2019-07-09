@@ -1,6 +1,4 @@
 sys:1: RuntimeWarning: not adding directory '' to sys.path since it's writable by an untrusted group.
 Untrusted users could put files in this directory which might then be imported by your Python code. As a general precaution from similar exploits, you should not execute Python code from this directory
-/home/software/sage-7.3/local/lib/python2.7/site-packages/matplotlib-1.5.1-py2.7-linux-x86_64.egg/matplotlib/font_manager.py:273: UserWarning: Matplotlib is building the font cache using fc-list. This may take a moment.
-  warnings.warn('Matplotlib is building the font cache using fc-list. This may take a moment.')
-2299769.86user 2560.40system 754:39:23elapsed 84%CPU (0avgtext+0avgdata 1303696maxresident)k
-1822104inputs+110008360outputs (94235major+525150360minor)pagefaults 0swaps
+111246.90user 266.03system 30:59:43elapsed 99%CPU (0avgtext+0avgdata 1257464maxresident)k
+8inputs+32696outputs (0major+92363780minor)pagefaults 0swaps

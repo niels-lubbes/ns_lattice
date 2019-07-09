@@ -75,14 +75,19 @@ def cls_to_tex():
     # create tex for legend
     #
     tex_lgd = ''
+    tex_lgd += '\\begin{table}\n'
+    tex_lgd += '\\setstretch{1.4}\n'
+    tex_lgd += '\\tiny\n'
+    tex_lgd += '\\caption{Classification of Neron-Severi lattices of weak del Pezzo surfaces (see THM{nsl})}\n'
+    tex_lgd += '\\label{tab:nsl}\n'
     tex_lgd += 'A dictionary for symbols in the columns $\\sigma_A$ and $B$:\n\\\\\n'
     tex_lgd += '\\begin{tabular}{@{}l@{}l@{~~~~}l@{}l@{~~~~}l@{}l@{}}\n'
     for idx in range( nnrows ):
         c1, c2, c3, c4, c5, c6 = lgd_lst[idx] + lgd_lst[idx + nnrows] + lgd_lst[idx + 2 * nnrows]
         tex_lgd += c1 + ' & ' + c2 + ' & ' + c3 + ' & ' + c4 + ' & ' + c5 + ' & ' + c6
         tex_lgd += '\\\\\n'
-    tex_lgd += '\\end{tabular}\n\n'
-
+    tex_lgd += '\\end{tabular}\n'
+    tex_lgd += '\\end{table}\n\n'
 
     # number of rows of the big table
     #
@@ -144,14 +149,13 @@ def cls_to_tex():
                 col1 = '$\\times$'
 
             # break (sometimes) the table for degree 2 according to Mtype
-
             if dpl.get_degree() == 2 and dpl.Mtype in Mtype_lst:
-                nheaders = len( tab ) / nrows
-                while len( tab ) % nrows != nrows - 1 - nheaders:
+                nheaders = len( tab ) / nrows  # each header shifts the row number
+                while len( tab ) % nrows != nrows - 1 - nheaders:  # add rows until end of table
                     tab += [7 * ['']]
                 Mtype_lst.remove( dpl.Mtype )
 
-
+            # add row
             tab += [[col1, col2, col3, col4, col5, col6, col7 + '||' + col8]]
             idx += 1
 
@@ -161,7 +165,7 @@ def cls_to_tex():
     # reformat table
     #
     #         i     d     A     B     E     G     Ac%Bc
-    hl = '@{~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{~~~~}'
+    hl = '@{~}l@{~~~}l@{~~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{}'
     hrow = ['', 'd', '$D(A)$', '$D(B)$', '$\#E$', '$\#G$', '$\sigma_A||B$']
     etab_lst = []
     etab = [hrow]
@@ -175,9 +179,9 @@ def cls_to_tex():
             etab += [row]
 
         if len( etab ) < nrows and tab_idx <= 3:
-            etab += [7 * ['']]  # add empty row to separate tables with different rank
+            etab += [7 * [''], 7 * ['']]  # add two empty rows to separate tables with different rank
         else:
-            for i in range( nrows - len( etab ) ):
+            while len( etab ) < nrows:
                 etab += [7 * ['']]  # add empty rows to fill up table
             etab_lst += [etab]
             etab = [hrow]
@@ -193,7 +197,10 @@ def cls_to_tex():
     for etab in etab_lst:
 
         if tab_idx % 2 == 0:
-            tex_tab += '\\begin{tabular}{@{}l@{~}|@{~}l@{}}\n'
+            tex_tab += '\\begin{table}\n'
+            tex_tab += '\\setstretch{1.6}\n'
+            tex_tab += '\\centering\\tiny\n'
+            tex_tab += '\\begin{tabular}{@{}l@{\\hspace{1cm}}l@{}}\n'
         elif tab_idx % 2 == 1:
             tex_tab += '&\n'
 
@@ -209,7 +216,8 @@ def cls_to_tex():
         tex_tab += '\\end{tabular}\n'
 
         if tab_idx % 2 == 1:
-            tex_tab += '\\end{tabular}\n\n'
+            tex_tab += '\\end{tabular}\n'
+            tex_tab += '\\end{table}\n\n'
 
         tab_idx += 1
 
@@ -219,14 +227,12 @@ def cls_to_tex():
 
     # creating tex for commands
     tex_cmd = ''
-    tex_cmd += '\\setstretch{1.4}'  # \usepackage{setspace}
-    tex_cmd += '\n'
     tex_cmd += '\\newcommand{\\udot}[1]{\\tikz[baseline=(todotted.base)]{\\node[inner sep=1pt,outer sep=0pt] (todotted) {$#1$};\\draw[densely dotted] (todotted.south west) -- (todotted.south east);}}'
     tex_cmd += '\n'
     tex_cmd += '\\newcommand{\\udash}[1]{\\tikz[baseline=(todotted.base)]{\\node[inner sep=1pt,outer sep=0pt] (todotted) {$#1$};\\draw[densely dashed] (todotted.south west) -- (todotted.south east);}}'
     tex_cmd += '\n\n'
 
-    out = tex_cmd + '{\\tiny %\n' + tex_lgd + '\n' + tex_tab + '}\n'
+    out = tex_cmd + tex_lgd + tex_tab
 
     return out
 

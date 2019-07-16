@@ -1189,8 +1189,8 @@ class DPLattice:
         if len( self.d_lst ) != len( other.d_lst ):
             return len( self.d_lst ) < len( other.d_lst )
 
-        if len( self.type ) != len( other.type ):
-            return len( self.type ) < len( other.type )
+        if self.type != other.type:
+            return self.type < other.type
 
         # more real lines implies smaller self.type!
 

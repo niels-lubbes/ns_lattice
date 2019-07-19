@@ -86,7 +86,7 @@ class TestClassDPLattice():
         for bas in bas_lst:
             type_lst += [( bas.Mtype, bas.type )]
         print( type_lst )
-        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', 'A2'), ('A0', '2A1'), ('A0', 'A1+A2')]"
+        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2')]"
 
         NSTools.set_enable_tool_dct( True )
 
@@ -143,8 +143,7 @@ class TestClassDPLattice():
             print( type_lst[-1] )
         print( type_lst )
 
-        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', 'A2'), ('A0', '2A1'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
-
+        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
         NSTools.set_enable_tool_dct( True )
 
 
@@ -247,7 +246,7 @@ class TestClassDPLattice():
             print( dpl.get_marked_Mtype(), dpl.type )
 
         print( type_lst )
-        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', 'A2'), ('A0', '2A1'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
+        assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
 
         NSTools.set_enable_tool_dct( True )
 
@@ -267,7 +266,7 @@ class TestClassDPLattice():
             out += type[0] + ',' + type[1] + '; '
         print( out )
 
-        assert out.strip() == "A0,A0; A0,{A1}; A0,{A1}; A0,{A2}; A0,2{A1}; A0,{A1}+{A2}; A1,A0; A1,{A1}; A1',A0; A1',{A1}; A1',{A2}; 2A1,A0;"
+        assert out.strip() == "A0,A0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1,A0; A1,{A1}; A1',A0; A1',{A1}; A1',{A2}; 2A1,A0;"
 
         NSTools.set_enable_tool_dct( True )
 

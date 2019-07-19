@@ -44,13 +44,23 @@ def usecase__get_cls( max_rank ):
         Maximal rank.  
     '''
 
-    row_format = '{:>5}{:>8}{:>16}{:>5}{:>5}{:>5}{:>5}{:>6}'
+    row_format = '{:>6}{:>5}{:>8}{:>16}{:>5}{:>5}{:>5}{:>5}{:>6}{:>7}{:>70}{:>135}{:>340}'
+    rownr = 0
     for rank in range( 3, max_rank + 1 ):
 
         dpl_lst = DPLattice.get_cls( rank )
-        row_lst = [['Mtype', 'type', '#-2', '#-1', '#fam', '#-2R', '#-1R', '#famR']]
+        row_lst = [['rownr', 'rank', 'Mtype', 'type',
+                    '#-2', '#-1', '#fam', '#-2R', '#-1R', '#famR',
+                    'Md_lst', 'd_lst', 'M']]
         for dpl in sorted( dpl_lst ):
-            row_lst += [[rank, dpl.get_marked_Mtype(), dpl.get_real_type() ] + list( dpl.get_numbers() )]
+            row_lst += [
+                        [rownr, rank, dpl.get_marked_Mtype(), dpl.get_real_type() ]
+                        + list( dpl.get_numbers() )
+                        + [str( dpl.Md_lst )]
+                        + [str( dpl.d_lst )]
+                        + [str( list( dpl.M ) )]
+                        ]
+            rownr += 1
         s = ''
         for row in row_lst:
             s += row_format.format( *row ) + '\n'
@@ -294,8 +304,8 @@ if __name__ == '__main__':
     #
     mod_lst = []
     mod_lst += ['__main__.py']
-    mod_lst += ['class_dp_lattice.py']
-    mod_lst += ['class_eta.py']
+    # mod_lst += ['class_dp_lattice.py']
+    # mod_lst += ['class_eta.py']
     NSTools.filter( mod_lst )  # output only from specified modules
     # NSTools.filter( None )  # print all verbose output, comment to disable.
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
@@ -318,9 +328,9 @@ if __name__ == '__main__':
     #########################################
 
     usecase__get_cls( rank )
-    # usecase__get_classes_dp1( rank )
-    # usecase__graphs( rank )
-    # usecase__construct_surfaces()
+    usecase__get_classes_dp1( rank )
+    usecase__graphs( rank )
+    usecase__construct_surfaces()
     # usecase__roman_circles()  # takes about 3 minutes
 
     #########################################

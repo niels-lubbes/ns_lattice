@@ -1,4 +1,4 @@
 sys:1: RuntimeWarning: not adding directory '' to sys.path since it's writable by an untrusted group.
 Untrusted users could put files in this directory which might then be imported by your Python code. As a general precaution from similar exploits, you should not execute Python code from this directory
-111246.90user 266.03system 30:59:43elapsed 99%CPU (0avgtext+0avgdata 1257464maxresident)k
-8inputs+32696outputs (0major+92363780minor)pagefaults 0swaps
+181362.59user 943.22system 50:39:51elapsed 99%CPU (0avgtext+0avgdata 1353612maxresident)k
+1224inputs+123117360outputs (1major+174175073minor)pagefaults 0swaps

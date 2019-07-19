@@ -49,13 +49,10 @@ def cls_to_tex():
     #
     abc = 'abcdefghijklmnopqrstuvwxyz'
     ch_lst = []
-    ch_lst += [ ch for ch in '012345678' + abc ]
-    # ch_lst += [ chr( ord( ch ) - 32 ) for ch in abc  ]  # capital letters
-    ch_lst += [ '\\.' + ch for ch in abc  ]
-    ch_lst += [ '\\"' + ch for ch in abc  ]
-    ch_lst += [ '\\^' + ch for ch in abc  ]
-    ch_lst += [ '\\u{' + ch + '}' for ch in abc  ]
-    ch_lst += [ '\\~' + ch for ch in abc  ]
+    ch_lst += [ '\\frac{' + ch1 + '}{' + ch2 + '}\\!' for ch1 in '0123456789' for ch2 in '0123456789' ]
+    ch_lst += [ '\\frac{' + ch1 + '}{' + ch2 + '}\\!' for ch1 in '0123456789' for ch2 in 'abcdef' ]
+
+
     NSTools.p( '(len(ch_lst), len(div_lst)) =', ( len( ch_lst ), len( div_lst ) ) )
 
     assert len( ch_lst ) >= len( div_lst )
@@ -67,7 +64,7 @@ def cls_to_tex():
     sym_dct = {}
     for i in range( len( div_lst ) ):
         sym_dct.update( {str( div_lst[i] ):ch_lst[i]} )
-        lgd_lst += [[ch_lst[i] + ':', ( '$' + str( div_lst[i] ) + '$' ).replace( 'e', 'e_' ) ]]
+        lgd_lst += [['$' + ch_lst[i] + '$ :', ( '$' + str( div_lst[i] ) + '$' ).replace( 'e', 'e_' ) ]]
     while len( lgd_lst ) % 3 != 0:
         lgd_lst += [['', '']]
     nnrows = len( lgd_lst ) / 3
@@ -156,7 +153,7 @@ def cls_to_tex():
                 Mtype_lst.remove( dpl.Mtype )
 
             # add row
-            tab += [[col1, col2, col3, col4, col5, col6, col7 + '||' + col8]]
+            tab += [[col1, col2, col3, col4, col5, col6, '$' + col7 + '||\!' + col8 + '$' ]]
             idx += 1
 
         tab_lst += [ tab ]

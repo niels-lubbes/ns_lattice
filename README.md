@@ -15,8 +15,6 @@ file for a text version of classification tables.
 
 
 
-
-
 ## Installation
 
 * Install Sage from [SageMath](https://SageMath.org).
@@ -60,10 +58,11 @@ See [this file](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattic
 for more example usecases. 
 The output of a full run can be found [here](https://github.com/niels-lubbes/ns_lattice/tree/master/ns_lattice/bin). 
 See the [source code](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice)
-the io-specification of each function.
+for the io-specification of each function.
 The [test functions](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/tests)
 might be informative for how to call each function.
-It takes a while to load the 
+
+When running the examples below, it may take a while to load the 
 [cache file](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice/class_ns_tools.py#L131) 
 in memory.
 

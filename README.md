@@ -63,6 +63,9 @@ See the [source code](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_
 the io-specification of each function.
 The [test functions](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/tests)
 might be informative for how to call each function.
+It takes a while to load the 
+[cache file](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice/class_ns_tools.py#L131) 
+in memory.
 
 
 __Example 1: Finding classes in Neron-Severi lattice with prescribed intersection products__
@@ -70,6 +73,8 @@ __Example 1: Finding classes in Neron-Severi lattice with prescribed intersectio
 # find (-1)-classes in Neron-Severi lattice of cubic del Pezzo surface
 from ns_lattice.class_div import Div
 from ns_lattice.div_in_lattice import get_divs
+from ns_lattice.class_ns_tools import NSTools
+# NSTools.filter(None) # uncomment to show verbose output
 
 h = Div.new('3e0-e1-e2-e3-e4-e5-e6',7)
 print( get_divs( h, 1, -1, False ) )

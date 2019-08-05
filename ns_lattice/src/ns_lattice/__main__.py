@@ -106,46 +106,61 @@ def usecase__get_classes_dp1( rank ):
             NSTools.p( '\t\t', c, '\t\t', c.get_basis_change( B ) )
 
 
-def usecase__graphs( rank ):
+def usecase__graphs( max_rank ):
     '''
-    M. Meringer: Fast Generation of Regular Graphs and Construction of Cages. Journal of Graph Theory 30, 137-146, 1999.
+    Lists attributes of simple family graphs.
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank of DPLattice objects that are considered.                        
     '''
-    rank = 7
-    dpl = DPLattice.get_cls( rank )[0]
-    f_lst = dpl.real_fam_lst
+    row_format = '{:<6}{:<5}{:<8}{:<16}{:<7}{:<10}{:<95}{:<30}{:<15}{:<15}{:<15}{:<15}'
 
-    G = sage_Graph()
-    G.add_vertices( range( len( f_lst ) ) )
+    already_in_cache = True
+    dpl_lst = []
+    rownr = 0
+    row_lst = [['rownr', 'deg', 'Mtype', 'type', '#vert', '#edges', 'degrees', 'labels', 'complete', 'connected', 'vert-xfer', 'edge-xfer']]
+    for rank in range( 3, max_rank + 1 ):
 
-    num_lst = []
-    ne_lst = []  # each entry denotes the number of outgoing edges of some vertex
-    for i in range( len( f_lst ) ):
-        ne = 0
-        for j in range( len( f_lst ) ):
-            if f_lst[i] * f_lst[j] > 1:
-                ne += 1
-                num = f_lst[i] * f_lst[j]
-                G.add_edge( i, j, num )
-                if num not in num_lst:
-                    num_lst += [num]
+        NSTools.p( 'rank =', rank )
 
-        if ne not in ne_lst:
-            ne_lst += [ne]
+        for dpl in DPLattice.get_cls( rank ):
 
-    NSTools.p( 'labels      =', sorted( num_lst ) )  # [2,3,4,5,6,7,8]
-    NSTools.p( 'regularity  =', sorted( ne_lst ) )  # E8: [2095]
-    NSTools.p( 'vertices    =', len( f_lst ) )  # E8: [2160]
+            already_in_cache = already_in_cache and ( dpl.SG != None )
+
+            dpl_lst += [dpl]
+            SG, SG_data = dpl.get_SG()
+            row_lst += [ [rownr, 10 - rank, dpl.get_marked_Mtype(), dpl.get_real_type() ] + SG_data ]
+            rownr += 1
+
+            if rank == 9 and ( rownr <= 390 or rownr % 100 == 0 ):
+                NSTools.p( '\t\trownr =', rownr )
 
 
-    P = G.graphplot( vertex_size = 1,
-                     vertex_labels = True,
-                     edge_labels = True,
-                     color_by_label = False,
-                     layout = 'circular' ).plot()
+
+    s = ''
+    for row in row_lst:
+        s += row_format.format( *row ) + '\n'
+
+    NSTools.p( 'Classification of simple family graphs:\n' + s )
+
+    if not already_in_cache:
+        NSTools.p( 'Saving data for simple family graphs...' )
+        NSTools.save_tool_dct()
+
+    # example for how to plot a simple family graph
+    #
+    NSTools.p( 'Plotting a simple family graph...' )
+    SG, SG_data = DPLattice.get_cls( 6 )[0].get_SG()
+    P = SG.graphplot( vertex_size = 1,
+                      vertex_labels = True,
+                      edge_labels = True,
+                      color_by_label = False,
+                      layout = 'circular' ).plot()
 
     P.save( os.environ['OUTPUT_PATH'] + 'graph.png' )
-
-    NSTools.p( '#components =', G.connected_components_number() )
+    NSTools.p( '#components =', SG.connected_components_number() )
 
 
 def usecase__construct_surfaces():
@@ -307,7 +322,7 @@ if __name__ == '__main__':
     # mod_lst += ['class_dp_lattice.py']
     # mod_lst += ['class_eta.py']
     NSTools.filter( mod_lst )  # output only from specified modules
-    # NSTools.filter( None )  # print all verbose output, comment to disable.
+    NSTools.filter( None )  # print all verbose output, comment to disable.
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
     if 'OUTPUT_PATH' not in os.environ:
@@ -319,7 +334,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    rank = 9
+    max_rank = 9
 
     #########################################
     #                                       #
@@ -327,9 +342,9 @@ if __name__ == '__main__':
     #                                       #
     #########################################
 
-    usecase__get_cls( rank )
-    usecase__get_classes_dp1( rank )
-    usecase__graphs( rank )
+    usecase__get_cls( max_rank )
+    usecase__get_classes_dp1( max_rank )
+    usecase__graphs( max_rank )
     usecase__construct_surfaces()
     # usecase__roman_circles()  # takes about 3 minutes
 

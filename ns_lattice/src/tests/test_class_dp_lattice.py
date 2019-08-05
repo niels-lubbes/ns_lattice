@@ -271,6 +271,27 @@ class TestClassDPLattice():
         NSTools.set_enable_tool_dct( True )
 
 
+    def test__get_SG( self ):
+        NSTools.set_enable_tool_dct( False )
+
+        dpl_lst = DPLattice.get_cls( 4 )
+        out_lst = []
+        for dpl in dpl_lst:
+            SG = dpl.get_SG()
+            nv = SG.num_verts()
+            dg = SG.degree()
+            lb = SG.edge_labels()
+            out_lst += [( dpl.Mtype, dpl.get_real_type(), nv, dg, lb )]
+
+        for out in out_lst:
+            print( out )
+
+        print( out_lst )
+        assert str( out_lst ) == "[('A0', 'A0', 3, [0, 0, 0], []), ('A0', '{A1}', 2, [0, 0], []), ('A0', '{A1}', 3, [0, 0, 0], []), ('A0', '2{A1}', 2, [0, 0], []), ('A0', '{A2}', 1, [0], []), ('A0', '{A1}+{A2}', 1, [0], []), ('A1', 'A0', 1, [0], []), ('A1', '{A1}', 1, [0], []), ('A1', 'A0', 3, [0, 0, 0], []), ('A1', '{A1}', 2, [0, 0], []), ('A1', '{A2}', 1, [0], []), ('2A1', 'A0', 1, [0], [])]"
+
+        NSTools.set_enable_tool_dct( True )
+
+
     def test__are_root_bases( self ):
 
         NSTools.set_enable_tool_dct( False )
@@ -307,7 +328,7 @@ if __name__ == '__main__':
 
     # TestClassDPLattice().test__eq()
     # TestClassDPLattice().test__get_marked_Mtype()
-    TestClassDPLattice().test__get_bas_lst__rank_3()
+    # TestClassDPLattice().test__get_bas_lst__rank_3()
     # TestClassDPLattice().test__get_bas_lst__rank_4()
     # TestClassDPLattice().test__get_inv_lst__rank_4()
     # TestClassDPLattice().test__get_cls_slow__rank_3()
@@ -321,6 +342,7 @@ if __name__ == '__main__':
     # TestClassDPLattice().test__get_cls__rank_3()
     # TestClassDPLattice().test__get_cls__rank_4()
     # TestClassDPLattice().test__get_real_type()
+    TestClassDPLattice().test__get_SG()
     # TestClassDPLattice().test__are_root_bases()
 
     pass

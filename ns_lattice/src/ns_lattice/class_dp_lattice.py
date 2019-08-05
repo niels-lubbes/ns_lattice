@@ -14,6 +14,7 @@ from ns_lattice.sage_interface import sage_QQ
 from ns_lattice.sage_interface import sage_Subsets
 from ns_lattice.sage_interface import sage_VectorSpace
 from ns_lattice.sage_interface import sage_vector
+from ns_lattice.sage_interface import sage_Graph
 
 from ns_lattice.div_in_lattice import get_divs
 from ns_lattice.div_in_lattice import get_indecomp_divs
@@ -123,8 +124,14 @@ class DPLattice:
         A list of "Div" objects that represents roots that are contained in
         the subspace spanned by "self.d_lst".  
     
-    G : sage_Graph
+    G : sage_GRAPH
         The Cremona invariant for the current lattice.
+        
+    SG : sage_GRAPH
+        Simple family graph (see self.get_SG()).
+    
+    SG_data : [int, int, list<int>, list<int>, bool, bool, bool, bool ]
+        A list of of data that characterizes the simple family graph (see self.get_SG()).
     '''
 
     def __init__( self, d_lst, Md_lst, M ):
@@ -161,6 +168,9 @@ class DPLattice:
         self.or_lst = None
         self.sr_lst = None
         self.G = None
+
+        self.SG = None
+        self.SG_data = None
 
 
     def set_attributes( self, level = 9 ):
@@ -475,6 +485,68 @@ class DPLattice:
         return dpl
 
 
+    def get_SG( self ):
+        '''
+        The simple family graph associated to the 
+        Neron-Severi lattice of a weak del Pezzo surface
+        is defined as the incidence diagram of self.real_fam_lst,
+        with the edges labeled <=1 removed. 
+        All vertices are labeled with the index of the element in 
+        self.real_fam_lst. 
+        
+        In the mathematical version (see arxiv paper) the vertices 
+        are labeled with the dimension of the linear series, which is 
+        always 1 with one exception: 
+        If len(self.real_fam_lst)==0 and rank==3, then
+        the simple family graph consists of a single vertex labeled 2. 
+        
+        Example
+        -------
+        # The following graph is related to the E8 root system:
+        #
+        dpl = DPLattice.get_cls( 9 )[0]
+        assert set(dpl.get_SG().num_verts()) == {2160}
+        assert set(dpl.get_SG().get_degree()) == {2095}
+        assert set(dpl.get_SG().edge_labels()) == {2,3,4,5,6,7,8}
+
+        
+        Returns
+        -------
+        sage_GRAPH, [int, int, list<int>, list<int>, bool, bool, bool, bool ]
+            The simple family graph self.SG and a list self.SG_data 
+            associated to the current DPLattice object.
+            Here self.SG_data consists of data that describes self.SG.
+            This method also initializes self.SG and self.SG_data.
+        '''
+
+        if self.SG != None:
+            return self.SG, self.SG_data
+
+        if self.get_rank() == 9 and self.get_numbers()[-1] > 800:
+            NSTools.p( 'Initializing simple family graph of current DPLattice object...', self.get_rank(), self.get_marked_Mtype(), self.get_real_type() )
+
+        f = self.real_fam_lst
+        f_range = range( len( f ) )
+
+        self.SG = sage_Graph()
+        self.SG.add_vertices( f_range )
+        for i in f_range:
+            for j in f_range:
+                if f[i] * f[j] > 1:
+                    self.SG.add_edge( i, j, f[i] * f[j] )
+
+        self.SG_data = [ self.SG.num_verts(),  # number of vertices
+                         self.SG.num_edges(),  # number of edges
+                         sorted( list( set( self.SG.degree() ) ) ),  # possible numbers of outgoing edges
+                         sorted( list( set( self.SG.edge_labels() ) ) ),  # possible edge labels
+                         self.SG.is_clique(),  # True iff the graph is complete.
+                         self.SG.is_connected(),
+                         self.SG.is_vertex_transitive(),
+                         self.SG.is_edge_transitive()]
+
+        return self.SG, self.SG_data
+
+
     @staticmethod
     def get_bas_lst( rank = 9 ):
         '''
@@ -611,9 +683,9 @@ class DPLattice:
             if inv not in inv_lst:
                 inv_lst += [ inv ]
             else:
-                amb_lst += [inv]
                 inv_prv = [inv2 for inv2 in inv_lst if inv == inv2][0]
                 inv_lst = [inv2 for inv2 in inv_lst if not inv2 == inv]
+                amb_lst += [inv, inv_prv]
                 if inv > inv_prv:
                     inv_lst += [inv]
                 else:

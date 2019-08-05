@@ -277,17 +277,14 @@ class TestClassDPLattice():
         dpl_lst = DPLattice.get_cls( 4 )
         out_lst = []
         for dpl in dpl_lst:
-            SG = dpl.get_SG()
-            nv = SG.num_verts()
-            dg = SG.degree()
-            lb = SG.edge_labels()
-            out_lst += [( dpl.Mtype, dpl.get_real_type(), nv, dg, lb )]
+            SG, SG_data = dpl.get_SG()
+            out_lst += [[ dpl.Mtype, dpl.get_real_type()] + SG_data]
 
         for out in out_lst:
             print( out )
 
         print( out_lst )
-        assert str( out_lst ) == "[('A0', 'A0', 3, [0, 0, 0], []), ('A0', '{A1}', 2, [0, 0], []), ('A0', '{A1}', 3, [0, 0, 0], []), ('A0', '2{A1}', 2, [0, 0], []), ('A0', '{A2}', 1, [0], []), ('A0', '{A1}+{A2}', 1, [0], []), ('A1', 'A0', 1, [0], []), ('A1', '{A1}', 1, [0], []), ('A1', 'A0', 3, [0, 0, 0], []), ('A1', '{A1}', 2, [0, 0], []), ('A1', '{A2}', 1, [0], []), ('2A1', 'A0', 1, [0], [])]"
+        assert str( out_lst ) == "[['A0', 'A0', 3, 0, [0], [], False, False, True, True], ['A0', '{A1}', 2, 0, [0], [], False, False, True, True], ['A0', '{A1}', 3, 0, [0], [], False, False, True, True], ['A0', '2{A1}', 2, 0, [0], [], False, False, True, True], ['A0', '{A2}', 1, 0, [0], [], True, True, True, True], ['A0', '{A1}+{A2}', 1, 0, [0], [], True, True, True, True], ['A1', 'A0', 1, 0, [0], [], True, True, True, True], ['A1', '{A1}', 1, 0, [0], [], True, True, True, True], ['A1', 'A0', 3, 0, [0], [], False, False, True, True], ['A1', '{A1}', 2, 0, [0], [], False, False, True, True], ['A1', '{A2}', 1, 0, [0], [], True, True, True, True], ['2A1', 'A0', 1, 0, [0], [], True, True, True, True]]"
 
         NSTools.set_enable_tool_dct( True )
 

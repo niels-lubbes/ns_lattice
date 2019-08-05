@@ -7,6 +7,16 @@ NS-Lattice is a Python library for doing calculations in Neron-Severi lattices o
 
 This library depends on [SageMath](https://SageMath.org) libraries.
 
+See 
+[this](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/bin/classification-table-weak-del-pezzo-surfaces.txt)
+and
+[this](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/bin/graphs.txt)
+file for a text version of classification tables. 
+
+
+
+
+
 ## Installation
 
 * Install Sage from [SageMath](https://SageMath.org).
@@ -48,6 +58,7 @@ For running the examples below, either copy paste the code into the Sage interfa
 
 See [this file](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice/__main__.py) 
 for more example usecases. 
+The output of a full run can be found [here](https://github.com/niels-lubbes/ns_lattice/tree/master/ns_lattice/bin). 
 See the [source code](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice)
 the io-specification of each function.
 The [test functions](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/tests)
@@ -79,7 +90,7 @@ from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.class_ns_tools import NSTools
 # NSTools.filter(None) # uncomment to show verbose output
 
-for dpl in DPLattice.get_reduced_cls( 4 ): print dpl.get_marked_Mtype(),'\t', dpl.type
+for dpl in DPLattice.get_cls( 4 ): print dpl.get_marked_Mtype(),'\t', dpl.type
 ```
 Output:    
 

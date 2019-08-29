@@ -13,6 +13,7 @@ from ns_lattice.sage_interface import sage_ZZ
 from ns_lattice.sage_interface import sage_identity_matrix
 from ns_lattice.sage_interface import sage_Subsets
 from ns_lattice.sage_interface import sage_Permutations
+from ns_lattice.sage_interface import sage_Combinations
 from ns_lattice.sage_interface import sage_Graph
 from ns_lattice.sage_interface import sage_gcd
 from ns_lattice.sage_interface import sage_factor
@@ -161,6 +162,156 @@ def usecase__graphs( max_rank ):
 
     P.save( os.environ['OUTPUT_PATH'] + 'graph.png' )
     NSTools.p( '#components =', SG.connected_components_number() )
+
+
+def usecase__analyze_graphs( max_rank ):
+    '''
+    We analyze the graphs of DPLattice objects in the output  
+    of DPLattice.get_cls().
+    
+    Parameters
+    ----------
+    max_rank : int
+        Maximal rank of DPLattice objects that are considered. 
+    '''
+
+    # number of vertices for constructed graphs
+    #
+    nvert1 = 6
+    nvert2 = 1
+
+    # Examine which of the graphs associated to DPLattices
+    # are isomorphic to one of the constructed graphs.
+    #
+    NSTools.p( '\t Compare contructed graphs with classified graphs...' )
+    rownr = 0
+    max_verts = 0
+    for rank in range( 3, max_rank + 1 ):
+        NSTools.p( '\t ---' )
+        for dpl in DPLattice.get_cls( rank ):
+
+            # retrieve the graph SG for analysis
+            #
+            SG, SG_data = dpl.get_SG()
+            s = ''
+            s += str( rownr ) + ' ' + 'rank=' + str( rank ) + ' '
+            rownr += 1
+
+            # Initialize G_lst which is a list of tuples (G,G_str)
+            # where G is a constructed graph and G_str is its string identifier.
+            # The identifiers are according Theorem 1 in arXiv:1807.05881v2.
+            #
+            G_lst = []
+            for nv1 in range( 1, nvert1 + 1 ):
+                for nv2 in range( 1, nvert1 + 1 ):
+
+                    # determine list c_lst of 2-element subsets of [1,...,m]
+                    # so that m is minimal under the condition that len(c_lst)>=nv1
+                    #
+                    c_lst = []
+                    for i in range( 2 * nv1 ):
+                        c_lst = list( sage_Combinations( i, 2 ) )
+                        if len( c_lst ) >= nv1:
+                            break
+
+                    Gd = sage_Graph()
+                    Gd.add_vertices( range( nv1 ) )
+                    if Gd.num_verts() > 1:
+                        G_lst += [( Gd, 'Gd:' + str( nv1 ) )]
+
+                    Gd2 = sage_Graph()
+                    Gd2.add_vertices( range( nv2 ) )
+
+                    Ge = sage_Graph()
+                    Ge.add_vertices( range( nv1 ) )
+                    for i in Ge.vertices():
+                        for j in Ge.vertices():
+                            Ge.add_edge( i, j, 2 )
+                    if Ge.num_verts() > 1:
+                        G_lst += [( Ge, 'Ge:' + str( nv1 ) )]
+
+                    Ge2 = sage_Graph()
+                    Ge2.add_vertices( range( nv2 ) )
+                    for i in Ge2.vertices():
+                        for j in Ge2.vertices():
+                            Ge2.add_edge( i, j, 2 )
+
+                    Gf = sage_Graph()
+                    Gf.add_vertices( range( len( c_lst ) ) )
+                    for i in Gf.vertices():
+                        for j in Gf.vertices():
+                            q = len( [ c for c in c_lst[i] if c in c_lst[j] ] )
+                            Gf.add_edge( i, j, 4 - 2 * q )
+                    if Gf.num_verts() > 0:
+                        G_lst += [( Gf, 'Gf:' + str( Gf.num_verts() ) )]
+
+                    Gg = sage_Graph()
+                    Gg.add_vertices( range( len( c_lst ) ) )
+                    for i in Gg.vertices():
+                        for j in Gg.vertices():
+                            q = len( [ c for c in c_lst[i] if c in c_lst[j] ] )
+                            if q > 0:
+                                Gg.add_edge( i, j, 2 )
+                    if Gf.num_verts() > 0:
+                        G_lst += [( Gg, 'Gg:' + str( Gg.num_verts() ) )]
+
+                    # construct combined graphs
+                    #
+                    if ( Gd.num_verts(), Ge2.num_verts() ) != ( 1, 1 ):
+                        Gde = sage_Graph()
+                        Gde.add_vertices( Ge2.vertices() )
+                        Gde.add_edges( Ge2.edges() )
+                        for i in range( Ge2.num_verts() - 1, -1, -1 ):
+                            Gde.relabel( {i:i + Gd.num_verts()} )
+                        Gde.add_vertices( Gd.vertices() )
+                        Gde.add_edges( Gd.edges() )
+                        for i in range( Gd.num_verts() ):
+                            for j in range( Gd.num_verts(), Gde.num_verts() ):
+                                Gde.add_edge( i, j, 2 )
+                        G_lst += [( Gde, 'Gde:' + str( Gd.num_verts() ) + '+' + str( Ge2.num_verts() ) )]
+
+                    if Gf.num_verts() > 0 and ( Gf.num_verts(), Gd2.num_verts() ) != ( 1, 1 ):
+                        Gfd = sage_Graph()
+                        Gfd.add_vertices( Gd2.vertices() )
+                        Gfd.add_edges( Gd2.edges() )
+                        for i in range( Gd2.num_verts() - 1, -1, -1 ):
+                            Gfd.relabel( {i:i + Gf.num_verts()} )
+                        Gfd.add_vertices( Gf.vertices() )
+                        Gfd.add_edges( Gf.edges() )
+                        for i in range( Gf.num_verts() ):
+                            for j in range( Gf.num_verts(), Gfd.num_verts() ):
+                                Gfd.add_edge( i, j, 2 )
+                        G_lst += [( Gfd, 'Gfd:' + str( Gf.num_verts() ) + '+' + str( Gd2.num_verts() ) )]
+
+                    if Gg.num_verts() > 0 and ( Gg.num_verts(), Ge2.num_verts() ) != ( 1, 1 ):
+                        Gge = sage_Graph()
+                        Gge.add_vertices( Ge2.vertices() )
+                        Gge.add_edges( Ge2.edges() )
+                        for i in range( Ge2.num_verts() - 1, -1, -1 ):
+                            Gge.relabel( {i:i + Gg.num_verts()} )
+                        Gge.add_vertices( Gg.vertices() )
+                        Gge.add_edges( Gg.edges() )
+                        for i in range( Gg.num_verts() ):
+                            for j in range( Gg.num_verts(), Gge.num_verts() ):
+                                Gge.add_edge( i, j, 2 )
+                        G_lst += [( Gge, 'Gge:' + str( Gg.num_verts() ) + '+' + str( Ge2.num_verts() ) )]
+
+
+
+            # check for each of the constructed graphs whether
+            # it is isomorphic to dpl.get_SG()
+            #
+            for ( G, G_str ) in G_lst:
+                if SG.is_isomorphic( G, edge_labels = True ):
+                    max_verts = max( max_verts, G.num_verts() )
+                    if G_str not in s and G.num_verts() > 3:
+                        s += G_str + ' '
+
+
+            if ':' in s:
+                NSTools.p( '\t', s )
+
+    NSTools.p( 'max_verts =', max_verts )
 
 
 def usecase__construct_surfaces():
@@ -345,6 +496,7 @@ if __name__ == '__main__':
     usecase__get_cls( max_rank )
     usecase__get_classes_dp1( max_rank )
     usecase__graphs( max_rank )
+    usecase__analyze_graphs( max_rank )
     usecase__construct_surfaces()
     # usecase__roman_circles()  # takes about 3 minutes
 

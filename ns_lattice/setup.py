@@ -13,7 +13,7 @@ from setuptools import setup
 
 setup( 
     name = 'ns_lattice',
-    version = '3',
+    version = '4',
     description = 'Algorithms for computing in Neron-Severi lattice',
     classifiers = [
         'Development Status :: 3 - Alpha',

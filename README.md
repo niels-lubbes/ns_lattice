@@ -62,7 +62,7 @@ for the io-specification of each function.
 The [test functions](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/tests)
 might be informative for how to call each function.
 
-When running the examples below, it may take a while to load the 
+When running the examples below, it may take a while to load and save the 
 [cache file](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/src/ns_lattice/class_ns_tools.py#L131) 
 in memory.
 
@@ -73,6 +73,7 @@ __Example 1: Finding classes in Neron-Severi lattice with prescribed intersectio
 from ns_lattice.class_div import Div
 from ns_lattice.div_in_lattice import get_divs
 from ns_lattice.class_ns_tools import NSTools
+NSTools.set_enable_tool_dct( False ) # disable caching
 # NSTools.filter(None) # uncomment to show verbose output
 
 h = Div.new('3e0-e1-e2-e3-e4-e5-e6',7)
@@ -92,6 +93,7 @@ __Example 2: Equivalence classes of Neron-Severi lattice of real sextic weak del
 # classification of rank 4 lattices
 from ns_lattice.class_dp_lattice import DPLattice
 from ns_lattice.class_ns_tools import NSTools
+NSTools.set_enable_tool_dct( True ) # enable caching
 # NSTools.filter(None) # uncomment to show verbose output
 
 for dpl in DPLattice.get_cls( 4 ): print dpl.get_marked_Mtype(),'\t', dpl.type

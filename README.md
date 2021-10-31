@@ -13,7 +13,8 @@ and
 [this](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/bin/graphs.txt)
 file for a text version of classification tables. 
 
-
+See the Mathematica file [product.m](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/bin/product.m)
+for the proof of Proposition 4 in the article "Translational and great Darboux cyclides".
 
 ## Installation
 

@@ -13,8 +13,9 @@ and
 [this](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/bin/graphs.txt)
 file for a text version of classification tables. 
 
-See the Mathematica file [product.nb](https://github.com/niels-lubbes/ns_lattice/blob/master/ns_lattice/bin/product.nb)
-for the proof of Proposition 4 in the article "Translational and great Darboux cyclides".
+See Section 5 in the article
+[Webs of rational curves on real surfaces and a classification of real weak del Pezzo surfaces](https://arxiv.org/abs/1807.05881)
+for a theoretical interpretation and description of the algorithms.
 
 ## Installation
 

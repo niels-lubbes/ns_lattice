@@ -11,10 +11,7 @@ export PYTHONPATH=$PYTHONPATH:../../linear_series/linear_series/src/
 export OUTPUT_PATH=../../OUTPUT/
 
 rm err out
-nohup time nice sage -python ../src/ns_lattice/__main__.py  > out 2> err < /dev/null &
+#nohup time nice sage -python ../src/ns_lattice/__main__.py  > out 2> err < /dev/null &
+time sage -python ../src/ns_lattice/__main__.py  > out 2> err < /dev/null &
 cat err
 cat out
-
-
-# sage -python setup.py install --user
-# sage -python __main__.py > out 2> err < /dev/null &

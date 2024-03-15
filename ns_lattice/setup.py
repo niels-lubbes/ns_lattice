@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup( 
     name='ns_lattice',
-    version='5',
+    version='4',
     description='Algorithms for computing in Neron-Severi lattice',
     classifiers=[
         'Development Status :: 3 - Alpha',
@@ -34,7 +34,7 @@ setup(
     license='MIT',
     package_dir={'ns_lattice': 'src/ns_lattice', 'tests':'src/tests'},
     packages=['ns_lattice', 'tests'],
-    package_data={'ns_lattice': ['ns_tools.sobj']},
+    package_data={'ns_lattice': ['ns_tools.sobj', 'reducible_conics.sobj']},
     include_package_data=True,
     install_requires=['linear_series'],
     setup_requires=['pytest-runner'],

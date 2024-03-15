@@ -15,14 +15,10 @@ from ns_lattice.sage_interface import sage_gcd
 from ns_lattice.sage_interface import sage_factor
 
 from ns_lattice.class_ns_tools import NSTools
-
 from ns_lattice.class_div import Div
-
 from ns_lattice.div_in_lattice import get_divs
 from ns_lattice.div_in_lattice import get_ak
-
 from ns_lattice.class_dp_lattice import DPLattice
-
 from ns_lattice.ns_basis import get_bases_lst
 
 from linear_series.class_poly_ring import PolyRing
@@ -506,7 +502,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    max_rank = 7
+    max_rank = 9
 
     #########################################
     #                                       #

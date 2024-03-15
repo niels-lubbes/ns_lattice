@@ -1,18 +1,13 @@
-# Compiled python modules.
 *.pyc
-
-# Setuptools distribution folder.
+.*.md.html
 /dist/
 /build/
-
-# Python egg metadata, regenerated from source files by setuptools.
 /src/*.egg-info
-*.egg-info
-
-# md viewer files
-.*.md.html
+*egg-info
+/.eggs/ 
+/.pytest_cache/
+/.settings/
 
 /src/ns_lattice/test_tools.sobj
 /src/ns_lattice/graph.png
-/.settings/
 

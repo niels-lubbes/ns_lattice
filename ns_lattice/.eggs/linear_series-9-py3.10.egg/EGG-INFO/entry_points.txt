@@ -1,3 +1,0 @@
-[console_scripts]
-run-linear-series = linear_series.__main__:main
-

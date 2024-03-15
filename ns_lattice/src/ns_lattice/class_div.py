@@ -31,11 +31,9 @@ class Div:
     #
     short_output = True
 
-
     # static list of intersection matrices
     #
     int_mat_lst = []
-
 
     def __init__( self, e_lst = 9 * [0], int_mat = None ):
         '''        
@@ -52,7 +50,6 @@ class Div:
 
         self.e_lst = list( e_lst )
 
-
         #
         # equal "self.int_mat" for each instantiated Div object references
         # to a unique matrix, so that no new matrix is instantiated for each
@@ -65,8 +62,6 @@ class Div:
             Div.int_mat_lst += [int_mat]
         idx = Div.int_mat_lst.index( int_mat )
         self.int_mat = Div.int_mat_lst[idx]
-
-
 
     @staticmethod
     def new( lbl, rank = 9 ):
@@ -174,19 +169,15 @@ class Div:
             if neg:
                 c.e_lst = [ -e for e in c.e_lst ]
 
-
         # end handling label of (-2)-class
-
 
         # update rank
         c.e_lst = c.e_lst + ( rank - len( c.e_lst ) ) * [0]
 
         return c
 
-
     def rank( self ):
         return len( self.e_lst )
-
 
     def is_positive( self ):
         '''
@@ -200,7 +191,6 @@ class Div:
             if e != 0:
                 return e > 0
         return True
-
 
     @staticmethod
     def get_min_rank( lbl ):
@@ -233,7 +223,6 @@ class Div:
 
         return len( lst )
 
-
     def get_basis_change( self, B ):
         '''
         Parameters
@@ -254,7 +243,6 @@ class Div:
         new_e_lst = self.mat_mul( ~( B.T ) ).e_lst
 
         return Div( new_e_lst, new_int_mat )
-
 
     def __get_minus_two_label( self ):
         '''
@@ -319,7 +307,6 @@ class Div:
 
         return lbl
 
-
     def get_abbr_label( self ):
         '''
         Returns
@@ -362,7 +349,6 @@ class Div:
 
         raise ValueError( 'Input is not treated by this function (use get_label() instead):', self.e_lst )
 
-
     def get_label( self, abbr = False ):
         '''
         Parameters
@@ -395,7 +381,6 @@ class Div:
         if abbr and self * self == -2 and self.rank() <= 9 and self * divK == 0:
             return self.__get_minus_two_label()
 
-
         # from this point on we treat the general case
         #
         lbl = ''
@@ -416,7 +401,6 @@ class Div:
 
         return lbl
 
-
     def mat_mul( self, M ):
         '''
         Parameters
@@ -434,7 +418,6 @@ class Div:
         v = sage_vector( self.e_lst ).column()
         return Div( ( M * v ).list() )
 
-
     def int_mul( self, n ):
         '''
         Parameters
@@ -449,16 +432,13 @@ class Div:
         '''
         return self.mat_mul( sage_diagonal_matrix( self.rank() * [n] ) )
 
-
     # operator overloading for ==
     def __eq__( self, other ):
         return self.e_lst == other.e_lst
 
-
     # operator overloading for !=
     def __ne__( self, other ):
         return not self.__eq__( other )
-
 
     # operator overloading for <
     # Used for sorting lists of "Div"-objects:
@@ -485,7 +465,7 @@ class Div:
             12 < 34
         '''
         if self.rank() != other.rank():
-           return self.rank() < other.rank()
+            return self.rank() < other.rank()
 
         a = self.e_lst
         b = other.e_lst
@@ -497,7 +477,6 @@ class Div:
         b = [b[0]] + [ -elt for elt in reversed( b[1:] )]
 
         return a < b  # lexicographic order
-
 
     # operator overloading for *
     def __mul__( self, div ):
@@ -521,28 +500,23 @@ class Div:
 
         return v[0][0]
 
-
     # operator overload for +
     def __add__( self, div ):
         v = sage_vector( sage_ZZ, self.e_lst ) + sage_vector( sage_ZZ, div.e_lst )
         return Div( list( v ) )
-
 
     # operator overload for -
     def __sub__( self, div ):
         v = sage_vector( sage_ZZ, self.e_lst ) - sage_vector( sage_ZZ, div.e_lst )
         return Div( list( v ) )
 
-
     # operator overloading for []
     def __getitem__( self, index ):
         return self.e_lst[index]
 
-
     # operator overloading for []
     def __setitem__( self, index, item ):
         self.e_lst[index] = item
-
 
     # overloading for str(.): human readable string representation of object
     def __str__( self ):
@@ -551,11 +525,9 @@ class Div:
         else:
             return str( self.e_lst )
 
-
     # overloading "__repr__()" as well, since python call this for Div objects in a list
     def __repr__( self ):
         return self.__str__()
-
 
     # so that lists of this object can be used with set()
     def __hash__( self ):

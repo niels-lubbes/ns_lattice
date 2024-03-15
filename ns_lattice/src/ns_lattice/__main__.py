@@ -4,15 +4,11 @@ Created on Aug 11, 2016
 @author: Niels Lubbes
 '''
 
-import sys
 import os
-
 
 from ns_lattice.sage_interface import sage_matrix
 from ns_lattice.sage_interface import sage_ZZ
 from ns_lattice.sage_interface import sage_identity_matrix
-from ns_lattice.sage_interface import sage_Subsets
-from ns_lattice.sage_interface import sage_Permutations
 from ns_lattice.sage_interface import sage_Combinations
 from ns_lattice.sage_interface import sage_Graph
 from ns_lattice.sage_interface import sage_gcd
@@ -56,10 +52,10 @@ def usecase__get_cls( max_rank ):
         for dpl in sorted( dpl_lst ):
             row_lst += [
                         [rownr, rank, dpl.get_marked_Mtype(), dpl.get_real_type() ]
-                        + list( dpl.get_numbers() )
-                        + [str( dpl.Md_lst )]
-                        + [str( dpl.d_lst )]
-                        + [str( list( dpl.M ) )]
+                        +list( dpl.get_numbers() )
+                        +[str( dpl.Md_lst )]
+                        +[str( dpl.d_lst )]
+                        +[str( list( dpl.M ) )]
                         ]
             rownr += 1
         s = ''
@@ -138,11 +134,10 @@ def usecase__graphs( max_rank ):
             if rank == 9 and ( rownr <= 390 or rownr % 100 == 0 ):
                 NSTools.p( '\t\trownr =', rownr )
 
-
-
     s = ''
     for row in row_lst:
-        s += row_format.format( *row ) + '\n'
+        print( row, type( row ) )
+        s += row_format.format( *[str( elt ) for elt in row] ) + '\n'
 
     NSTools.p( 'Classification of simple family graphs:\n' + s )
 
@@ -154,11 +149,11 @@ def usecase__graphs( max_rank ):
     #
     NSTools.p( 'Plotting a simple family graph...' )
     SG, SG_data = DPLattice.get_cls( 6 )[0].get_SG()
-    P = SG.graphplot( vertex_size = 1,
-                      vertex_labels = True,
-                      edge_labels = True,
-                      color_by_label = False,
-                      layout = 'circular' ).plot()
+    P = SG.graphplot( vertex_size=1,
+                      vertex_labels=True,
+                      edge_labels=True,
+                      color_by_label=False,
+                      layout='circular' ).plot()
 
     P.save( os.environ['OUTPUT_PATH'] + 'graph.png' )
     NSTools.p( '#components =', SG.connected_components_number() )
@@ -200,7 +195,6 @@ def usecase__analyze_graphs( max_rank ):
             s = ''
             s += str( rownr ) + ' ' + 'rank=' + str( rank ) + ' '
 
-
             # Initialize G_lst which is a list of tuples (G,G_str)
             # where G is a constructed graph and G_str is its string identifier.
             # The identifiers are according Theorem 1 in arXiv:1807.05881v2.
@@ -219,18 +213,18 @@ def usecase__analyze_graphs( max_rank ):
 
                     # construct graphs
                     #
-                    Gd = sage_Graph()
+                    Gd = sage_Graph( loops=True )
                     Gd.add_vertices( range( nv1 ) )
                     G_lst += [( Gd, 'Gd:' + str( nv1 ) )]
 
-                    Ge = sage_Graph()
+                    Ge = sage_Graph( loops=True )
                     Ge.add_vertices( range( nv1 ) )
                     for i in Ge.vertices():
                         for j in Ge.vertices():
                             Ge.add_edge( i, j, 2 )
                     G_lst += [( Ge, 'Ge:' + str( nv1 ) )]
 
-                    Gf = sage_Graph()
+                    Gf = sage_Graph( loops=True )
                     Gf.add_vertices( range( len( c_lst ) ) )
                     for i in Gf.vertices():
                         for j in Gf.vertices():
@@ -238,7 +232,7 @@ def usecase__analyze_graphs( max_rank ):
                             Gf.add_edge( i, j, 4 - 2 * q )
                     G_lst += [( Gf, 'Gf:' + str( Gf.num_verts() ) )]
 
-                    Gg = sage_Graph()
+                    Gg = sage_Graph( loops=True )
                     Gg.add_vertices( range( len( c_lst ) ) )
                     for i in Gg.vertices():
                         for j in Gg.vertices():
@@ -247,16 +241,15 @@ def usecase__analyze_graphs( max_rank ):
                                 Gg.add_edge( i, j, 2 )
                     G_lst += [( Gg, 'Gg:' + str( Gg.num_verts() ) )]
 
-
                     # construct combined graphs
                     #
                     if nv1 + nv2 > SG.num_verts():
                         continue
 
-                    Gd2 = sage_Graph()
+                    Gd2 = sage_Graph( loops=True )
                     Gd2.add_vertices( range( nv2 ) )
 
-                    Ge2 = sage_Graph()
+                    Ge2 = sage_Graph( loops=True )
                     Ge2.add_vertices( range( nv2 ) )
                     for i in Ge2.vertices():
                         for j in Ge2.vertices():
@@ -265,7 +258,7 @@ def usecase__analyze_graphs( max_rank ):
                     if nv1 + nv2 == SG.num_verts():
 
                         if ( Gd.num_verts(), Ge2.num_verts() ) != ( 1, 1 ):
-                            Gde = sage_Graph()
+                            Gde = sage_Graph( loops=True )
                             Gde.add_vertices( Ge2.vertices() )
                             Gde.add_edges( Ge2.edges() )
                             for i in range( Ge2.num_verts() - 1, -1, -1 ):
@@ -277,10 +270,9 @@ def usecase__analyze_graphs( max_rank ):
                                     Gde.add_edge( i, j, 2 )
                             G_lst += [( Gde, 'Gde:' + str( Gd.num_verts() ) + '+' + str( Ge2.num_verts() ) )]
 
-
                     if len( c_lst ) + nv2 == SG.num_verts():
 
-                        Gfd = sage_Graph()
+                        Gfd = sage_Graph( loops=True )
                         Gfd.add_vertices( Gd2.vertices() )
                         Gfd.add_edges( Gd2.edges() )
                         for i in range( Gd2.num_verts() - 1, -1, -1 ):
@@ -292,7 +284,7 @@ def usecase__analyze_graphs( max_rank ):
                                 Gfd.add_edge( i, j, 2 )
                         G_lst += [( Gfd, 'Gfd:' + str( Gf.num_verts() ) + '+' + str( Gd2.num_verts() ) )]
 
-                        Gge = sage_Graph()
+                        Gge = sage_Graph( loops=True )
                         Gge.add_vertices( Ge2.vertices() )
                         Gge.add_edges( Ge2.edges() )
                         for i in range( Ge2.num_verts() - 1, -1, -1 ):
@@ -304,12 +296,11 @@ def usecase__analyze_graphs( max_rank ):
                                 Gge.add_edge( i, j, 2 )
                         G_lst += [( Gge, 'Gge:' + str( Gg.num_verts() ) + '+' + str( Ge2.num_verts() ) )]
 
-
             # check for each of the constructed graphs whether
             # it is isomorphic to dpl.get_SG()
             #
             for ( G, G_str ) in G_lst:
-                if SG.is_isomorphic( G, edge_labels = True ):
+                if SG.is_isomorphic( G, edge_labels=True ):
                     max_verts = max( max_verts, G.num_verts() )
                     if G_str not in s:
                         s += G_str + ' '
@@ -333,7 +324,7 @@ def usecase__construct_surfaces():
     # del Pezzo surface with 5 families of conics.
     # Moreover the surface contains 8 straight lines.
     #
-    ring = PolyRing( 'x,y,z', True )
+    PolyRing( 'x,y,z', True )
     p1 = ( -1, 0 )
     p2 = ( 0, 0 )
     p3 = ( 1, 0 )
@@ -438,36 +429,59 @@ def usecase__roman_circles():
     # e0-e1-e2
     b = [( a0 - 1, -a0 ), ( -a0, a0 - 1 )]
     bp_tree = BasePointTree()
-    bp = bp_tree.add( 'z', b[0], 1 )
-    bp = bp_tree.add( 'z', b[1] , 1 )
+    bp_tree.add( 'z', b[0], 1 )
+    bp_tree.add( 'z', b[1] , 1 )
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
     # e0-e3-e4
     b = [( -a0 + 1, a0 ), ( a0, -a0 + 1 )]
     bp_tree = BasePointTree()
-    bp = bp_tree.add( 'z', b[0], 1 )
-    bp = bp_tree.add( 'z', b[1] , 1 )
+    bp_tree.add( 'z', b[0], 1 )
+    bp_tree.add( 'z', b[1] , 1 )
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
     # e0-e5-e6
     b = [ ( a0 - 1, a0 ), ( -a0, -a0 + 1 )]
     bp_tree = BasePointTree()
-    bp = bp_tree.add( 'z', b[0], 1 )
-    bp = bp_tree.add( 'z', b[1] , 1 )
+    bp_tree.add( 'z', b[0], 1 )
+    bp_tree.add( 'z', b[1] , 1 )
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
     # e0-e7-e8
     b = [( -a0 + 1, -a0 ), ( a0, a0 - 1 )]
     bp_tree = BasePointTree()
-    bp = bp_tree.add( 'z', b[0], 1 )
-    bp = bp_tree.add( 'z', b[1] , 1 )
+    bp_tree.add( 'z', b[0], 1 )
+    bp_tree.add( 'z', b[1] , 1 )
     NSTools.p( 'basepoints =', b )
     NSTools.p( LinearSeries.get( [1], bp_tree ) )
 
     return
+
+
+def cleanup_tool_dct():
+    '''
+    Cleans up NSTools.get_tool_dct(), keeping only
+    the cached content that is needed to run __main__.
+    '''
+    clean_tool_dct = {}
+    for key in NSTools.get_tool_dct().keys():
+        keepkey = False
+        keepkey = keepkey or key.startswith( 'get_cls_' )
+        keepkey = keepkey or key.startswith( 'get_dynkin_type_' )
+        keepkey = keepkey or key.startswith( 'get_divs_' )
+        keepkey = keepkey or key.startswith( 'get_bases_lst__([e0-e1, e0-e2], [1 0 0 0 0 0 0 0 0]' )
+        if keepkey:
+            clean_tool_dct[key] = NSTools.get_tool_dct()[key]
+    NSTools.get_tool_dct().clear()
+    for key in clean_tool_dct.keys():
+        NSTools.get_tool_dct()[key] = clean_tool_dct[key]
+    NSTools.save_tool_dct()
+    NSTools.p( len( NSTools.get_tool_dct().keys() ) )
+    for key in NSTools.get_tool_dct().keys():
+        NSTools.p( key )
 
 
 if __name__ == '__main__':
@@ -480,6 +494,7 @@ if __name__ == '__main__':
     # mod_lst += ['class_eta.py']
     NSTools.filter( mod_lst )  # output only from specified modules
     NSTools.filter( None )  # print all verbose output, comment to disable.
+    # cleanup_tool_dct()  # uncomment to remove content from cache
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 
     if 'OUTPUT_PATH' not in os.environ:
@@ -491,7 +506,7 @@ if __name__ == '__main__':
     # Should be between 3 and 9.
     # computes classifications up to rank "max_rank".
     #
-    max_rank = 9
+    max_rank = 7
 
     #########################################
     #                                       #
@@ -514,6 +529,4 @@ if __name__ == '__main__':
 
     NSTools.end_timer()
     NSTools.p( 'The End' )
-
-
 

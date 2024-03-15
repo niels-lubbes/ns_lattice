@@ -12,8 +12,6 @@ from ns_lattice.sage_interface import sage_matrix
 from ns_lattice.sage_interface import sage_identity_matrix
 from ns_lattice.sage_interface import sage_diagonal_matrix
 
-from ns_lattice.class_ns_tools import NSTools
-
 from ns_lattice.class_div import Div
 
 from ns_lattice.div_in_lattice import get_ak
@@ -59,12 +57,12 @@ def complete_basis( d_lst ):
 
     # verify output
     if mat.rank() < d_lst[0].rank():
-        raise Error( 'Matrix expected to have full rank: ', d_lst, '\n' + str( mat ) )
+        raise Exception( 'Matrix expected to have full rank: ', d_lst, '\n' + str( mat ) )
     de_lst = [ Div( ext ) for ext in ext_lst ]
     for de in de_lst:
         for d in d_lst:
             if d * de != 0:
-                raise Error( 'Extended columns are expected to be orthogonal: ', de, d, de_lst, d_lst, list( mat ) )
+                raise Exception( 'Extended columns are expected to be orthogonal: ', de, d, de_lst, d_lst, list( mat ) )
 
     return mat
 

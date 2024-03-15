@@ -14,11 +14,7 @@ from ns_lattice.dp_involutions import complete_basis
 from ns_lattice.sage_interface import sage_vector
 from ns_lattice.div_in_lattice import get_divs
 from ns_lattice.div_in_lattice import get_ak
-from ns_lattice.class_eta import ETA
 from ns_lattice.sage_interface import sage_ZZ
-
-
-from ns_lattice.dp_root_bases import get_dynkin_type
 
 from ns_lattice.class_ns_tools import NSTools
 
@@ -42,7 +38,6 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_marked_Mtype( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -62,7 +57,6 @@ class TestClassDPLattice():
         assert dpl.get_marked_Mtype() == "2A1'"
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_bas_lst__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
         bas_lst = DPLattice.get_bas_lst( 3 )
@@ -71,7 +65,6 @@ class TestClassDPLattice():
             print( bas )
         print( len( bas_lst ) )
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_bas_lst__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
@@ -90,7 +83,6 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_inv_lst__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
         rank = 4
@@ -107,7 +99,6 @@ class TestClassDPLattice():
         assert len( inv_lst ) == 4
         assert str( type_lst ) == "[('A0', 'A0'), ('A1', 'A0'), ('A1', 'A0'), ('2A1', 'A0')]"
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_cls_slow__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
@@ -127,7 +118,6 @@ class TestClassDPLattice():
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A1', 'A0')]"
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_cls_slow__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -145,7 +135,6 @@ class TestClassDPLattice():
 
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A0', 'A1'), ('A0', '2A1'), ('A0', 'A2'), ('A0', 'A1+A2'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A0'), ('A1', 'A1'), ('A1', 'A2'), ('2A1', 'A0')]"
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_num_types( self ):
 
@@ -167,7 +156,6 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_part_roots( self ):
         NSTools.set_enable_tool_dct( False )
         inv_lst = DPLattice.get_inv_lst( 4 )
@@ -179,7 +167,6 @@ class TestClassDPLattice():
         assert q_lst == []
 
         NSTools.set_enable_tool_dct( True )
-
 
     def test__seek_bases( self ):
         NSTools.set_enable_tool_dct( False )
@@ -202,7 +189,6 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_cls__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -214,7 +200,6 @@ class TestClassDPLattice():
 
         assert str( type_lst ) == "[('A0', 'A0'), ('A0', 'A1'), ('A1', 'A0')]"
         NSTools.set_enable_tool_dct( True )
-
 
     def test__import_cls( self ):
         NSTools.set_enable_tool_dct( False )
@@ -235,7 +220,6 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_cls__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -250,7 +234,6 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__get_real_type( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -261,15 +244,14 @@ class TestClassDPLattice():
             type_lst += [( dpl.get_marked_Mtype(), dpl.get_real_type() )]
 
         out = ''
-        for type in type_lst:
-            print( type[0] + ', ' + type[1] )
-            out += type[0] + ',' + type[1] + '; '
+        for dtype in type_lst:
+            print( dtype[0] + ', ' + dtype[1] )
+            out += dtype[0] + ',' + dtype[1] + '; '
         print( out )
 
         assert out.strip() == "A0,A0; A0,{A1}; A0,{A1}; A0,2{A1}; A0,{A2}; A0,{A1}+{A2}; A1,A0; A1,{A1}; A1',A0; A1',{A1}; A1',{A2}; 2A1,A0;"
 
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_SG( self ):
         NSTools.set_enable_tool_dct( False )
@@ -288,12 +270,10 @@ class TestClassDPLattice():
 
         NSTools.set_enable_tool_dct( True )
 
-
     def test__are_root_bases( self ):
 
         NSTools.set_enable_tool_dct( False )
         bas_lst = DPLattice.get_bas_lst( 4 )
-
 
         for bas in bas_lst:
             if bas.d_lst == []:
@@ -322,7 +302,6 @@ if __name__ == '__main__':
     NSTools.filter( None )
     # NSTools.filter( ['class_dp_lattice.py', 'class_eta.py'] )
 
-
     # TestClassDPLattice().test__eq()
     # TestClassDPLattice().test__get_marked_Mtype()
     # TestClassDPLattice().test__get_bas_lst__rank_3()
@@ -339,7 +318,8 @@ if __name__ == '__main__':
     # TestClassDPLattice().test__get_cls__rank_3()
     # TestClassDPLattice().test__get_cls__rank_4()
     # TestClassDPLattice().test__get_real_type()
-    TestClassDPLattice().test__get_SG()
+    # TestClassDPLattice().test__get_SG()
+
     # TestClassDPLattice().test__are_root_bases()
 
     pass

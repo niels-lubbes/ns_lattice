@@ -37,17 +37,15 @@ class TestDPRootBasis():
         bas_lst = [12, -23 ]
         assert not is_root_basis( [Div.new( str( bas ), 4 ) for bas in bas_lst] )
 
-
     def test__get_graph( self ):
         bas_lst = [12, 23, 34 ]
         d_lst = [Div.new( str( bas ), 5 ) for bas in bas_lst]
         G = get_graph( d_lst )
-        test_G = sage_Graph()
+        test_G = sage_Graph( loops=True )
         test_G.add_vertices( [0, 1, 2] )
         test_G.add_edge( 0, 1, 1 )
         test_G.add_edge( 1, 2, 1 )
         assert G == test_G
-
 
     def test__get_ext_graph( self ):
         NSTools.set_enable_tool_dct( False )
@@ -66,9 +64,8 @@ class TestDPRootBasis():
         d_lst2 = [Div.new( s, 4 ) for s in e_lst + ['1123'] ]
         G2 = get_ext_graph( d_lst2, M )
 
-        assert not G1.is_isomorphic( G2, edge_labels = True )
+        assert not G1.is_isomorphic( G2, edge_labels=True )
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_dynkin_type( self ):
         NSTools.set_enable_tool_dct( False )
@@ -78,7 +75,6 @@ class TestDPRootBasis():
         assert get_dynkin_type( d_lst ) == 'A3'
         NSTools.set_enable_tool_dct( True )
 
-
     def test__convert_type( self ):
         NSTools.set_enable_tool_dct( False )
 
@@ -87,7 +83,6 @@ class TestDPRootBasis():
         assert convert_type( 'A0+2A1+3A1+D4+A0' ) == 5 * ['A1'] + ['D4']
 
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_root_bases_orbit__rank_3( self ):
         NSTools.set_enable_tool_dct( False )
@@ -104,7 +99,6 @@ class TestDPRootBasis():
         assert str( d_lst_lst ) == '[[e1-e2]]'
 
         NSTools.set_enable_tool_dct( True )
-
 
     def test__get_root_bases_orbit__rank_4( self ):
         NSTools.set_enable_tool_dct( False )
@@ -127,7 +121,7 @@ if __name__ == '__main__':
 
     NSTools.filter( None )
 
-    # TestDPRootBasis().test__get_ext_graph()
+    TestDPRootBasis().test__get_ext_graph()
     # TestDPRootBasis().test__get_root_bases_orbit__rank_3()
     # TestDPRootBasis().test__get_root_bases_orbit__rank_4()
-    TestDPRootBasis().test__convert_type()
+    # TestDPRootBasis().test__convert_type()

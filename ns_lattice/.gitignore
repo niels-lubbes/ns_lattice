@@ -13,3 +13,5 @@
 .*.md.html
 
 /src/ns_lattice/test_tools.sobj
+/.settings/
+

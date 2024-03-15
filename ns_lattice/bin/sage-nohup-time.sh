@@ -6,11 +6,15 @@
 # in the files err/out respectively.
 #
 
-export SAGE_PATH=$SAGE_PATH:../src/
-export OUTPUT_PATH=/home/LOCAL/nlubbes/OUTPUT/
+export PYTHONPATH=$PYTHONPATH:../src/
+export PYTHONPATH=$PYTHONPATH:../../linear_series/linear_series/src/
+export OUTPUT_PATH=../../OUTPUT/
 
 rm err out
-nohup time nice /home/software/sage-7.3/sage -python ../src/ns_lattice/__main__.py  > out 2> err < /dev/null &
+nohup time nice sage -python ../src/ns_lattice/__main__.py  > out 2> err < /dev/null &
 cat err
 cat out
 
+
+# sage -python setup.py install --user
+# sage -python __main__.py > out 2> err < /dev/null &

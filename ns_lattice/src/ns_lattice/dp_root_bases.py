@@ -10,22 +10,16 @@ of type either A1, A1+A2, A4, D5, E6, E7 or E8.
 import time
 
 from ns_lattice.sage_interface import sage_VectorSpace
-from ns_lattice.sage_interface import sage_vector
 from ns_lattice.sage_interface import sage_QQ
-from ns_lattice.sage_interface import sage_identity_matrix
 from ns_lattice.sage_interface import sage_Graph
 from ns_lattice.sage_interface import sage_Partitions
 from ns_lattice.sage_interface import sage_RootSystem
-from ns_lattice.sage_interface import sage_Subsets
 from ns_lattice.sage_interface import sage_Combinations
 from ns_lattice.sage_interface import sage_Permutations
 
 from ns_lattice.class_ns_tools import NSTools
 
-from ns_lattice.class_div import Div
-
 from ns_lattice.div_in_lattice import get_divs
-from ns_lattice.div_in_lattice import get_indecomp_divs
 from ns_lattice.div_in_lattice import get_ak
 
 
@@ -84,7 +78,7 @@ def get_graph( d_lst ):
         is non-zero and the edge is labeled with
         the intersection product.
     '''
-    G = sage_Graph()
+    G = sage_Graph( loops=True )
     G.add_vertices( range( len( d_lst ) ) );
 
     for i in range( len( d_lst ) ):
@@ -119,7 +113,7 @@ def get_ext_graph( d_lst, M ):
     '''
     NSTools.p( 'd_lst =', len( d_lst ), d_lst, ', M =', list( M ) )
 
-    G = sage_Graph()
+    G = sage_Graph( loops=True )
     G.add_vertices( range( len( d_lst ) ) )
 
     for i in range( len( d_lst ) ):
@@ -205,7 +199,7 @@ def get_dynkin_type( d_lst ):
         ts_lst = []
         for ade in ade_lst:
             for r in range( 1, max_r + 1 ):
-                for p_lst in sage_Partitions( r + max_r, length = max_r ):
+                for p_lst in sage_Partitions( r + max_r, length=max_r ):
 
                     # obtain type list
                     t_lst = [( ade[i], p_lst[i] - 1 ) for i in range( max_r ) if  p_lst[i] != 1]
@@ -222,12 +216,12 @@ def get_dynkin_type( d_lst ):
 
                     # obtain graph G
                     mat = list( -1 * rs.cartan_matrix() )
-                    G = sage_Graph()
+                    G = sage_Graph( loops=True )
                     G.add_vertices( range( len( mat ) ) );
                     for i in range( len( mat ) ):
                         for j in range( len( mat[0] ) ):
-                           if mat[i][j] == 1:
-                               G.add_edge( i, j )
+                            if mat[i][j] == 1:
+                                G.add_edge( i, j )
 
                     # obtain string for type
                     # Example: [(A,1),(A,1),(A,1),(A,3)] ---> '3A1+A3'
@@ -269,7 +263,7 @@ def get_dynkin_type( d_lst ):
     raise ValueError( 'Could not recognize Dynkin type: ', d_lst )
 
 
-def convert_type( type ):
+def convert_type( dtype ):
     '''
     Converts a Dynkin type string to a sorted list of 
     irreducible Dynkin types.
@@ -281,7 +275,7 @@ def convert_type( type ):
         
     Parameters
     ----------
-    type: string
+    dtype: string
         A string representing a Dynkin type. 
         We assume that an irreducible rootsystem
         occurs with multiplicity at most 9. 
@@ -294,7 +288,7 @@ def convert_type( type ):
         A list of string representing the Dynkin type 
         of an irreducible root system.
     '''
-    t_lst = type.split( '+' )
+    t_lst = dtype.split( '+' )
     out_lst = []
     for t in t_lst:
         if t[0] not in ['A', 'D', 'E']:
@@ -306,7 +300,7 @@ def convert_type( type ):
     return sorted( out_lst )
 
 
-def get_root_bases_orbit( d_lst, positive = True ):
+def get_root_bases_orbit( d_lst, positive=True ):
     '''
     Computes the orbit of a root base under the Weyl group.
     
@@ -410,12 +404,4 @@ def get_root_bases_orbit( d_lst, positive = True ):
     NSTools.p( '#orbit(' + str( d_lst ) + ') =', len( pd_lst_lst ) )
 
     return pd_lst_lst
-
-
-
-
-
-
-
-
 

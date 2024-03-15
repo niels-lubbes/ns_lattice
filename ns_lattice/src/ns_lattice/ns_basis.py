@@ -15,14 +15,12 @@ from ns_lattice.div_in_lattice import get_indecomp_divs
 from ns_lattice.div_in_lattice import get_ak
 from ns_lattice.div_in_lattice import get_divs
 
-from ns_lattice.class_dp_lattice import DPLattice
-
 from ns_lattice.class_eta import ETA
 
 from ns_lattice.class_ns_tools import NSTools
 
 
-def get_bases_lst( a_lst, M, d_lst, m1_lst, perm = False ):
+def get_bases_lst( a_lst, M, d_lst, m1_lst, perm=False ):
     '''
     Returns a list of basis with specified generators.
     
@@ -72,7 +70,6 @@ def get_bases_lst( a_lst, M, d_lst, m1_lst, perm = False ):
     key = 'get_bases_lst__' + str( ( a_lst, M, d_lst, m1_lst, perm ) ) + '__' + str( M.rank() )
     if key in NSTools.get_tool_dct():
         return NSTools.get_tool_dct()[key]
-
 
     if a_lst == []:
         return [[]]
@@ -166,7 +163,6 @@ def get_webs( dpl ):
         if pat_lst not in pat_lst_lst:
             pat_lst_lst += [ pat_lst ]
             rfam_lst_lst += [ fam_lst ]
-
 
     # cache output
     NSTools.get_tool_dct()[key] = rfam_lst_lst

@@ -6,8 +6,6 @@ This module is for classifying real structures and singularities
 of weak Del Pezzo surfaces of degree between 1 and 7.
 
 '''
-import time
-
 from ns_lattice.sage_interface import sage_identity_matrix
 from ns_lattice.sage_interface import sage_ZZ
 from ns_lattice.sage_interface import sage_QQ
@@ -172,8 +170,7 @@ class DPLattice:
         self.SG = None
         self.SG_data = None
 
-
-    def set_attributes( self, level = 9 ):
+    def set_attributes( self, level=9 ):
         '''
         Sets attributes of this object, depending
         on the input level.
@@ -252,9 +249,6 @@ class DPLattice:
         if self.G == None:
             self.G = get_ext_graph( self.d_lst + self.m1_lst, self.M )
 
-
-
-
     def get_rank( self ):
         '''
         Parameters
@@ -268,7 +262,6 @@ class DPLattice:
             Integer denoting rank of lattice.
         '''
         return self.M.dimensions()[0]
-
 
     def get_degree( self ):
         '''
@@ -284,7 +277,6 @@ class DPLattice:
             "self" its corresponding Neron-Severi lattice.
         '''
         return 10 - self.get_rank()
-
 
     def get_numbers( self ):
         '''
@@ -319,7 +311,6 @@ class DPLattice:
                  len( self.real_m1_lst ),
                  len( self.real_fam_lst ) )
 
-
     def contains_fam_pair( self ):
         '''
         Parameters
@@ -341,7 +332,6 @@ class DPLattice:
                 if f1 * f2 == 1:
                     return True
         return False
-
 
     def is_real_minimal( self ):
         '''
@@ -368,7 +358,6 @@ class DPLattice:
                 return False
         return True
 
-
     def get_marked_Mtype( self ):
         '''
         We mark Mtype with a '-symbol to distinguish between real 
@@ -387,7 +376,6 @@ class DPLattice:
             mark = "'"
 
         return self.Mtype + mark
-
 
     def get_real_type( self ):
         '''
@@ -425,28 +413,27 @@ class DPLattice:
                 if c != mc:
                     elementwise = False
             mc_lst.sort()
-            type = get_dynkin_type( c_lst )
+            dtype = get_dynkin_type( c_lst )
 
             if set( mc_lst ) == set( c_lst ) and c_lst != []:
                 if elementwise:
-                    type_lst += ['{' + type + '}']
+                    type_lst += ['{' + dtype + '}']
                 else:
-                    type_lst += ['[' + type + ']']
+                    type_lst += ['[' + dtype + ']']
             else:
-                type_lst += [type]
+                type_lst += [dtype]
 
         # construct string
         out = ''
         while type_lst != []:
-            type = type_lst[0]
-            num = type_lst.count( type )
+            dtype = type_lst[0]
+            num = type_lst.count( dtype )
             if num != 1: out += str( num )
-            out += type + '+'
-            type_lst = [ elt for elt in type_lst if elt != type ]
+            out += dtype + '+'
+            type_lst = [ elt for elt in type_lst if elt != dtype ]
         out = out[:-1]  # remove last plus
 
         return out
-
 
     def get_basis_change( self, B ):
         '''
@@ -483,7 +470,6 @@ class DPLattice:
         dpl.real_fam_lst = [ fam.get_basis_change( B ) for fam in self.real_fam_lst ]
 
         return dpl
-
 
     def get_SG( self ):
         '''
@@ -528,7 +514,7 @@ class DPLattice:
         f = self.real_fam_lst
         f_range = range( len( f ) )
 
-        self.SG = sage_Graph()
+        self.SG = sage_Graph( loops=True )
         self.SG.add_vertices( f_range )
         for i in f_range:
             for j in f_range:
@@ -546,9 +532,8 @@ class DPLattice:
 
         return self.SG, self.SG_data
 
-
     @staticmethod
-    def get_bas_lst( rank = 9 ):
+    def get_bas_lst( rank=9 ):
         '''
         See [Algorithm 5, http://arxiv.org/abs/1302.6678] for more info. 
         
@@ -625,9 +610,8 @@ class DPLattice:
 
         return dpl_lst
 
-
     @staticmethod
-    def get_inv_lst( rank = 9 ):
+    def get_inv_lst( rank=9 ):
         '''
         Outputs a list representing a classification of root 
         subsystems that define unimodular involutions on the 
@@ -694,7 +678,6 @@ class DPLattice:
                            ' inv>inv_prv: ', inv > inv_prv,
                            ' ambitious types =', [ amb.Mtype for amb in amb_lst if amb == inv ] )
 
-
         # store in cache
         inv_lst.sort()
         NSTools.get_tool_dct()[key] = inv_lst
@@ -702,9 +685,8 @@ class DPLattice:
 
         return inv_lst
 
-
     @staticmethod
-    def get_cls_slow( rank = 7 ):
+    def get_cls_slow( rank=7 ):
         '''        
         Use get_cls_real_dp() for a faster method. This method does not terminate
         within reasonable time if rank>7. We still keep the method in order to 
@@ -733,7 +715,6 @@ class DPLattice:
 
         inv_lst = DPLattice.get_inv_lst( rank )
         bas_lst = DPLattice.get_bas_lst( rank )
-
 
         # we fix an involution up to equivalence and go through
         # all possible root bases for singularities.
@@ -766,7 +747,6 @@ class DPLattice:
         NSTools.save_tool_dct()
 
         return dpl_lst
-
 
     @staticmethod
     def get_num_types( inv, bas, bas_lst ):
@@ -817,7 +797,6 @@ class DPLattice:
         r_lst = get_divs( get_ak( inv.get_rank() ), 0, -2, True )
         s_lst = [ r for r in r_lst if r.mat_mul( inv.M ) == r ]
 
-
         if len( s_lst ) == 30:  # D6 since #roots=60=2*30
             if bas.type in ['2A1', 'A3', '4A1', '2A1+A3', 'A5']:
                 return 2
@@ -831,7 +810,6 @@ class DPLattice:
             return 1
 
         return -1
-
 
     @staticmethod
     def get_part_roots( inv ):
@@ -882,9 +860,8 @@ class DPLattice:
 
         return s_lst, q_lst
 
-
     @staticmethod
-    def seek_bases( inv, d_lst, r_lst, eq = False, num = -1, b_lst = [], bas_lst = [] ):
+    def seek_bases( inv, d_lst, r_lst, eq=False, num=-1, b_lst=[], bas_lst=[] ):
         '''
         Look for root bases in a given set of roots whose Dynkin type 
         is the same as a given root bases. 
@@ -978,7 +955,6 @@ class DPLattice:
 
             return bas_lst
 
-
     @staticmethod
     def import_cls( cls_lst, inv ):
         '''
@@ -1027,9 +1003,8 @@ class DPLattice:
 
         return out_lst
 
-
     @staticmethod
-    def get_cls( rank = 9 ):
+    def get_cls( rank=9 ):
         '''
         Parameters
         ----------
@@ -1069,22 +1044,18 @@ class DPLattice:
 
             NSTools.p( 'looping through inv_lst:', ( rank, inv.get_marked_Mtype(), inv.Md_lst ) )
 
-
             # recover the known classification
             if inv.Mtype == 'A0':
                 NSTools.p( 'Since Mtype equals A0 we recover the classification from bas_lst.' )
                 dpl_lst += [bas for bas in bas_lst]
                 continue
 
-
             # partition the roots into two sets
             s_lst, q_lst = DPLattice.get_part_roots( inv )
-
 
             # import classification for rank-1
             bas1_lst = DPLattice.import_cls( DPLattice.get_cls( rank - 1 ), inv )
             NSTools.p( 'looping through inv_lst continued after recursive call:', ( rank, inv.get_marked_Mtype(), inv.Md_lst ) )
-
 
             # correct partition of roots (bas1_lst always contains inv)
             if len( bas1_lst ) > 1:
@@ -1094,7 +1065,6 @@ class DPLattice:
             NSTools.p( 'bas1_lst =', len( bas1_lst ), [( bas1.Mtype, bas1.type ) for bas1 in bas1_lst] )
             NSTools.p( 's_lst    =', len( s_lst ), s_lst )
             NSTools.p( 'q_lst    =', len( q_lst ), q_lst )
-
 
             # collect all possible root bases in s_lst and q_lst
             bas2_lst = []
@@ -1125,7 +1095,6 @@ class DPLattice:
                         tmp.d_lst.sort()
                         bas3_lst += [tmp]
 
-
             # debug info
             NSTools.p( 'Setting Dynkin types of', len( bas2_lst + bas3_lst ), 'items...please wait...' )
             eta = ETA( len( bas2_lst + bas3_lst ), len( bas2_lst + bas3_lst ) / 10 )
@@ -1147,9 +1116,7 @@ class DPLattice:
             NSTools.p( 'bas2_lst =', len( bas2_lst ), lst2 )
             NSTools.p( 'bas3_lst =', len( bas3_lst ), lst3 )
 
-
             # construct a list of combinations of DPLattice objects in bas1_lst bas2_lst and
-            comb_lst = []
             total = len( bas1_lst ) * len( bas2_lst ) * len( bas3_lst )
             step = total / 10 if total > 10 else total
             eta = ETA( total, step )
@@ -1174,7 +1141,6 @@ class DPLattice:
         NSTools.save_tool_dct()
 
         return dpl_lst
-
 
     # overloading of "=="
     # returns True if isomorphic as Neron-Severi lattices
@@ -1227,16 +1193,14 @@ class DPLattice:
         # check Cremona invariant
         self.set_attributes( 9 )
         other.set_attributes( 9 )
-        if not self.G.is_isomorphic( other.G, edge_labels = True ):
+        if not self.G.is_isomorphic( other.G, edge_labels=True ):
             return False
 
         return True
 
-
     # operator overloading for !=
     def __ne__( self, other ):
         return not self.__eq__( other )
-
 
     # operator overloading for <
     # Used for sorting lists of DPLattice objects:
@@ -1244,10 +1208,10 @@ class DPLattice:
     def __lt__( self, other ):
 
         if self.get_rank() != other.get_rank():
-           return self.get_rank() < other.get_rank()
+            return self.get_rank() < other.get_rank()
 
         if len( self.Md_lst ) != len( other.Md_lst ):
-           return len( self.Md_lst ) < len( other.Md_lst )
+            return len( self.Md_lst ) < len( other.Md_lst )
 
         self.set_attributes( 8 )
         other.set_attributes( 8 )
@@ -1277,7 +1241,6 @@ class DPLattice:
 
         if len( self.fam_lst ) != len( other.fam_lst ):
             return len( self.fam_lst ) > len( other.fam_lst )
-
 
     # overloading of "str()": human readable string representation of object
     def __str__( self ):
@@ -1319,5 +1282,4 @@ class DPLattice:
         s += 50 * '=' + '\n'
 
         return s
-
 

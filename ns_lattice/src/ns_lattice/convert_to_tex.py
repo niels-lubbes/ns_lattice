@@ -44,19 +44,15 @@ def cls_to_tex():
     div_lst.remove( e0 )
     div_lst = [e0] + div_lst
 
-
     # create dictionary characters for elements in div_lst
     #
-    abc = 'abcdefghijklmnopqrstuvwxyz'
     ch_lst = []
     ch_lst += [ '\\frac{' + ch1 + '}{' + ch2 + '}\\!' for ch1 in '0123456789' for ch2 in '0123456789' ]
     ch_lst += [ '\\frac{' + ch1 + '}{' + ch2 + '}\\!' for ch1 in '0123456789' for ch2 in 'abcdef' ]
 
-
     NSTools.p( '(len(ch_lst), len(div_lst)) =', ( len( ch_lst ), len( div_lst ) ) )
 
     assert len( ch_lst ) >= len( div_lst )
-
 
     # create legend and dictionary
     #
@@ -142,7 +138,7 @@ def cls_to_tex():
                 col8 += sym_dct[str( d )]
 
             # these subroot systems cannot be realized as weak del Pezzo surfaces
-            if col4 in ['$7\underline{A_1}$', '$8\underline{A_1}$', '$4\underline{A_1}+\underline{D_4}$']:
+            if col4 in ['$7\\underline{A_1}$', '$8\\underline{A_1}$', '$4\\underline{A_1}+\\underline{D_4}$']:
                 col1 = '$\\times$'
 
             # break (sometimes) the table for degree 2 according to Mtype
@@ -153,17 +149,16 @@ def cls_to_tex():
                 Mtype_lst.remove( dpl.Mtype )
 
             # add row
-            tab += [[col1, col2, col3, col4, col5, col6, '$' + col7 + '||\!' + col8 + '$' ]]
+            tab += [[col1, col2, col3, col4, col5, col6, '$' + col7 + '||\\!' + col8 + '$' ]]
             idx += 1
 
         tab_lst += [ tab ]
-
 
     # reformat table
     #
     #         i     d     A     B     E     G     Ac%Bc
     hl = '@{~}l@{~~~}l@{~~~}l@{~~}l@{~~}l@{~~}l@{~~}l@{}'
-    hrow = ['', 'd', '$D(A)$', '$D(B)$', '$\#E$', '$\#G$', '$\sigma_A||B$']
+    hrow = ['', 'd', '$D(A)$', '$D(B)$', '$\\#E$', '$\\#G$', '$\\sigma_A||B$']
     etab_lst = []
     etab = [hrow]
     tab_idx = 0
@@ -185,7 +180,6 @@ def cls_to_tex():
 
         tab_idx += 1
     NSTools.p( 'etab_lst: ', [len( etab ) for etab in etab_lst] )
-
 
     # create tex for main classification table
     #

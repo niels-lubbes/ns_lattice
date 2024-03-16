@@ -98,7 +98,7 @@ from ns_lattice.class_ns_tools import NSTools
 NSTools.set_enable_tool_dct( True ) # enable caching
 # NSTools.filter(None) # uncomment to show verbose output
 
-for dpl in DPLattice.get_cls( 4 ): print dpl.get_marked_Mtype(),'\t', dpl.type
+for dpl in DPLattice.get_cls( 4 ): print( dpl.get_marked_Mtype(),'\t', dpl.type )
 ```
 Output:    
 
@@ -228,19 +228,19 @@ a = Div.new('e0-e1-e2-e3',4)
 M = basis_to_involution( [a], 4 )
 dpl1 = DPLattice( [], [a], M )
 dpl1.set_attributes()
-print 'dpl1 =', dpl1
+print('dpl1 =', dpl1)
 
 # obtain base changes
 g1=Div.new('e0-e1',4)
 g2=Div.new('e0-e2',4)
 bas_lst = get_bases_lst( [g1,g2], dpl1.M, dpl1.d_lst, dpl1.m1_lst )
-print 'bas_lst =', bas_lst 
+print('bas_lst =', bas_lst) 
 
 # apply base change to dpl1
 B = sage_matrix( sage_ZZ, [ d.e_lst for d in bas_lst[0] ] )
 dpl2 = dpl1.get_basis_change( B )
-print 'B =\n', B
-print 'dpl2 =', dpl2
+print('B =\n', B)
+print('dpl2 =', dpl2)
 
 ```
 Output:

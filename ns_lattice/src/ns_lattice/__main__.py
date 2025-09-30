@@ -489,7 +489,7 @@ if __name__ == '__main__':
     # mod_lst += ['class_dp_lattice.py']
     # mod_lst += ['class_eta.py']
     NSTools.filter( mod_lst )  # output only from specified modules
-    NSTools.filter( None )  # print all verbose output, comment to disable.
+    # NSTools.filter( None )  # print all verbose output, comment to disable.
     # cleanup_tool_dct()  # uncomment to remove content from cache
     # NSTools.get_tool_dct().clear()  # uncomment to remove all cache!
 

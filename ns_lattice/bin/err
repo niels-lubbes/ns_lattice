@@ -1,2 +1,18 @@
-197803.70user 975.20system 55:20:16elapsed 99%CPU (0avgtext+0avgdata 7034828maxresident)k
-368inputs+123400152outputs (0major+183765609minor)pagefaults 0swaps
+/home/guests/nilsl/Downloads/ns_lattice/src/ns_lattice/class_dp_lattice.py:1077: DeprecationWarning: parameter 'sort' will be set to False by default in the future
+See https://github.com/sagemath/sage/issues/35889 for details.
+  eta.update( 'get_cls seeking bases in s_lst and q_lst: ', ( rank, inv.get_marked_Mtype(), bas.get_real_type() ) )
+/home/guests/nilsl/Downloads/ns_lattice/src/ns_lattice/class_dp_lattice.py:1135: DeprecationWarning: parameter 'sort' will be set to False by default in the future
+See https://github.com/sagemath/sage/issues/35889 for details.
+  NSTools.p( '\t appended: ', ( rank, dpl.get_marked_Mtype(), dpl.get_real_type() ), ', ( bas1.type, bas2.type, bas3.type ) =', ( bas1.type, bas2.type, bas3.type ) )
+/home/guests/nilsl/Downloads/ns_lattice/bin/../src/ns_lattice/__main__.py:54: DeprecationWarning: parameter 'sort' will be set to False by default in the future
+See https://github.com/sagemath/sage/issues/35889 for details.
+  [rownr, rank, dpl.get_marked_Mtype(), dpl.get_real_type() ]
+/home/guests/nilsl/Downloads/ns_lattice/src/ns_lattice/class_dp_lattice.py:991: DeprecationWarning: parameter 'sort' will be set to False by default in the future
+See https://github.com/sagemath/sage/issues/35889 for details.
+  NSTools.p( 'importing: ', ( inv.get_rank(), cls.get_marked_Mtype(), cls.get_real_type() ), Md_lst, '==', inv.Md_lst )
+/home/guests/nilsl/Downloads/ns_lattice/bin/../src/ns_lattice/__main__.py:131: DeprecationWarning: parameter 'sort' will be set to False by default in the future
+See https://github.com/sagemath/sage/issues/35889 for details.
+  row_lst += [ [rownr, 10 - rank, dpl.get_marked_Mtype(), dpl.get_real_type() ] + SG_data ]
+/home/guests/nilsl/Downloads/ns_lattice/src/ns_lattice/class_dp_lattice.py:512: DeprecationWarning: parameter 'sort' will be set to False by default in the future
+See https://github.com/sagemath/sage/issues/35889 for details.
+  NSTools.p( 'Initializing simple family graph of current DPLattice object...', self.get_rank(), self.get_marked_Mtype(), self.get_real_type() )

@@ -19,12 +19,11 @@ from setuptools import setup
 
 setup( 
     name='ns_lattice',
-    version='4',
+    version='5',
     description='Algorithms for computing in Neron-Severi lattice',
     classifiers=[
         'Development Status :: 3 - Alpha',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
         'Topic :: Scientific/Engineering :: Mathematics',
         ],

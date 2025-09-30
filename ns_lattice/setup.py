@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup( 
     name='ns_lattice',
-    version='5',
+    version='6',
     description='Algorithms for computing in Neron-Severi lattice',
     classifiers=[
         'Development Status :: 3 - Alpha',
